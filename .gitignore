@@ -30,3 +30,12 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Local Database and Assets
+data/
+*.db
+*.db-journal
+
+# Binaries
+bin/
+achievement-vault
