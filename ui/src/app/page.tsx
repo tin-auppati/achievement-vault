@@ -304,43 +304,25 @@ export default function Dashboard() {
             Refresh Feed
           </button>
 
-          {/* THEME SWITCHER BUTTON */}
+          {/* PREMIUM TWO-STATE EXPLICIT THEME SWITCHER */}
           {mounted && (
-            <div className="flex items-center border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-0.5 shadow-sm">
-              <button
-                onClick={() => setTheme("light")}
-                className={`p-1.5 rounded-md transition-all ${
-                  theme === "light"
-                    ? "bg-zinc-100 text-amber-500 shadow-inner"
-                    : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                }`}
-                title="Light Mode"
-              >
-                <Sun className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={() => setTheme("dark")}
-                className={`p-1.5 rounded-md transition-all ${
-                  theme === "dark"
-                    ? "bg-zinc-800 text-indigo-400 shadow-inner"
-                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-                }`}
-                title="Dark Mode"
-              >
-                <Moon className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={() => setTheme("system")}
-                className={`p-1.5 rounded-md transition-all ${
-                  theme === "system"
-                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-inner"
-                    : "text-zinc-450 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
-                }`}
-                title="System Mode"
-              >
-                <Laptop className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg hover:border-cyan-500 dark:hover:border-cyan-400 text-zinc-600 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all duration-300 shadow-sm cursor-pointer"
+              title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="h-3.5 w-3.5 text-amber-500 animate-spin-slow" />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-3.5 w-3.5 text-indigo-450 dark:text-indigo-400" />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </button>
           )}
         </div>
       </header>
