@@ -255,7 +255,7 @@ export default function Dashboard() {
   const totalStatPoints = Object.values(stats).reduce((a, b) => a + b, 0) || 1;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col p-6 md:p-8 selection:bg-cyan-500 selection:text-black transition-colors duration-300">
+    <div className="min-h-screen flex flex-col p-6 md:p-8 selection:bg-cyan-500 selection:text-black">
       
       {/* HEADER SECTION */}
       <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-900 relative">
@@ -372,7 +372,7 @@ export default function Dashboard() {
                           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
                             draftViewMode === "raw"
                               ? "bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-sm"
-                              : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-355"
+                              : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                           }`}
                         >
                           <Code className="h-3 w-3" /> Raw Markdown
@@ -472,19 +472,19 @@ export default function Dashboard() {
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1 grid grid-cols-3 gap-4">
               <div className="glass-glow p-4 rounded-xl flex flex-col justify-center items-center text-center">
-                <span className="text-[9px] font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase flex items-center gap-1">
+                <span className="text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase flex items-center gap-1">
                   <Activity className="h-2.5 w-2.5 text-cyan-500" /> Projects
                 </span>
                 <span className="text-2xl font-black text-cyan-600 dark:text-cyan-400 mt-1">{uniqueProjects}</span>
               </div>
               <div className="glass-glow p-4 rounded-xl flex flex-col justify-center items-center text-center">
-                <span className="text-[9px] font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase flex items-center gap-1">
+                <span className="text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase flex items-center gap-1">
                   <BarChart3 className="h-2.5 w-2.5 text-indigo-500" /> Raw Logs
                 </span>
                 <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{totalLogs}</span>
               </div>
               <div className="glass-glow p-4 rounded-xl flex flex-col justify-center items-center text-center">
-                <span className="text-[9px] font-bold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase flex items-center gap-1">
+                <span className="text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase flex items-center gap-1">
                   <Award className="h-2.5 w-2.5 text-purple-500" /> Summaries
                 </span>
                 <span className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">{totalAchievements}</span>
@@ -494,7 +494,7 @@ export default function Dashboard() {
             <div className="lg:col-span-2 glass-glow p-5 rounded-xl flex flex-col justify-between">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-mono">Technology Impact Footprint</span>
-                <span className="text-[8px] font-mono text-zinc-400 dark:text-zinc-500">Inferred from commit changesets</span>
+                <span className="text-[8px] font-mono text-zinc-500 dark:text-zinc-400">Inferred from commit changesets</span>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {Object.entries(stats).map(([lang, count]) => {
@@ -553,7 +553,7 @@ export default function Dashboard() {
                         <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-300 rounded border border-zinc-200 dark:border-zinc-700 uppercase font-semibold">
                           {log.project_name}
                         </span>
-                        <span className="text-[9px] font-mono text-zinc-450 dark:text-zinc-505">
+                        <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
                           {new Date(log.timestamp).toLocaleDateString(undefined, {
                             month: "short",
                             day: "numeric",
@@ -566,7 +566,7 @@ export default function Dashboard() {
                       
                       {activeLog?.id === log.id && log.metadata && (
                         <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 text-[10px] font-mono bg-zinc-50 dark:bg-black/60 p-2.5 rounded-lg text-emerald-700 dark:text-emerald-400 overflow-x-auto whitespace-pre">
-                          <div className="text-zinc-400 dark:text-zinc-600 mb-1 font-semibold">// Git commit diff stats</div>
+                          <div className="text-zinc-400 dark:text-zinc-400 mb-1 font-semibold">// Git commit diff stats</div>
                           {log.metadata}
                         </div>
                       )}
@@ -606,7 +606,7 @@ export default function Dashboard() {
                           <span className="text-[9px] font-bold tracking-widest text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 px-2 py-0.5 rounded-full">
                             ID: {ach.id}
                           </span>
-                          <span className="text-[9px] font-mono text-zinc-450 dark:text-zinc-505">
+                          <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
                             {new Date(ach.created_at).toLocaleDateString()}
                           </span>
                         </div>
@@ -617,7 +617,7 @@ export default function Dashboard() {
                       </div>
 
                       {/* Rendered markdown instead of raw text inside gallery previews */}
-                      <div className="pt-3 border-t border-zinc-150 dark:border-zinc-850 text-[10px] text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans prose dark:prose-invert prose-xs max-w-none pointer-events-none">
+                      <div className="pt-3 border-t border-zinc-150 dark:border-zinc-850 text-[10px] text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed font-sans prose dark:prose-invert prose-xs max-w-none pointer-events-none">
                         <ReactMarkdown>{ach.content_md}</ReactMarkdown>
                       </div>
 
@@ -664,7 +664,7 @@ export default function Dashboard() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-b-2xl text-right flex justify-between items-center text-[9px] text-zinc-400 dark:text-zinc-500 font-mono">
+            <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-b-2xl text-right flex justify-between items-center text-[9px] text-zinc-500 dark:text-zinc-400 font-mono">
               <span>Saved in vault at: {new Date(activeAchievement.created_at).toLocaleString()}</span>
               <button
                 onClick={() => setActiveAchievement(null)}
