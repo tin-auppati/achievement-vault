@@ -81,6 +81,16 @@ func SaveDraftSummary(db *sql.DB, contentMd, startDate, endDate string) error {
 	return nil
 }
 
+// UpdateDraftSummary updates the content_md of the most recent draft summary.
+func UpdateDraftSummary(db *sql.DB, newContent string) error {
+	query := `UPDATE draft_summaries SET content_md = ? WHERE id = (SELECT id FROM draft_summaries ORDER BY id DESC LIMIT 1)`
+	_, err := db.Exec(query, newContent)
+	if err != nil {
+		return fmt.Errorf("failed to update draft summary: %w", err)
+	}
+	return nil
+}
+
 // GetDraftSummary returns the latest draft summary if one exists.
 func GetDraftSummary(db *sql.DB) (contentMd, startDate, endDate string, exists bool, err error) {
 	query := `SELECT content_md, start_date, end_date FROM draft_summaries ORDER BY id DESC LIMIT 1`

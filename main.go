@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/charmbracelet/glamour"
 	"github.com/tin-auppati/achievement-vault/internal/ai"
 	"github.com/tin-auppati/achievement-vault/internal/database"
 	"github.com/tin-auppati/achievement-vault/internal/vault"
@@ -283,24 +284,41 @@ func handleSummarize() {
 	fmt.Println(summary)
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 
-	// Interactive Approval Prompt
-	fmt.Print("\n\033[1;33mDo you want to save this summary to the vault? (y/n): \033[0m")
-	reader := bufio.NewReader(os.Stdin)
-	answer, _ := reader.ReadString('\n')
-	answer = strings.TrimSpace(strings.ToLower(answer))
+	// Interactive Approval Prompt with Glamour Markdown Preview Renderer
+	for {
+		fmt.Print("\n\033[1;33mDo you want to save this summary to the vault? (y/n/r for Render Review): \033[0m")
+		reader := bufio.NewReader(os.Stdin)
+		answer, _ := reader.ReadString('\n')
+		answer = strings.TrimSpace(strings.ToLower(answer))
 
-	if answer == "y" || answer == "yes" {
-		id, err := vault.ApproveDraftSummary(db.DB)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mError saving/approving summary: %v\033[0m\n", err)
-			os.Exit(1)
+		if answer == "r" || answer == "review" {
+			rendered, err := glamour.Render(summary, "dark")
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "\033[31mError rendering preview: %v\033[0m\n", err)
+				fmt.Println(summary)
+			} else {
+				fmt.Println("\n\033[1;35m✨ --- Beautiful Rendered Markdown Preview --- ✨\033[0m")
+				fmt.Println(rendered)
+				fmt.Println("\033[1;35m---------------------------------------------------\033[0m")
+			}
+			continue
 		}
 
-		fmt.Println("\n\033[32m✔ Summary successfully saved to the vault as an append-only weekly achievement!\033[0m")
-		fmt.Printf("  \033[1mAchievement ID:\033[0m  %d\n", id)
-		fmt.Printf("  \033[1mPeriod:\033[0m          %s to %s\n", startDateStr, endDateStr)
-	} else {
-		fmt.Println("\033[33mDraft summary discarded (retained in draft table for web approval until next summary run).\033[0m")
+		if answer == "y" || answer == "yes" {
+			id, err := vault.ApproveDraftSummary(db.DB)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "\033[31mError saving/approving summary: %v\033[0m\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Println("\n\033[32m✔ Summary successfully saved to the vault as an append-only weekly achievement!\033[0m")
+			fmt.Printf("  \033[1mAchievement ID:\033[0m  %d\n", id)
+			fmt.Printf("  \033[1mPeriod:\033[0m          %s to %s\n", startDateStr, endDateStr)
+			break
+		} else {
+			fmt.Println("\033[33mDraft summary discarded (retained in draft table for web approval until next summary run).\033[0m")
+			break
+		}
 	}
 }
 
@@ -341,11 +359,18 @@ func handleHistory() {
 			os.Exit(1)
 		}
 
-		// Display full markdown weekly achievement summary
+		// Display full markdown weekly achievement summary rendered via Glamour
 		fmt.Println("\033[1;36m==================================================================\033[0m")
 		fmt.Printf(" \033[1mWeekly Achievement Detail - ID: %d (%s to %s)\033[0m\n", found.ID, found.StartDate, found.EndDate)
 		fmt.Println("\033[1;36m==================================================================\033[0m")
-		fmt.Println(found.ContentMd)
+		
+		rendered, err := glamour.Render(found.ContentMd, "dark")
+		if err != nil {
+			fmt.Println(found.ContentMd)
+		} else {
+			fmt.Println(rendered)
+		}
+		
 		fmt.Println("\033[1;36m==================================================================\033[0m")
 		return
 	}
@@ -371,7 +396,7 @@ func handleHistory() {
 		fmt.Printf("    \033[1mSaved At:\033[0m %s\n\n", ach.CreatedAt)
 	}
 	fmt.Println("\033[1;36m==================================================================\033[0m")
-	fmt.Println("\033[33m💡 Tip: Run './achievement-vault history <id>' to view the full markdown summary of an entry.\033[0m")
+	fmt.Println("\033[33m💡 Tip: Run 'vault history <id>' to view the full markdown summary of an entry.\033[0m")
 }
 
 func handleCheckPending() {
@@ -507,7 +532,43 @@ func handleServe() {
 		}
 	}
 
-	err = vault.StartAPIServer(db.DB, port)
+	// Dynamic summarize callback function using Dependency Injection Pattern to avoid circular packages dependency
+	summarizeFn := func(days int) (string, error) {
+		logs, err := vault.GetLogsFromLastDays(db.DB, days)
+		if err != nil {
+			return "", fmt.Errorf("failed to retrieve logs: %w", err)
+		}
+
+		if len(logs) == 0 {
+			return "", fmt.Errorf("no logs registered in the database for the last %d days", days)
+		}
+
+		summary, err := ai.SummarizeLogs(logs)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate AI summary: %w", err)
+		}
+
+		now := time.Now()
+		endDateStr := now.Format("2006-01-02")
+		startDateStr := now.AddDate(0, 0, -days).Format("2006-01-02")
+
+		err = vault.SaveDraftSummary(db.DB, summary, startDateStr, endDateStr)
+		if err != nil {
+			return "", fmt.Errorf("failed to save draft summary to database: %w", err)
+		}
+
+		return summary, nil
+	}
+
+	refineFn := func(currentDraft, prompt string) (string, error) {
+		refined, err := ai.RefineDraft(currentDraft, prompt)
+		if err != nil {
+			return "", fmt.Errorf("failed to refine draft: %w", err)
+		}
+		return refined, nil
+	}
+
+	err = vault.StartAPIServer(db.DB, port, summarizeFn, refineFn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mError starting API Server: %v\033[0m\n", err)
 		os.Exit(1)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -21,7 +22,91 @@ type APILog struct {
 }
 
 // StartAPIServer binds and launches the REST API backend server on the specified port.
-func StartAPIServer(db *sql.DB, port int) error {
+func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, error), refineFn func(currentDraft, prompt string) (string, error)) error {
+	http.HandleFunc("/api/summarize", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		days := 7
+		if r.URL.Query().Get("days") != "" {
+			if parsedDays, err := strconv.Atoi(r.URL.Query().Get("days")); err == nil {
+				days = parsedDays
+			}
+		}
+
+		draftContent, err := summarizeFn(days)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true, "draft_content": %q}`, draftContent)
+	}))
+
+	http.HandleFunc("/api/draft", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "PUT" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var payload struct {
+			Content string `json:"content"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+			return
+		}
+
+		if err := UpdateDraftSummary(db, payload.Content); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true}`)
+	}))
+
+	http.HandleFunc("/api/draft/refine", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var payload struct {
+			Prompt string `json:"prompt"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+			return
+		}
+
+		// Fetch current draft
+		currentDraft, _, _, exists, err := GetDraftSummary(db)
+		if err != nil || !exists {
+			http.Error(w, `{"error": "no pending draft to refine"}`, http.StatusNotFound)
+			return
+		}
+
+		// AI refine
+		refinedContent, err := refineFn(currentDraft, payload.Prompt)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		// Update draft in DB
+		if err := UpdateDraftSummary(db, refinedContent); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true, "draft_content": %q}`, refinedContent)
+	}))
+
 	http.HandleFunc("/api/logs", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		logs, err := getAPILogs(db)
 		if err != nil {

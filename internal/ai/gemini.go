@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -39,10 +40,20 @@ func loadEnvAPIKey() string {
 		return val
 	}
 
-	// 2. Fallback: Parse local .env manually to avoid dependencies
-	data, err := os.ReadFile(".env")
+	// 2. Locate .env path globally
+	envPath := ".env"
+	if vaultHome := os.Getenv("VAULT_HOME"); vaultHome != "" {
+		envPath = filepath.Join(vaultHome, ".env")
+	}
+
+	// 3. Fallback / Read file manually to avoid dependencies
+	data, err := os.ReadFile(envPath)
 	if err != nil {
-		return ""
+		// Fallback to relative .env if VAULT_HOME reading fails
+		data, err = os.ReadFile(".env")
+		if err != nil {
+			return ""
+		}
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -130,42 +141,183 @@ Here is the log data:
 		return "", fmt.Errorf("failed to serialize request content: %w", err)
 	}
 
-	// Request endpoint for Gemini 2.5 Flash
-	apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=%s", apiKey)
+	// Dynamic Fallback Models Chain to guarantee high availability (Guards against temporary 503 Overloads)
+	modelsToTry := []string{
+		"gemini-2.5-flash",
+		"gemini-1.5-flash",
+		"gemini-1.5-pro",
+	}
 
-	// Post HTTP Request
+	var lastErr error
 	client := &http.Client{Timeout: 30 * time.Second}
-	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
+
+	for _, modelName := range modelsToTry {
+		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
+		
+		maxRetries := 3
+		backoffDuration := 2 * time.Second
+
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
+			if err != nil {
+				return "", fmt.Errorf("failed to create API HTTP request: %w", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				lastErr = fmt.Errorf("[%s] network error (attempt %d/%d): %w", modelName, attempt, maxRetries, err)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			respBytes, ioErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if ioErr != nil {
+				lastErr = fmt.Errorf("[%s] failed to read API response body: %w", modelName, ioErr)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			// Handle service overload/limit errors gracefully by retrying
+			if resp.StatusCode != http.StatusOK {
+				lastErr = fmt.Errorf("[%s] status code %d (attempt %d/%d): %s", modelName, resp.StatusCode, attempt, maxRetries, string(respBytes))
+				
+				// Retry on temporary server overloads (503) or rate limits (429)
+				if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+					fmt.Printf("\033[33m[GEMINI ALERT] Model %s experiencing temporary spikes (code %d). Retrying in %v...\033[0m\n", modelName, resp.StatusCode, backoffDuration)
+					time.Sleep(backoffDuration)
+					backoffDuration *= 2
+					continue
+				}
+				
+				// Break loop immediately on unrecoverable errors (e.g., bad API Key 400, auth issues 403)
+				break
+			}
+
+			// Parse JSON Response
+			var geminiResp geminiResponse
+			if err := json.Unmarshal(respBytes, &geminiResp); err != nil {
+				lastErr = fmt.Errorf("[%s] failed to deserialize response: %w", modelName, err)
+				break
+			}
+
+			// Validate candidates in response
+			if len(geminiResp.Candidates) == 0 || len(geminiResp.Candidates[0].Content.Parts) == 0 {
+				lastErr = fmt.Errorf("[%s] empty candidate response: %s", modelName, string(respBytes))
+				break
+			}
+
+			// Success! Inform which model succeeded if we fell back
+			if modelName != modelsToTry[0] {
+				fmt.Printf("\033[32m✔ Fallback succeeded! Successfully compiled summary via model: %s\033[0m\n", modelName)
+			}
+			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
+		}
+		
+		fmt.Printf("\033[33m[GEMINI INFO] Model %s failed. Switching to alternative model...\033[0m\n", modelName)
+	}
+
+	return "", fmt.Errorf("Gemini API was unavailable across all tested models. Last error received: %w", lastErr)
+}
+
+// RefineDraft sends the current draft and a user prompt to Gemini to refine the markdown.
+func RefineDraft(currentDraft, userPrompt string) (string, error) {
+	apiKey := loadEnvAPIKey()
+	if apiKey == "" {
+		return "", fmt.Errorf("GEMINI_API_KEY is not configured. Please add it to system environment variables or your local .env file")
+	}
+
+	prompt := fmt.Sprintf(`You are an expert technical editor. Below is a draft summary of a developer's weekly accomplishments in Markdown format.
+
+Your task is to refine, rewrite, or adjust the draft based strictly on the following user request:
+"%s"
+
+Here is the current draft:
+%s
+
+Return ONLY the refined Markdown content. Do not include any conversational filler or intro/outro text.`, userPrompt, currentDraft)
+
+	reqPayload := geminiRequest{
+		Contents: []geminiContent{
+			{
+				Parts: []geminiPart{
+					{Text: prompt},
+				},
+			},
+		},
+	}
+
+	reqBytes, err := json.Marshal(reqPayload)
 	if err != nil {
-		return "", fmt.Errorf("failed to create API HTTP request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute Gemini API call: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read API response body: %w", err)
+		return "", fmt.Errorf("failed to serialize request content: %w", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Gemini API returned error code %d: %s", resp.StatusCode, string(respBytes))
+	modelsToTry := []string{
+		"gemini-2.5-flash",
+		"gemini-1.5-flash",
+		"gemini-1.5-pro",
 	}
 
-	// Parse JSON Response
-	var geminiResp geminiResponse
-	if err := json.Unmarshal(respBytes, &geminiResp); err != nil {
-		return "", fmt.Errorf("failed to deserialize Gemini response: %w", err)
+	var lastErr error
+	client := &http.Client{Timeout: 30 * time.Second}
+
+	for _, modelName := range modelsToTry {
+		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
+		
+		maxRetries := 3
+		backoffDuration := 2 * time.Second
+
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
+			if err != nil {
+				return "", fmt.Errorf("failed to create API HTTP request: %w", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				lastErr = fmt.Errorf("[%s] network error (attempt %d/%d): %w", modelName, attempt, maxRetries, err)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			respBytes, ioErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if ioErr != nil {
+				lastErr = fmt.Errorf("[%s] failed to read API response body: %w", modelName, ioErr)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			if resp.StatusCode != http.StatusOK {
+				lastErr = fmt.Errorf("[%s] status code %d (attempt %d/%d): %s", modelName, resp.StatusCode, attempt, maxRetries, string(respBytes))
+				if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+					time.Sleep(backoffDuration)
+					backoffDuration *= 2
+					continue
+				}
+				break
+			}
+
+			var geminiResp geminiResponse
+			if err := json.Unmarshal(respBytes, &geminiResp); err != nil {
+				lastErr = fmt.Errorf("[%s] failed to deserialize response: %w", modelName, err)
+				break
+			}
+
+			if len(geminiResp.Candidates) == 0 || len(geminiResp.Candidates[0].Content.Parts) == 0 {
+				lastErr = fmt.Errorf("[%s] empty candidate response: %s", modelName, string(respBytes))
+				break
+			}
+
+			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
+		}
 	}
 
-	// Validate candidates in response
-	if len(geminiResp.Candidates) == 0 || len(geminiResp.Candidates[0].Content.Parts) == 0 {
-		return "", fmt.Errorf("Gemini returned empty results. Complete response: %s", string(respBytes))
-	}
-
-	return geminiResp.Candidates[0].Content.Parts[0].Text, nil
+	return "", fmt.Errorf("Gemini API was unavailable for refinement. Last error received: %w", lastErr)
 }
