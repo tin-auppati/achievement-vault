@@ -36,6 +36,12 @@ func main() {
 		handleSummarize()
 	case "history":
 		handleHistory()
+	case "check-pending":
+		handleCheckPending()
+	case "setup-shell":
+		handleSetupShell()
+	case "serve":
+		handleServe()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -224,6 +230,16 @@ func handleSummarize() {
 		os.Exit(1)
 	}
 
+	now := time.Now()
+	endDateStr := now.Format("2006-01-02")
+	startDateStr := now.AddDate(0, 0, -days).Format("2006-01-02")
+
+	// Save draft state in SQLite database for state-aware Web Dashboard access
+	err = vault.SaveDraftSummary(db.DB, summary, startDateStr, endDateStr)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[33m⚠ Warning: failed to save draft to database: %v\033[0m\n", err)
+	}
+
 	// Premium Report Output
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 	fmt.Printf(" \033[1m🚀 Gemini Weekly Summarizer Draft (Last %d Days Preview)\033[0m\n", days)
@@ -238,13 +254,9 @@ func handleSummarize() {
 	answer = strings.TrimSpace(strings.ToLower(answer))
 
 	if answer == "y" || answer == "yes" {
-		now := time.Now()
-		endDateStr := now.Format("2006-01-02")
-		startDateStr := now.AddDate(0, 0, -days).Format("2006-01-02")
-
-		id, err := vault.SaveWeeklyAchievement(db.DB, summary, startDateStr, endDateStr)
+		id, err := vault.ApproveDraftSummary(db.DB)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mError saving summary: %v\033[0m\n", err)
+			fmt.Fprintf(os.Stderr, "\033[31mError saving/approving summary: %v\033[0m\n", err)
 			os.Exit(1)
 		}
 
@@ -252,7 +264,7 @@ func handleSummarize() {
 		fmt.Printf("  \033[1mAchievement ID:\033[0m  %d\n", id)
 		fmt.Printf("  \033[1mPeriod:\033[0m          %s to %s\n", startDateStr, endDateStr)
 	} else {
-		fmt.Println("\033[33mDraft summary discarded.\033[0m")
+		fmt.Println("\033[33mDraft summary discarded (retained in draft table for web approval until next summary run).\033[0m")
 	}
 }
 
@@ -326,6 +338,146 @@ func handleHistory() {
 	fmt.Println("\033[33m💡 Tip: Run './achievement-vault history <id>' to view the full markdown summary of an entry.\033[0m")
 }
 
+func handleCheckPending() {
+	// Initialize the DB
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	now := time.Now()
+	weekday := now.Weekday()
+
+	// Only alert on Friday, Saturday, or Sunday
+	if weekday != time.Friday && weekday != time.Saturday && weekday != time.Sunday {
+		return
+	}
+
+	var offset int
+	switch weekday {
+	case time.Friday:
+		offset = 0
+	case time.Saturday:
+		offset = -1
+	case time.Sunday:
+		offset = -2
+	}
+
+	// Calculate Friday 5:00 PM of the current week
+	friday := now.AddDate(0, 0, offset)
+	friday5pm := time.Date(friday.Year(), friday.Month(), friday.Day(), 17, 0, 0, 0, now.Location())
+
+	// If it's not Friday 5 PM yet, do nothing
+	if now.Before(friday5pm) {
+		return
+	}
+
+	// Fetch latest achievement date from database
+	latestDate, err := db.GetLatestWeeklyAchievementDate()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError checking pending status: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	// If there's no achievement yet, or the latest achievement was created before Friday 5 PM
+	if latestDate.IsZero() || latestDate.Before(friday5pm) {
+		fmt.Println("\n\033[1;31m⚠️  [VAULT ALERT] Your weekly summary is pending! Run go run main.go summarize to record your impact.\033[0m\n")
+	}
+}
+
+func handleSetupShell() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError getting user home directory: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		wd = "/home/tin/projects/achievement-vault"
+	}
+	mainPath := filepath.Join(wd, "main.go")
+
+	cmdStr := fmt.Sprintf("\ngo run %s check-pending\n", mainPath)
+
+	shellConfigs := []string{
+		filepath.Join(home, ".bashrc"),
+		filepath.Join(home, ".zshrc"),
+	}
+
+	installedCount := 0
+	for _, configPath := range shellConfigs {
+		// Check if file exists
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
+			continue
+		}
+
+		// Read file content
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError reading %s: %v\033[0m\n", configPath, err)
+			continue
+		}
+
+		// Check if check-pending command is already installed to maintain idempotency
+		content := string(data)
+		if strings.Contains(content, "check-pending") {
+			fmt.Printf("\033[33mℹ check-pending is already installed in %s\033[0m\n", filepath.Base(configPath))
+			installedCount++
+			continue
+		}
+
+		// Append command to shell configuration
+		f, err := os.OpenFile(configPath, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError opening %s: %v\033[0m\n", configPath, err)
+			continue
+		}
+		defer f.Close()
+
+		if _, err := f.WriteString(cmdStr); err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError writing to %s: %v\033[0m\n", configPath, err)
+			continue
+		}
+
+		fmt.Printf("\033[32m✔ Successfully installed check-pending to %s!\033[0m\n", filepath.Base(configPath))
+		installedCount++
+	}
+
+	if installedCount == 0 {
+		fmt.Println("\033[33m⚠ No active .bashrc or .zshrc found in home directory. No shell configs updated.\033[0m")
+	} else {
+		fmt.Println("\033[32m✔ Shell startup hooks successfully configured!\033[0m")
+	}
+}
+
+func handleServe() {
+	// Initialize the DB
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	port := 8080
+	// Optional custom port override
+	if len(os.Args) == 3 {
+		p, err := strconv.Atoi(os.Args[2])
+		if err == nil {
+			port = p
+		}
+	}
+
+	err = vault.StartAPIServer(db.DB, port)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError starting API Server: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+}
+
 func printUsage() {
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 	fmt.Println(" \033[1mAchievement Vault - Local CLI Tool\033[0m")
@@ -340,6 +492,9 @@ func printUsage() {
 	fmt.Println("                                    Collect commit message and diff (Internal/Hook)")
 	fmt.Println("  \033[32msummarize [--days <days>]\033[0m         Generate draft summaries of work from the last N days")
 	fmt.Println("  \033[32mhistory [<id>]\033[0m                    List saved weekly summaries or view a specific entry")
+	fmt.Println("  \033[32mcheck-pending\033[0m                     Scan and alert if the current week's summary is pending")
+	fmt.Println("  \033[32msetup-shell\033[0m                       Install check-pending hook to .bashrc and .zshrc")
+	fmt.Println("  \033[32mserve [<port>]\033[0m                    Start REST API backend server (default port 8080)")
 	fmt.Println("  \033[32mhelp\033[0m                              Display usage and help details")
 	fmt.Println()
 	fmt.Println("Example:")
@@ -347,5 +502,8 @@ func printUsage() {
 	fmt.Println("  ./achievement-vault install \"my-api\"")
 	fmt.Println("  ./achievement-vault summarize --days 7")
 	fmt.Println("  ./achievement-vault history 1")
+	fmt.Println("  ./achievement-vault check-pending")
+	fmt.Println("  ./achievement-vault setup-shell")
+	fmt.Println("  ./achievement-vault serve 8080")
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 }

@@ -63,3 +63,58 @@ func GetWeeklyAchievements(db *sql.DB) ([]WeeklyAchievement, error) {
 
 	return achievements, nil
 }
+
+// SaveDraftSummary deletes any existing draft and saves the latest generated draft in the database.
+func SaveDraftSummary(db *sql.DB, contentMd, startDate, endDate string) error {
+	// Delete any old draft
+	_, err := db.Exec("DELETE FROM draft_summaries")
+	if err != nil {
+		return fmt.Errorf("failed to clean up old draft summaries: %w", err)
+	}
+
+	query := `INSERT INTO draft_summaries (content_md, start_date, end_date) VALUES (?, ?, ?)`
+	_, err = db.Exec(query, contentMd, startDate, endDate)
+	if err != nil {
+		return fmt.Errorf("failed to save new draft summary: %w", err)
+	}
+
+	return nil
+}
+
+// GetDraftSummary returns the latest draft summary if one exists.
+func GetDraftSummary(db *sql.DB) (contentMd, startDate, endDate string, exists bool, err error) {
+	query := `SELECT content_md, start_date, end_date FROM draft_summaries ORDER BY id DESC LIMIT 1`
+	err = db.QueryRow(query).Scan(&contentMd, &startDate, &endDate)
+	if err == sql.ErrNoRows {
+		return "", "", "", false, nil
+	}
+	if err != nil {
+		return "", "", "", false, fmt.Errorf("failed to retrieve draft summary: %w", err)
+	}
+	return contentMd, startDate, endDate, true, nil
+}
+
+// ApproveDraftSummary moves the draft summary content to the weekly_achievements table and deletes the draft.
+func ApproveDraftSummary(db *sql.DB) (int64, error) {
+	contentMd, startDate, endDate, exists, err := GetDraftSummary(db)
+	if err != nil {
+		return 0, err
+	}
+	if !exists {
+		return 0, fmt.Errorf("no pending draft summary found to approve")
+	}
+
+	// Save permanently
+	id, err := SaveWeeklyAchievement(db, contentMd, startDate, endDate)
+	if err != nil {
+		return 0, fmt.Errorf("failed to save draft permanently: %w", err)
+	}
+
+	// Delete draft
+	_, err = db.Exec("DELETE FROM draft_summaries")
+	if err != nil {
+		return 0, fmt.Errorf("failed to clean up draft summaries after approval: %w", err)
+	}
+
+	return id, nil
+}

@@ -89,16 +89,27 @@ func SummarizeLogs(logs []vault.RawLog) (string, error) {
 		logsText.WriteString("\n")
 	}
 
-	// Craft prompt template following strict guidelines
-	prompt := fmt.Sprintf(`You are an expert technical writer and senior engineering manager.
-Analyze the following raw logs from my workspace (commit messages, diffs, types) and generate a premium, professional Weekly Progress Report draft.
+	// Craft result-oriented prompt template using Google XYZ formula and workflow value
+	prompt := fmt.Sprintf(`You are an expert senior software engineer and technical portfolio architect.
+Analyze the following raw logs from my development workspace (including commit messages, diff summaries, and log types). Use this data to generate a highly professional, result-oriented Weekly Progress Report draft in clean Markdown format, tailored for a professional developer portfolio.
 
-Ensure you do the following:
-1. **Group Similar Tasks**: Group comparable or related commits and achievements together under cohesive, bold headers or thematic categories.
-2. **Key accomplishments**: Generate exactly 3 to 5 high-impact bullet points summarizing what was achieved.
-   Each bullet point MUST strictly follow the formula: "Action Verb + Task + Result".
-   Example: "Refactored main.go database connection logic to use pooled SQLite connections, reducing connection overhead by 30%%."
-3. **Key Technologies Used**: Identify and list the technologies (languages, frameworks, file configurations) used based on the file extensions seen in the diff details (e.g., .go -> Go, .db -> SQLite, .env -> Configuration, .gitignore -> Git).
+Ensure you fulfill the following criteria:
+1. **Group Work Into Thematic Categories**: Organize comparable tasks together under bold, descriptive headings (e.g., "Core Infrastructure", "Automation & Developer Workflows", "Integration Services").
+2. **Key Accomplishments (Google XYZ Formula)**: Generate exactly 3 to 5 high-impact bullet points summarizing key achievements.
+   Each bullet point MUST strictly follow the Google XYZ Formula:
+   "Accomplished [X] as measured by [Y], by doing [Z]"
+   
+   - **X (Accomplishment)**: The goal achieved (e.g., streamlined commit logging, optimized database transactions).
+   - **Y (Measurement/Metrics)**: The measured improvement or inferred metric (e.g., reducing manual effort by 100%%, shrinking code footprint, optimizing latency). You MUST infer realistic metrics from the diff statistics:
+     * If there are many line deletions, focus on "reducing code footprint", "simplifying code paths", or "improving maintainability".
+     * If there are new tools/scripts (like Git hooks or CLI commands), focus on "automating manual processes" or "reducing developer friction".
+   - **Z (Action Taken)**: The technical execution (e.g., by architecting a custom post-commit Git hook installer, by implementing a secure SQLite storage layer).
+   
+   *CRITICAL: Heavily emphasize and lead with executive-level action verbs like "Architected", "Streamlined", "Optimized", "Automated", "Engineered", or "Pioneered".*
+   *Example: "Automated manual commit logging as measured by a 100%% reduction in human intervention, by architecting an intelligent post-commit hook installer in Go."*
+
+3. **Developer Experience (DX) & Workflow Impact**: Include a dedicated section detailing how these achievements specifically improve a developer's daily workflow (e.g., removing manual data entry, providing instant feedback, increasing repository tracking hygiene).
+4. **Key Technologies Used**: Summarize the technologies used based on the file extensions and paths seen in the diff details (e.g., .go -> Go, .db -> SQLite, .env -> Security/Configuration, .sh/.hooks -> Shell/Automation).
 
 Here is the log data:
 %s`, logsText.String())

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -82,6 +83,15 @@ func createTables(db *sql.DB) error {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
+	draftSummariesSchema := `
+	CREATE TABLE IF NOT EXISTS draft_summaries (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		content_md TEXT NOT NULL,
+		start_date TEXT NOT NULL,
+		end_date TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
 	if _, err := db.Exec(projectsSchema); err != nil {
 		return fmt.Errorf("failed to create projects table: %w", err)
 	}
@@ -94,5 +104,35 @@ func createTables(db *sql.DB) error {
 		return fmt.Errorf("failed to create weekly_achievements table: %w", err)
 	}
 
+	if _, err := db.Exec(draftSummariesSchema); err != nil {
+		return fmt.Errorf("failed to create draft_summaries table: %w", err)
+	}
+
 	return nil
+}
+
+// GetLatestWeeklyAchievementDate returns the created_at timestamp of the most recent weekly achievement.
+// If no achievement exists, it returns a zero time and nil error.
+func (db *DB) GetLatestWeeklyAchievementDate() (time.Time, error) {
+	var createdAtStr string
+	query := `SELECT created_at FROM weekly_achievements ORDER BY created_at DESC LIMIT 1`
+	err := db.QueryRow(query).Scan(&createdAtStr)
+	if err == sql.ErrNoRows {
+		return time.Time{}, nil
+	}
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to query latest weekly achievement: %w", err)
+	}
+
+	// Parse SQLite DATETIME default format: "YYYY-MM-DD HH:MM:SS" (stored in UTC usually)
+	parsedTime, err := time.Parse("2006-01-02 15:04:05", createdAtStr)
+	if err != nil {
+		// Try parsing ISO8601 if SQLite saved it differently in other contexts
+		parsedTime, err = time.Parse(time.RFC3339, createdAtStr)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("failed to parse weekly achievement created_at timestamp %q: %w", createdAtStr, err)
+		}
+	}
+
+	return parsedTime, nil
 }
