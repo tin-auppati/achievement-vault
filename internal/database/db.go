@@ -73,12 +73,25 @@ func createTables(db *sql.DB) error {
 		FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 	);`
 
+	weeklyAchievementsSchema := `
+	CREATE TABLE IF NOT EXISTS weekly_achievements (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		content_md TEXT NOT NULL,
+		start_date TEXT NOT NULL,
+		end_date TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
 	if _, err := db.Exec(projectsSchema); err != nil {
 		return fmt.Errorf("failed to create projects table: %w", err)
 	}
 
 	if _, err := db.Exec(rawLogsSchema); err != nil {
 		return fmt.Errorf("failed to create raw_logs table: %w", err)
+	}
+
+	if _, err := db.Exec(weeklyAchievementsSchema); err != nil {
+		return fmt.Errorf("failed to create weekly_achievements table: %w", err)
 	}
 
 	return nil

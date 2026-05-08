@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/tin-auppati/achievement-vault/internal/ai"
 	"github.com/tin-auppati/achievement-vault/internal/database"
@@ -31,6 +34,8 @@ func main() {
 		handleCollect()
 	case "summarize":
 		handleSummarize()
+	case "history":
+		handleHistory()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -42,7 +47,6 @@ func main() {
 
 func handleRegister() {
 	// Expecting: main register <name> <path> <source>
-	// Total 5 elements in os.Args
 	if len(os.Args) != 5 {
 		fmt.Fprintln(os.Stderr, "\033[31mError: register command requires exactly 3 arguments: <name> <path> <source>\033[0m")
 		fmt.Fprintln(os.Stderr, "Usage: achievement-vault register <name> <path> <source>")
@@ -226,7 +230,100 @@ func handleSummarize() {
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 	fmt.Println(summary)
 	fmt.Println("\033[1;36m==================================================================\033[0m")
-	fmt.Println("\033[33m💡 Note: This is a preview draft. It is NOT yet saved to the vault.\033[0m")
+
+	// Interactive Approval Prompt
+	fmt.Print("\n\033[1;33mDo you want to save this summary to the vault? (y/n): \033[0m")
+	reader := bufio.NewReader(os.Stdin)
+	answer, _ := reader.ReadString('\n')
+	answer = strings.TrimSpace(strings.ToLower(answer))
+
+	if answer == "y" || answer == "yes" {
+		now := time.Now()
+		endDateStr := now.Format("2006-01-02")
+		startDateStr := now.AddDate(0, 0, -days).Format("2006-01-02")
+
+		id, err := vault.SaveWeeklyAchievement(db.DB, summary, startDateStr, endDateStr)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError saving summary: %v\033[0m\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println("\n\033[32m✔ Summary successfully saved to the vault as an append-only weekly achievement!\033[0m")
+		fmt.Printf("  \033[1mAchievement ID:\033[0m  %d\n", id)
+		fmt.Printf("  \033[1mPeriod:\033[0m          %s to %s\n", startDateStr, endDateStr)
+	} else {
+		fmt.Println("\033[33mDraft summary discarded.\033[0m")
+	}
+}
+
+func handleHistory() {
+	// Initialize the DB
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	// If ID is specified (e.g., main history <id>)
+	if len(os.Args) == 3 {
+		idStr := os.Args[2]
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError: invalid achievement ID %q: must be an integer\033[0m\n", idStr)
+			os.Exit(1)
+		}
+
+		achievements, err := vault.GetWeeklyAchievements(db.DB)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError retrieving history: %v\033[0m\n", err)
+			os.Exit(1)
+		}
+
+		var found *vault.WeeklyAchievement
+		for _, ach := range achievements {
+			if ach.ID == int64(id) {
+				found = &ach
+				break
+			}
+		}
+
+		if found == nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError: weekly achievement with ID %d not found\033[0m\n", id)
+			os.Exit(1)
+		}
+
+		// Display full markdown weekly achievement summary
+		fmt.Println("\033[1;36m==================================================================\033[0m")
+		fmt.Printf(" \033[1mWeekly Achievement Detail - ID: %d (%s to %s)\033[0m\n", found.ID, found.StartDate, found.EndDate)
+		fmt.Println("\033[1;36m==================================================================\033[0m")
+		fmt.Println(found.ContentMd)
+		fmt.Println("\033[1;36m==================================================================\033[0m")
+		return
+	}
+
+	// List all achievements
+	achievements, err := vault.GetWeeklyAchievements(db.DB)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError retrieving weekly achievements: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	if len(achievements) == 0 {
+		fmt.Println("\033[33m⚠ No weekly achievements registered in the vault yet.\033[0m")
+		return
+	}
+
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+	fmt.Println(" \033[1m📜 Previously Saved Weekly Achievements History\033[0m")
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+	for _, ach := range achievements {
+		fmt.Printf("  \033[32m✔ ID: %d\033[0m\n", ach.ID)
+		fmt.Printf("    \033[1mPeriod:\033[0m   %s to %s\n", ach.StartDate, ach.EndDate)
+		fmt.Printf("    \033[1mSaved At:\033[0m %s\n\n", ach.CreatedAt)
+	}
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+	fmt.Println("\033[33m💡 Tip: Run './achievement-vault history <id>' to view the full markdown summary of an entry.\033[0m")
 }
 
 func printUsage() {
@@ -242,11 +339,13 @@ func printUsage() {
 	fmt.Println("  \033[32mcollect --project-id <id> --message <msg> --diff <diff>\033[0m")
 	fmt.Println("                                    Collect commit message and diff (Internal/Hook)")
 	fmt.Println("  \033[32msummarize [--days <days>]\033[0m         Generate draft summaries of work from the last N days")
+	fmt.Println("  \033[32mhistory [<id>]\033[0m                    List saved weekly summaries or view a specific entry")
 	fmt.Println("  \033[32mhelp\033[0m                              Display usage and help details")
 	fmt.Println()
 	fmt.Println("Example:")
 	fmt.Println("  ./achievement-vault register \"my-api\" \"/home/user/my-api\" \"github\"")
 	fmt.Println("  ./achievement-vault install \"my-api\"")
 	fmt.Println("  ./achievement-vault summarize --days 7")
+	fmt.Println("  ./achievement-vault history 1")
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 }
