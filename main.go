@@ -17,14 +17,41 @@ import (
 	"github.com/tin-auppati/achievement-vault/internal/vault"
 )
 
+func GetVaultHome() string {
+	vaultHome := os.Getenv("VAULT_HOME")
+	if vaultHome != "" {
+		return vaultHome
+	}
+
+	// Fallback 1: directory where the binary is located
+	execPath, err := os.Executable()
+	if err == nil {
+		execDir := filepath.Dir(execPath)
+		// Check if data directory or config exists in binary folder
+		if _, err := os.Stat(filepath.Join(execDir, "data")); err == nil {
+			return execDir
+		}
+	}
+
+	// Fallback 2: ~/.achievement-vault config dir in user home
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "."
+	}
+	return filepath.Join(home, ".achievement-vault")
+}
+
 func getDBPath() string {
-	return filepath.Join("data", "vault.db")
+	vh := GetVaultHome()
+	dbDir := filepath.Join(vh, "data")
+	os.MkdirAll(dbDir, 0755)
+	return filepath.Join(dbDir, "vault.db")
 }
 
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	command := os.Args[1]
@@ -43,6 +70,8 @@ func main() {
 		handleCheckPending()
 	case "setup-shell":
 		handleSetupShell()
+	case "setup-global":
+		handleSetupGlobal()
 	case "serve":
 		handleServe()
 	case "start-all":
@@ -390,7 +419,7 @@ func handleCheckPending() {
 
 	// If there's no achievement yet, or the latest achievement was created before Friday 5 PM
 	if latestDate.IsZero() || latestDate.Before(friday5pm) {
-		fmt.Println("\n\033[1;31m⚠️  [VAULT ALERT] Your weekly summary is pending! Run go run main.go summarize to record your impact.\033[0m\n")
+		fmt.Println("\n\033[1;31m⚠️  [VAULT ALERT] Your weekly summary is pending! Run vault summarize to record your impact.\033[0m")
 	}
 }
 
@@ -469,7 +498,7 @@ func handleServe() {
 	}
 	defer db.Close()
 
-	port := 8080
+	port := 8001
 	// Optional custom port override
 	if len(os.Args) == 3 {
 		p, err := strconv.Atoi(os.Args[2])
@@ -490,30 +519,30 @@ func handleStartAll() {
 	fmt.Println(" \033[1m🚀 Launching Achievement Vault Stack Concurrently...\033[0m")
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "\033[31mError getting current working directory: %v\033[0m\n", err)
-		os.Exit(1)
-	}
+	vh := GetVaultHome()
 
-	// 1. Prepare Backend Server process
-	backendBin := filepath.Join(wd, "achievement-vault")
+	// 1. Prepare Backend Server process with absolute binary path
+	backendBin := filepath.Join(vh, "achievement-vault")
 	if _, err := os.Stat(backendBin); os.IsNotExist(err) {
-		backendBin = "go"
+		// Fallback to compiled global binary if present
+		backendBin = filepath.Join(vh, "vault")
+		if _, err := os.Stat(backendBin); os.IsNotExist(err) {
+			backendBin = "go"
+		}
 	}
 
 	var backendCmd *exec.Cmd
 	if backendBin == "go" {
-		backendCmd = exec.Command("go", "run", "main.go", "serve")
+		backendCmd = exec.Command("go", "run", filepath.Join(vh, "main.go"), "serve")
 	} else {
 		backendCmd = exec.Command(backendBin, "serve")
 	}
 	backendCmd.Stdout = os.Stdout
 	backendCmd.Stderr = os.Stderr
 
-	// 2. Prepare Frontend Dev Server process
+	// 2. Prepare Frontend Dev Server process using absolute directory target
 	frontendCmd := exec.Command("npm", "run", "dev")
-	frontendCmd.Dir = filepath.Join(wd, "ui")
+	frontendCmd.Dir = filepath.Join(vh, "ui")
 	frontendCmd.Stdout = os.Stdout
 	frontendCmd.Stderr = os.Stderr
 
@@ -522,7 +551,7 @@ func handleStartAll() {
 	frontendCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	// Start Backend
-	fmt.Println("\033[36m⚡ Starting Go REST API Backend on port 8080...\033[0m")
+	fmt.Println("\033[36m⚡ Starting Go REST API Backend on port 8001...\033[0m")
 	if err := backendCmd.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mError starting backend: %v\033[0m\n", err)
 		os.Exit(1)
@@ -683,36 +712,155 @@ func handleAutostartDisable() {
 	fmt.Println("\033[32m✔ Autostart successfully disabled and entries removed!\033[0m")
 }
 
+func handleSetupGlobal() {
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+	fmt.Println(" \033[1m🌍 Configuring Achievement Vault for Global Directory Execution...\033[0m")
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+
+	vh := GetVaultHome()
+
+	// 1. Ask/Instruct the user to compile the binary using 'go build -o vault main.go'
+	fmt.Println("\033[36m⚡ Phase 1: Compiling fresh global binary 'vault'...\033[0m")
+	buildCmd := exec.Command("go", "build", "-o", "vault", "main.go")
+	buildCmd.Dir = vh // Always execute inside the workspace folder where go.mod resides!
+	buildCmd.Stdout = os.Stdout
+	buildCmd.Stderr = os.Stderr
+	if err := buildCmd.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError compiling vault binary: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("\033[32m✔ Global binary 'vault' compiled successfully!\033[0m")
+
+	// 2. Provide instructions and copy to global bins (~/go/bin/ or ~/.local/bin/)
+	fmt.Println("\n\033[36m⚡ Phase 2: Copying global binary to user's PATH...\033[0m")
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError getting user home directory: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	localBin := filepath.Join(home, ".local", "bin")
+	goBin := filepath.Join(home, "go", "bin")
+
+	targetDir := ""
+	if _, err := os.Stat(goBin); err == nil {
+		targetDir = goBin
+	} else if _, err := os.Stat(localBin); err == nil {
+		targetDir = localBin
+	} else {
+		os.MkdirAll(localBin, 0755)
+		targetDir = localBin
+	}
+
+	targetPath := filepath.Join(targetDir, "vault")
+	
+	input, err := os.ReadFile(filepath.Join(vh, "vault")) // Read from workspace directory where go compiled it!
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError reading compiled binary: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	err = os.WriteFile(targetPath, input, 0755)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError copying binary to %s: %v\033[0m\n", targetPath, err)
+		fmt.Println("\033[33m💡 Please manually copy the compiled binary 'vault' to your global PATH, e.g.:\033[0m")
+		fmt.Println("   sudo cp vault /usr/local/bin/")
+	} else {
+		fmt.Printf("\033[32m✔ Successfully installed global 'vault' command into %s!\033[0m\n", targetPath)
+	}
+
+	// 3. Ensure .bashrc and .zshrc have VAULT_HOME and PATH exported pointing to appropriate directories
+	fmt.Println("\n\033[36m⚡ Phase 3: Exporting VAULT_HOME and PATH extensions to shell...\033[0m")
+	
+	envStr := fmt.Sprintf("\n# Achievement Vault Global Workspace Config\nexport VAULT_HOME=\"%s\"\nexport PATH=\"$PATH:%s\"\n", vh, targetDir)
+	
+	shellConfigs := []string{
+		filepath.Join(home, ".bashrc"),
+		filepath.Join(home, ".zshrc"),
+	}
+
+	configuredCount := 0
+	for _, configPath := range shellConfigs {
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
+			continue
+		}
+
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			continue
+		}
+
+		content := string(data)
+		if strings.Contains(content, "export VAULT_HOME") && strings.Contains(content, "export PATH") && strings.Contains(content, targetDir) {
+			fmt.Printf("\033[33mℹ VAULT_HOME & PATH are already configured in %s (skipping write to maintain idempotency)\033[0m\n", filepath.Base(configPath))
+			configuredCount++
+			continue
+		}
+
+		f, err := os.OpenFile(configPath, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			continue
+		}
+		defer f.Close()
+
+		if _, err := f.WriteString(envStr); err == nil {
+			fmt.Printf("\033[32m✔ Exported VAULT_HOME and PATH variables successfully to %s!\033[0m\n", filepath.Base(configPath))
+			configuredCount++
+		}
+	}
+
+	fmt.Println("\n\033[32m✔ Global Environment Setup Complete!\033[0m")
+	fmt.Println("  \033[1;33m💡 To enable the 'vault' command in your CURRENT terminal session, run:\033[0m")
+	fmt.Printf("     \033[1;32mexport PATH=\"$PATH:%s\"\033[0m\n\n", targetDir)
+	fmt.Println("  \033[1mTo enable it permanently, reload your terminal session by running:\033[0m")
+	fmt.Println("     \033[1;32msource ~/.bashrc\033[0m (or \033[1;32msource ~/.zshrc\033[0m if using Zsh)")
+	fmt.Println("\n  You can then run \033[32mvault\033[0m from absolutely ANY directory globally!")
+}
+
 func printUsage() {
-	fmt.Println("\033[1;36m==================================================================\033[0m")
-	fmt.Println(" \033[1mAchievement Vault - Local CLI Tool\033[0m")
-	fmt.Println("\033[1;36m==================================================================\033[0m")
+	fmt.Println("\033[1;36m┌────────────────────────────────────────────────────────────────────────────────────────┐\033[0m")
+	fmt.Println("\033[1;36m│                       🏆  ACHIEVEMENT VAULT - PREMIUM CLI TOOL v1.2                     │\033[0m")
+	fmt.Println("\033[1;36m└────────────────────────────────────────────────────────────────────────────────────────┘\033[0m")
 	fmt.Println("Usage:")
-	fmt.Println("  achievement-vault <command> [arguments]")
+	fmt.Println("  \033[1;32mvault\033[0m \033[36m<command> [arguments]\033[0m")
 	fmt.Println()
-	fmt.Println("Available Commands:")
-	fmt.Println("  \033[32mregister <name> <path> <source>\033[0m   Register a new project into the database")
-	fmt.Println("  \033[32minstall <project_name>\033[0m            Install git post-commit hook in registered project")
-	fmt.Println("  \033[32mcollect --project-id <id> --message <msg> --diff <diff>\033[0m")
-	fmt.Println("                                    Collect commit message and diff (Internal/Hook)")
-	fmt.Println("  \033[32msummarize [--days <days>]\033[0m         Generate draft summaries of work from the last N days")
-	fmt.Println("  \033[32mhistory [<id>]\033[0m                    List saved weekly summaries or view a specific entry")
-	fmt.Println("  \033[32mcheck-pending\033[0m                     Scan and alert if the current week's summary is pending")
-	fmt.Println("  \033[32msetup-shell\033[0m                       Install check-pending hook to .bashrc and .zshrc")
-	fmt.Println("  \033[32mserve [<port>]\033[0m                    Start REST API backend server (default port 8080)")
-	fmt.Println("  \033[32mstart-all\033[0m                         Run both Go backend API and Next.js UI concurrently")
-	fmt.Println("  \033[32mautostart <enable|disable>\033[0m        Configure system service to launch the stack automatically")
-	fmt.Println("  \033[32mhelp\033[0m                              Display usage and help details")
+
+	// 1. REPOSITORY SETUP & HOOKS (Green)
+	fmt.Println("\033[1;32m📁 REPOSITORY SETUP & HOOKS\033[0m")
+	fmt.Println("  \033[32mregister\033[0m <name> <path> <source>         Register a new local development project")
+	fmt.Println("  \033[32minstall\033[0m <project_name>                  Install Git post-commit hook automatically")
+	fmt.Println("  \033[32msetup-shell\033[0m                             Append pending report check trigger to .bashrc/.zshrc")
+	fmt.Println("  \033[32msetup-global\033[0m                            Configure global 'vault' command and export VAULT_HOME")
 	fmt.Println()
-	fmt.Println("Example:")
-	fmt.Println("  ./achievement-vault register \"my-api\" \"/home/user/my-api\" \"github\"")
-	fmt.Println("  ./achievement-vault install \"my-api\"")
-	fmt.Println("  ./achievement-vault summarize --days 7")
-	fmt.Println("  ./achievement-vault history 1")
-	fmt.Println("  ./achievement-vault check-pending")
-	fmt.Println("  ./achievement-vault setup-shell")
-	fmt.Println("  ./achievement-vault serve 8080")
-	fmt.Println("  ./achievement-vault start-all")
-	fmt.Println("  ./achievement-vault autostart enable")
-	fmt.Println("\033[1;36m==================================================================\033[0m")
+
+	// 2. ACTIVITY LOG COLLECTION (Cyan)
+	fmt.Println("\033[1;36m📥 GIT COMMIT LOG COLLECTION\033[0m")
+	fmt.Println("  \033[36mcollect\033[0m --project-id <id> --message <msg> --diff <diff>")
+	fmt.Println("                                          Collect activities to SQLite database (Hook backend)")
+	fmt.Println()
+
+	// 3. AI SUMMARIZATION & APPROVAL WORKFLOWS (Purple)
+	fmt.Println("\033[1;35m✨ AI SUMMARIZATION & EXECUTIVE APPROVALS\033[0m")
+	fmt.Println("  \033[35msummarize\033[0m [--days <days>]               Generate draft weekly summaries via Gemini API")
+	fmt.Println("  \033[35mhistory\033[0m [<id>]                          List saved weekly achievement summaries or view an entry")
+	fmt.Println("  \033[35mcheck-pending\033[0m                           Scan and warn if weekly summary is due/pending")
+	fmt.Println()
+
+	// 4. SERVICES & PERSISTENT DEPLOYMENTS (Yellow)
+	fmt.Println("\033[1;33m⚙ SERVICES & BACKGROUND PERSISTENT DEPLOYMENTS\033[0m")
+	fmt.Println("  \033[33mserve\033[0m [<port>]                          Start REST API backend server (default port 8001)")
+	fmt.Println("  \033[33mstart-all\033[0m                               Run both Go REST API and Next.js Web UI concurrently")
+	fmt.Println("  \033[33mautostart\033[0m <enable|disable>              Configure Systemd Service to boot stack on startup")
+	fmt.Println()
+
+	// 5. META SYSTEM INFO (Gray)
+	fmt.Println("\033[1;30m📚 SYSTEM SUPPORT & HELP\033[0m")
+	fmt.Println("  \033[1;30mhelp\033[0m                                    Show this premium help dashboard interface")
+	fmt.Println()
+	fmt.Println("\033[1;36m┌────────────────────────────────────────────────────────────────────────────────────────┐\033[0m")
+	fmt.Println("\033[1;36m│ Example:                                                                               │\033[0m")
+	fmt.Println("\033[1;36m│   vault register \"my-api\" \"/absolute/path/my-api\" \"github\"                             │\033[0m")
+	fmt.Println("\033[1;36m│   vault install \"my-api\"                                                               │\033[0m")
+	fmt.Println("\033[1;36m│   vault start-all                                                                      │\033[0m")
+	fmt.Println("\033[1;36m└────────────────────────────────────────────────────────────────────────────────────────┘\033[0m")
 }
