@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/tin-auppati/achievement-vault/internal/database"
 	"github.com/tin-auppati/achievement-vault/internal/vault"
 )
 
-const defaultDBPath = "./data/vault.db"
+func getDBPath() string {
+	return filepath.Join("data", "vault.db")
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -48,7 +51,7 @@ func handleRegister() {
 	source := os.Args[4]
 
 	// Initialize the DB
-	db, err := database.InitDB(defaultDBPath)
+	db, err := database.InitDB(getDBPath())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
 		os.Exit(1)
@@ -81,7 +84,7 @@ func handleInstall() {
 	projectName := os.Args[2]
 
 	// Initialize the DB
-	db, err := database.InitDB(defaultDBPath)
+	db, err := database.InitDB(getDBPath())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
 		os.Exit(1)
@@ -108,23 +111,19 @@ func handleInstall() {
 }
 
 func handleCollect() {
-	// Expecting: main collect <project_id> --message <msg> --diff <diff>
-	if len(os.Args) < 7 {
-		fmt.Fprintln(os.Stderr, "\033[31mError: collect command requires project ID, --message and --diff flags\033[0m")
-		fmt.Fprintln(os.Stderr, "Usage: achievement-vault collect <project_id> --message <msg> --diff <diff>")
+	// Expecting: main collect --project-id <id> --message <msg> --diff <diff>
+	if len(os.Args) < 8 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: collect command requires --project-id, --message and --diff flags\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault collect --project-id <id> --message <msg> --diff <diff>")
 		os.Exit(1)
 	}
 
-	projectIDStr := os.Args[2]
-	projectID, err := strconv.Atoi(projectIDStr)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "\033[31mError: invalid project ID %q: must be an integer\033[0m\n", projectIDStr)
-		os.Exit(1)
-	}
-
-	var message, diff string
-	for i := 3; i < len(os.Args); i++ {
-		if os.Args[i] == "--message" && i+1 < len(os.Args) {
+	var projectIDStr, message, diff string
+	for i := 2; i < len(os.Args); i++ {
+		if os.Args[i] == "--project-id" && i+1 < len(os.Args) {
+			projectIDStr = os.Args[i+1]
+			i++
+		} else if os.Args[i] == "--message" && i+1 < len(os.Args) {
 			message = os.Args[i+1]
 			i++
 		} else if os.Args[i] == "--diff" && i+1 < len(os.Args) {
@@ -133,6 +132,10 @@ func handleCollect() {
 		}
 	}
 
+	if projectIDStr == "" {
+		fmt.Fprintln(os.Stderr, "\033[31mError: --project-id flag is required and cannot be empty\033[0m")
+		os.Exit(1)
+	}
 	if message == "" {
 		fmt.Fprintln(os.Stderr, "\033[31mError: --message flag is required and cannot be empty\033[0m")
 		os.Exit(1)
@@ -142,8 +145,14 @@ func handleCollect() {
 		os.Exit(1)
 	}
 
+	projectID, err := strconv.Atoi(projectIDStr)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError: invalid --project-id %q: must be an integer\033[0m\n", projectIDStr)
+		os.Exit(1)
+	}
+
 	// Initialize the DB
-	db, err := database.InitDB(defaultDBPath)
+	db, err := database.InitDB(getDBPath())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
 		os.Exit(1)
@@ -173,7 +182,7 @@ func printUsage() {
 	fmt.Println("Available Commands:")
 	fmt.Println("  \033[32mregister <name> <path> <source>\033[0m   Register a new project into the database")
 	fmt.Println("  \033[32minstall <project_name>\033[0m            Install git post-commit hook in registered project")
-	fmt.Println("  \033[32mcollect <project_id> --message <msg> --diff <diff>\033[0m")
+	fmt.Println("  \033[32mcollect --project-id <id> --message <msg> --diff <diff>\033[0m")
 	fmt.Println("                                    Collect commit message and diff (Internal/Hook)")
 	fmt.Println("  \033[32mhelp\033[0m                              Display usage and help details")
 	fmt.Println()
