@@ -4,9 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/tin-auppati/achievement-vault/internal/ai"
@@ -42,6 +45,10 @@ func main() {
 		handleSetupShell()
 	case "serve":
 		handleServe()
+	case "start-all":
+		handleStartAll()
+	case "autostart":
+		handleAutostart()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -478,6 +485,204 @@ func handleServe() {
 	}
 }
 
+func handleStartAll() {
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+	fmt.Println(" \033[1m🚀 Launching Achievement Vault Stack Concurrently...\033[0m")
+	fmt.Println("\033[1;36m==================================================================\033[0m")
+
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError getting current working directory: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	// 1. Prepare Backend Server process
+	backendBin := filepath.Join(wd, "achievement-vault")
+	if _, err := os.Stat(backendBin); os.IsNotExist(err) {
+		backendBin = "go"
+	}
+
+	var backendCmd *exec.Cmd
+	if backendBin == "go" {
+		backendCmd = exec.Command("go", "run", "main.go", "serve")
+	} else {
+		backendCmd = exec.Command(backendBin, "serve")
+	}
+	backendCmd.Stdout = os.Stdout
+	backendCmd.Stderr = os.Stderr
+
+	// 2. Prepare Frontend Dev Server process
+	frontendCmd := exec.Command("npm", "run", "dev")
+	frontendCmd.Dir = filepath.Join(wd, "ui")
+	frontendCmd.Stdout = os.Stdout
+	frontendCmd.Stderr = os.Stderr
+
+	// Set process group so we can signal/kill child groups on unix
+	backendCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	frontendCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+	// Start Backend
+	fmt.Println("\033[36m⚡ Starting Go REST API Backend on port 8080...\033[0m")
+	if err := backendCmd.Start(); err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError starting backend: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	// Start Frontend
+	fmt.Println("\033[36m⚡ Starting Next.js Dev Server on http://localhost:3000...\033[0m")
+	if err := frontendCmd.Start(); err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError starting frontend: %v\033[0m\n", err)
+		// Clean up backend
+		syscall.Kill(-backendCmd.Process.Pid, syscall.SIGKILL)
+		os.Exit(1)
+	}
+
+	// Signal handling for graceful Ctrl+C terminates
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		fmt.Println("\n\033[33m⚡ Shutdown signal received. Terminating both child processes gracefully...\033[0m")
+
+		// Kill the process groups
+		syscall.Kill(-backendCmd.Process.Pid, syscall.SIGINT)
+		syscall.Kill(-frontendCmd.Process.Pid, syscall.SIGINT)
+
+		// Wait briefly
+		time.Sleep(1500 * time.Millisecond)
+
+		// Hard kill fallback
+		syscall.Kill(-backendCmd.Process.Pid, syscall.SIGKILL)
+		syscall.Kill(-frontendCmd.Process.Pid, syscall.SIGKILL)
+
+		fmt.Println("\033[32m✔ Both processes successfully shut down. Goodbye!\033[0m")
+		os.Exit(0)
+	}()
+
+	// Wait for commands to exit
+	backendCmd.Wait()
+	frontendCmd.Wait()
+}
+
+func handleAutostart() {
+	if len(os.Args) < 3 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: autostart requires a subcommand (enable or disable)\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault autostart [enable|disable]")
+		os.Exit(1)
+	}
+
+	sub := os.Args[2]
+	switch sub {
+	case "enable":
+		handleAutostartEnable()
+	case "disable":
+		handleAutostartDisable()
+	default:
+		fmt.Fprintf(os.Stderr, "\033[31mError: unknown autostart subcommand %q: must be enable or disable\033[0m\n", sub)
+		os.Exit(1)
+	}
+}
+
+func handleAutostartEnable() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError getting user home directory: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		wd = "/home/tin/projects/achievement-vault"
+	}
+	binaryPath := filepath.Join(wd, "achievement-vault")
+
+	// Ensure the binary is compiled and built first
+	fmt.Println("\033[36m⚡ Guaranteeing compiled achievement-vault binary is fresh...\033[0m")
+	buildCmd := exec.Command("go", "build", "-o", "achievement-vault", "main.go")
+	buildCmd.Stdout = os.Stdout
+	buildCmd.Stderr = os.Stderr
+	if err := buildCmd.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError compiling binary: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	systemdDir := filepath.Join(home, ".config", "systemd", "user")
+	if err := os.MkdirAll(systemdDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError creating systemd user directory: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	serviceFile := filepath.Join(systemdDir, "achievement-vault.service")
+	serviceContent := fmt.Sprintf(`[Unit]
+Description=Achievement Vault Service (start-all Stack)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%s
+ExecStart=%s start-all
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+`, wd, binaryPath)
+
+	err = os.WriteFile(serviceFile, []byte(serviceContent), 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError writing systemd service file: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	// Reload daemon, enable service, and start it
+	fmt.Println("\033[36m⚡ Registering Systemd user service entries...\033[0m")
+	
+	exec.Command("systemctl", "--user", "daemon-reload").Run()
+	
+	err = exec.Command("systemctl", "--user", "enable", "achievement-vault.service").Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError enabling service: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	err = exec.Command("systemctl", "--user", "start", "achievement-vault.service").Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError starting service: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("\033[32m✔ Achievement Vault Autostart successfully configured & started!\033[0m")
+	fmt.Printf("  \033[1mService File:\033[0m  %s\n", serviceFile)
+	fmt.Println("  \033[1mDetails:\033[0m       The Go backend and Next.js frontend will now run concurrently in the background automatically on boot.")
+}
+
+func handleAutostartDisable() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError getting user home directory: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	serviceFile := filepath.Join(home, ".config", "systemd", "user", "achievement-vault.service")
+
+	fmt.Println("\033[36m⚡ Stopping and disabling systemd user service...\033[0m")
+	
+	exec.Command("systemctl", "--user", "stop", "achievement-vault.service").Run()
+	exec.Command("systemctl", "--user", "disable", "achievement-vault.service").Run()
+
+	if _, err := os.Stat(serviceFile); err == nil {
+		err = os.Remove(serviceFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError removing service file: %v\033[0m\n", err)
+		}
+	}
+
+	exec.Command("systemctl", "--user", "daemon-reload").Run()
+
+	fmt.Println("\033[32m✔ Autostart successfully disabled and entries removed!\033[0m")
+}
+
 func printUsage() {
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 	fmt.Println(" \033[1mAchievement Vault - Local CLI Tool\033[0m")
@@ -495,6 +700,8 @@ func printUsage() {
 	fmt.Println("  \033[32mcheck-pending\033[0m                     Scan and alert if the current week's summary is pending")
 	fmt.Println("  \033[32msetup-shell\033[0m                       Install check-pending hook to .bashrc and .zshrc")
 	fmt.Println("  \033[32mserve [<port>]\033[0m                    Start REST API backend server (default port 8080)")
+	fmt.Println("  \033[32mstart-all\033[0m                         Run both Go backend API and Next.js UI concurrently")
+	fmt.Println("  \033[32mautostart <enable|disable>\033[0m        Configure system service to launch the stack automatically")
 	fmt.Println("  \033[32mhelp\033[0m                              Display usage and help details")
 	fmt.Println()
 	fmt.Println("Example:")
@@ -505,5 +712,7 @@ func printUsage() {
 	fmt.Println("  ./achievement-vault check-pending")
 	fmt.Println("  ./achievement-vault setup-shell")
 	fmt.Println("  ./achievement-vault serve 8080")
+	fmt.Println("  ./achievement-vault start-all")
+	fmt.Println("  ./achievement-vault autostart enable")
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 }
