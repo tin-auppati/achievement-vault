@@ -85,10 +85,10 @@ export default function Dashboard() {
       };
 
       const [logsRes, achievementsRes, statsRes, statusRes] = await Promise.all([
-        fetch(`http://localhost:8001/api/logs?_t=${t}`, headersOption).then((r) => r.json()).catch(() => []),
-        fetch(`http://localhost:8001/api/achievements?_t=${t}`, headersOption).then((r) => r.json()).catch(() => []),
-        fetch(`http://localhost:8001/api/stats?_t=${t}`, headersOption).then((r) => r.json()).catch(() => ({})),
-        fetch(`http://localhost:8001/api/status?_t=${t}`, headersOption).then((r) => r.json()).catch(() => ({
+        fetch(`/api/logs?_t=${t}`, headersOption).then((r) => r.json()).catch(() => []),
+        fetch(`/api/achievements?_t=${t}`, headersOption).then((r) => r.json()).catch(() => []),
+        fetch(`/api/stats?_t=${t}`, headersOption).then((r) => r.json()).catch(() => ({})),
+        fetch(`/api/status?_t=${t}`, headersOption).then((r) => r.json()).catch(() => ({
           is_weekly_pending: false,
           has_pending_draft: false,
           draft_content: "",
@@ -120,7 +120,7 @@ export default function Dashboard() {
   const handleSaveDraft = async () => {
     try {
       setSavingDraft(true);
-      const res = await fetch("http://localhost:8001/api/draft", {
+      const res = await fetch("/api/draft", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: editedDraft }),
@@ -145,7 +145,7 @@ export default function Dashboard() {
       setRefining(true);
       showToast("✨ AI is refining your draft...", "info");
       
-      const res = await fetch("http://localhost:8001/api/draft/refine", {
+      const res = await fetch("/api/draft/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: aiPrompt }),
@@ -171,7 +171,7 @@ export default function Dashboard() {
   const handleApproveDraft = async () => {
     try {
       setApproving(true);
-      const res = await fetch("http://localhost:8001/api/achievements/approve", {
+      const res = await fetch("/api/achievements/approve", {
         method: "POST",
         cache: "no-store",
       });
@@ -196,7 +196,7 @@ export default function Dashboard() {
       setSummarizing(true);
       showToast("Compiling logs and generating draft with Gemini AI...", "info");
       
-      const res = await fetch("http://localhost:8001/api/summarize", {
+      const res = await fetch("/api/summarize", {
         method: "POST",
         cache: "no-store",
       });
@@ -224,7 +224,7 @@ export default function Dashboard() {
       showToast("Scanning repository databases for pending weekly deadlines...", "info");
       
       const t = Date.now();
-      const res = await fetch(`http://localhost:8001/api/status?_t=${t}`, {
+      const res = await fetch(`/api/status?_t=${t}`, {
         cache: "no-store",
       });
       if (!res.ok) {
