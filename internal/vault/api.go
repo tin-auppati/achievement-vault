@@ -22,7 +22,23 @@ type APILog struct {
 }
 
 // StartAPIServer binds and launches the REST API backend server on the specified port.
-func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, error), refineFn func(currentDraft, prompt string) (string, error)) error {
+func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, error), refineFn func(currentDraft, prompt string) (string, error), resumeFn func() (string, error)) error {
+	http.HandleFunc("/api/resume", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		resumeContent, err := resumeFn()
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true, "resume_content": %q}`, resumeContent)
+	}))
+
 	http.HandleFunc("/api/summarize", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)

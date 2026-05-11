@@ -65,6 +65,8 @@ func main() {
 		handleCollect()
 	case "summarize":
 		handleSummarize()
+	case "summarize-project":
+		handleSummarizeProject()
 	case "history":
 		handleHistory()
 	case "check-pending":
@@ -322,6 +324,55 @@ func handleSummarize() {
 	}
 }
 
+func handleSummarizeProject() {
+	// Initialize the DB
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	fmt.Println("\033[36m⚡ Fetching all approved weekly achievements from the vault...\033[0m")
+
+	achievements, err := vault.GetWeeklyAchievements(db.DB)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError retrieving weekly achievements: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	if len(achievements) == 0 {
+		fmt.Println("\033[33m⚠ No weekly achievements registered in the vault yet.\033[0m")
+		fmt.Println("\033[33m💡 Please run 'vault summarize' or approve drafts to create weekly achievements first!\033[0m")
+		return
+	}
+
+	fmt.Printf("\033[36m⚡ Sending %d weekly summaries to Gemini AI to generate a recruiter-ready project resume...\033[0m\n", len(achievements))
+
+	var summaries []string
+	for _, ach := range achievements {
+		summaries = append(summaries, ach.ContentMd)
+	}
+
+	resume, err := ai.GenerateProjectResume(summaries)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError generating project resume: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	// Render output with Glamour
+	rendered, err := glamour.Render(resume, "dark")
+	if err != nil {
+		fmt.Println("\n\033[1;35m✨ --- Project Resume Summary (Raw) --- ✨\033[0m")
+		fmt.Println(resume)
+		fmt.Println("\033[1;35m----------------------------------------\033[0m")
+	} else {
+		fmt.Println("\n\033[1;35m✨ --- Beautiful Rendered Project Resume --- ✨\033[0m")
+		fmt.Println(rendered)
+		fmt.Println("\033[1;35m---------------------------------------------\033[0m")
+	}
+}
+
 func handleHistory() {
 	// Initialize the DB
 	db, err := database.InitDB(getDBPath())
@@ -568,7 +619,30 @@ func handleServe() {
 		return refined, nil
 	}
 
-	err = vault.StartAPIServer(db.DB, port, summarizeFn, refineFn)
+	resumeFn := func() (string, error) {
+		achievements, err := vault.GetWeeklyAchievements(db.DB)
+		if err != nil {
+			return "", fmt.Errorf("failed to retrieve achievements: %w", err)
+		}
+
+		if len(achievements) == 0 {
+			return "", fmt.Errorf("no weekly achievements registered in the vault yet")
+		}
+
+		var summaries []string
+		for _, ach := range achievements {
+			summaries = append(summaries, ach.ContentMd)
+		}
+
+		resume, err := ai.GenerateProjectResume(summaries)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate project resume: %w", err)
+		}
+
+		return resume, nil
+	}
+
+	err = vault.StartAPIServer(db.DB, port, summarizeFn, refineFn, resumeFn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mError starting API Server: %v\033[0m\n", err)
 		os.Exit(1)
@@ -903,6 +977,7 @@ func printUsage() {
 	// 3. AI SUMMARIZATION & APPROVAL WORKFLOWS (Purple)
 	fmt.Println("\033[1;35m✨ AI SUMMARIZATION & EXECUTIVE APPROVALS\033[0m")
 	fmt.Println("  \033[35msummarize\033[0m [--days <days>]               Generate draft weekly summaries via Gemini API")
+	fmt.Println("  \033[35msummarize-project\033[0m                       Generate recruiter-ready project resume from achievements")
 	fmt.Println("  \033[35mhistory\033[0m [<id>]                          List saved weekly achievement summaries or view an entry")
 	fmt.Println("  \033[35mcheck-pending\033[0m                           Scan and warn if weekly summary is due/pending")
 	fmt.Println()

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import ReactMarkdown from "react-markdown";
-import { Sun, Moon, Laptop, RotateCw, Activity, Award, BarChart3, AlertTriangle, Sparkles, X, ChevronRight, Eye, Code, Search } from "lucide-react";
+import { Sun, Moon, Laptop, RotateCw, Activity, Award, BarChart3, AlertTriangle, Sparkles, X, ChevronRight, Eye, Code, Search, Copy, Check } from "lucide-react";
 
 interface Log {
   id: number;
@@ -61,6 +61,38 @@ export default function Dashboard() {
   const [savingDraft, setSavingDraft] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [refining, setRefining] = useState(false);
+
+  // States for Project Resume Generator
+  const [resumeContent, setResumeContent] = useState("");
+  const [fetchingResume, setFetchingResume] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
+
+  const handleFetchProjectResume = async () => {
+    try {
+      setFetchingResume(true);
+      showToast("Generating recruiter-ready project resume with Gemini AI...", "info");
+      
+      const res = await fetch("/api/resume", {
+        headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to generate project resume");
+      }
+
+      const data = await res.json();
+      setResumeContent(data.resume_content);
+      setShowResumeModal(true);
+      showToast("✨ Project resume compiled successfully!", "success");
+    } catch (err: any) {
+      console.error("Error fetching project resume:", err);
+      showToast(err.message || "Failed to compile project resume. Please ensure you have approved weekly achievements.", "error");
+    } finally {
+      setFetchingResume(false);
+    }
+  };
 
   const { theme, setTheme } = useTheme();
   // Prevent hydration mismatch
@@ -292,6 +324,16 @@ export default function Dashboard() {
           >
             <Sparkles className={`h-3.5 w-3.5 ${summarizing ? "animate-spin" : "animate-pulse"}`} />
             {summarizing ? "Generating AI Draft..." : "AI Summarize"}
+          </button>
+
+          {/* Project Resume Button */}
+          <button
+            onClick={handleFetchProjectResume}
+            disabled={fetchingResume || loading || summarizing || checkingPending}
+            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-cyan-200 dark:border-cyan-900/60 bg-cyan-50/40 dark:bg-cyan-950/15 text-cyan-700 dark:text-cyan-400 rounded-lg hover:border-cyan-500 dark:hover:border-cyan-400 hover:bg-cyan-100/30 dark:hover:bg-cyan-950/30 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
+          >
+            <Award className={`h-3.5 w-3.5 ${fetchingResume ? "animate-spin" : ""}`} />
+            {fetchingResume ? "Compiling Resume..." : "Project Resume"}
           </button>
 
           {/* Refresh Feed Button */}
@@ -669,6 +711,63 @@ export default function Dashboard() {
               <button
                 onClick={() => setActiveAchievement(null)}
                 className="px-4 py-1.5 bg-cyan-600 dark:bg-cyan-500 hover:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FULL MD MODAL WINDOW FOR PROJECT RESUME */}
+      {showResumeModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 animate-fade-in">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-colors duration-300">
+            
+            {/* Modal Header */}
+            <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50 rounded-t-2xl">
+              <div>
+                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200 dark:border-cyan-800/50 text-cyan-600 dark:text-cyan-400 rounded-full font-sans font-semibold">
+                  AI Portfolio Architect
+                </span>
+                <h2 className="text-xs font-bold text-zinc-800 dark:text-zinc-100 mt-2 font-mono">
+                  ✨ Recruiter-Ready Project Resume Description
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(resumeContent);
+                    showToast("Markdown copied to clipboard!", "success");
+                  }}
+                  className="px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:text-cyan-600 dark:hover:text-cyan-400 rounded-lg text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition-colors"
+                  title="Copy Markdown Code"
+                >
+                  <Copy className="h-3.5 w-3.5 animate-pulse" />
+                  Copy Markdown
+                </button>
+                <button
+                  onClick={() => setShowResumeModal(false)}
+                  className="h-8 w-8 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-750 rounded-full flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-850 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body - Rendered beautifully via Markdown rendering with Tailwind prose style */}
+            <div className="p-6 overflow-y-auto flex-1 bg-zinc-50 dark:bg-zinc-950/20 border-b border-zinc-200 dark:border-zinc-800 shadow-inner">
+              <div className="prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-200 font-sans text-sm leading-relaxed">
+                <ReactMarkdown>{resumeContent}</ReactMarkdown>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-b-2xl text-right flex justify-between items-center text-[9px] text-zinc-500 dark:text-zinc-400 font-mono font-semibold">
+              <span>Compiled from {totalAchievements} approved weekly achievements history</span>
+              <button
+                onClick={() => setShowResumeModal(false)}
+                className="px-5 py-1.5 bg-cyan-600 dark:bg-cyan-500 hover:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-black font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
               >
                 Close
               </button>

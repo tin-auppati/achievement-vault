@@ -321,3 +321,127 @@ Return ONLY the refined Markdown content. Do not include any conversational fill
 
 	return "", fmt.Errorf("Gemini API was unavailable for refinement. Last error received: %w", lastErr)
 }
+
+// GenerateProjectResume processes all approved weekly achievements and formats them into a professional project resume description.
+func GenerateProjectResume(summaries []string) (string, error) {
+	if len(summaries) == 0 {
+		return "No achievements found to generate a project resume.", nil
+	}
+
+	apiKey := loadEnvAPIKey()
+	if apiKey == "" {
+		return "", fmt.Errorf("GEMINI_API_KEY is not configured. Please add it to system environment variables or your local .env file")
+	}
+
+	// Group the summaries together
+	var summariesText strings.Builder
+	for i, s := range summaries {
+		summariesText.WriteString(fmt.Sprintf("--- Weekly Summary #%d ---\n%s\n\n", i+1, s))
+	}
+
+	prompt := fmt.Sprintf(`You are an expert Technical Recruiter and Software Architect.
+Analyze the following collective weekly summaries from this project's development history and generate a professional, recruiter-ready, high-impact project description in clean Markdown format suitable for a resume or high-end portfolio.
+
+Ensure your output contains exactly the following sections:
+
+### **Project Purpose**
+A 1-2 sentence high-level summary explaining what the project actually does and its core value proposition. Lead with strong, impactful language.
+
+### **Architecture & Features**
+A concise summary of key systems built, derived from the logs (e.g., automated hooks, local REST API, web dashboard, state-aware approval systems, persistent storage, process managers, etc.). Format as high-quality descriptions.
+
+### **Resume Bullets (XYZ Formula)**
+Provide exactly 3 to 4 highly impactful, result-oriented bullet points summarizing the overarching achievements.
+Each bullet point MUST strictly follow the Google XYZ Formula:
+"Accomplished [X] as measured by [Y], by doing [Z]"
+- **X**: Achievement / Business goal (e.g., eliminated manual tracking, reduced latency, streamlined deployments)
+- **Y**: Realistic measurement or inferred metric (e.g., 100%% reduction in manual logging overhead, sub-second update responsiveness, 0%% database corruption risk)
+- **Z**: The exact technical action taken (e.g., by building a lightweight Go daemon with background services, by designing a Same-Origin Proxy using Next.js rewrites)
+
+### **Tech Stack**
+Provide a consolidated, clean bulleted list of technologies used (e.g., Go, Next.js, SQLite, TypeScript, Gemini API, TailwindCSS v4, Git Hooks, Glamour, etc.).
+
+Here is the weekly achievement data:
+%s`, summariesText.String())
+
+	reqPayload := geminiRequest{
+		Contents: []geminiContent{
+			{
+				Parts: []geminiPart{
+					{Text: prompt},
+				},
+			},
+		},
+	}
+
+	reqBytes, err := json.Marshal(reqPayload)
+	if err != nil {
+		return "", fmt.Errorf("failed to serialize request content: %w", err)
+	}
+
+	modelsToTry := []string{
+		"gemini-2.5-flash",
+		"gemini-1.5-flash",
+		"gemini-1.5-pro",
+	}
+
+	var lastErr error
+	client := &http.Client{Timeout: 35 * time.Second}
+
+	for _, modelName := range modelsToTry {
+		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
+		
+		maxRetries := 3
+		backoffDuration := 2 * time.Second
+
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
+			if err != nil {
+				return "", fmt.Errorf("failed to create API HTTP request: %w", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				lastErr = fmt.Errorf("[%s] network error (attempt %d/%d): %w", modelName, attempt, maxRetries, err)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			respBytes, ioErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if ioErr != nil {
+				lastErr = fmt.Errorf("[%s] failed to read API response body: %w", modelName, ioErr)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			if resp.StatusCode != http.StatusOK {
+				lastErr = fmt.Errorf("[%s] status code %d (attempt %d/%d): %s", modelName, resp.StatusCode, attempt, maxRetries, string(respBytes))
+				if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+					time.Sleep(backoffDuration)
+					backoffDuration *= 2
+					continue
+				}
+				break
+			}
+
+			var geminiResp geminiResponse
+			if err := json.Unmarshal(respBytes, &geminiResp); err != nil {
+				lastErr = fmt.Errorf("[%s] failed to deserialize response: %w", modelName, err)
+				break
+			}
+
+			if len(geminiResp.Candidates) == 0 || len(geminiResp.Candidates[0].Content.Parts) == 0 {
+				lastErr = fmt.Errorf("[%s] empty candidate response: %s", modelName, string(respBytes))
+				break
+			}
+
+			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
+		}
+	}
+
+	return "", fmt.Errorf("Gemini API was unavailable for project resume generation. Last error received: %w", lastErr)
+}
