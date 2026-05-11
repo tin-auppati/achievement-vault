@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import { Sun, Moon, Laptop, RotateCw, Activity, Award, BarChart3, AlertTriangle, Sparkles, X, ChevronRight, Eye, Code, Search, Copy, Check, Folder, Briefcase, Save, Trash2, Plus } from "lucide-react";
 
 interface Log {
@@ -95,6 +97,7 @@ export default function Dashboard() {
   const [savingResume, setSavingResume] = useState(false);
   const [compilingResumeAI, setCompilingResumeAI] = useState(false);
   const [projectProfilingId, setProjectProfilingId] = useState<number | null>(null);
+  const [resumeMode, setResumeMode] = useState<"edit" | "preview">("edit");
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ message, type });
@@ -647,7 +650,7 @@ export default function Dashboard() {
                       <div className="bg-zinc-100/50 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl max-h-[250px] overflow-y-auto text-xs leading-relaxed shadow-inner font-mono text-zinc-700 dark:text-zinc-300">
                         {draftViewMode === "preview" ? (
                           <div className="prose dark:prose-invert prose-xs max-w-none text-zinc-800 dark:text-zinc-200 font-sans leading-relaxed">
-                            <ReactMarkdown>{status.draft_content}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{status.draft_content}</ReactMarkdown>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-3">
@@ -872,7 +875,7 @@ export default function Dashboard() {
 
                           {/* Rendered markdown instead of raw text inside gallery previews */}
                           <div className="pt-3 border-t border-zinc-150 dark:border-zinc-850 text-[10px] text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed font-sans prose dark:prose-invert prose-xs max-w-none pointer-events-none">
-                            <ReactMarkdown>{ach.content_md}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{ach.content_md}</ReactMarkdown>
                           </div>
                         </div>
                       ))}
@@ -960,7 +963,7 @@ export default function Dashboard() {
                                 Project Purpose
                               </h4>
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert prose-xs max-w-none">
-                                <ReactMarkdown>{proj.profile_purpose}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_purpose}</ReactMarkdown>
                               </div>
                             </div>
 
@@ -971,7 +974,7 @@ export default function Dashboard() {
                                 Inferred Tech Stack
                               </h4>
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 font-mono prose dark:prose-invert prose-xs max-w-none">
-                                <ReactMarkdown>{proj.profile_tech_stack}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_tech_stack}</ReactMarkdown>
                               </div>
                             </div>
 
@@ -982,7 +985,7 @@ export default function Dashboard() {
                                 Key Systems & Features
                               </h4>
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert prose-xs max-w-none">
-                                <ReactMarkdown>{proj.profile_key_features}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_key_features}</ReactMarkdown>
                               </div>
                             </div>
                           </div>
@@ -1055,36 +1058,77 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* SPLIT PANEL WORKSPACE EDITING */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-3">
-                      {/* Raw Markdown Editor Pane */}
-                      <div className="space-y-1.5">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono block">
-                          Raw Markdown Editor
-                        </label>
-                        <textarea
-                          value={resumeContentInput}
-                          onChange={(e) => setResumeContentInput(e.target.value)}
-                          placeholder="Draft portfolio content or edit here..."
-                          className="w-full h-96 p-4 bg-zinc-900 text-zinc-100 font-mono text-xs rounded-xl border border-zinc-850 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none leading-relaxed shadow-inner"
-                        />
+                    {/* MODE TOGGLE SEGMENTED CONTROL */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-zinc-150 dark:border-zinc-850">
+                      <div className="flex bg-zinc-100 dark:bg-zinc-900/60 p-1 rounded-xl border border-zinc-200/50 dark:border-zinc-800/80 w-fit">
+                        <button
+                          type="button"
+                          onClick={() => setResumeMode("edit")}
+                          className={`px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-lg transition-all duration-300 cursor-pointer ${
+                            resumeMode === "edit"
+                              ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-sm animate-fade-in"
+                              : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+                          }`}
+                        >
+                          Raw Editor
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setResumeMode("preview")}
+                          className={`px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-lg transition-all duration-300 cursor-pointer ${
+                            resumeMode === "preview"
+                              ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-sm animate-fade-in"
+                              : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+                          }`}
+                        >
+                          Document Preview
+                        </button>
                       </div>
 
-                      {/* Live Preview Pane */}
-                      <div className="space-y-1.5 flex flex-col">
-                        <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono block">
-                          Live Rendered Preview
-                        </label>
-                        <div className="w-full h-96 p-5 bg-white dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-850 rounded-xl overflow-y-auto prose dark:prose-invert max-w-none text-xs font-sans leading-relaxed shadow-inner">
-                          {resumeContentInput.trim() === "" ? (
-                            <div className="h-full flex items-center justify-center text-zinc-400 dark:text-zinc-500 font-mono">
-                              Empty State: Live preview compiles here...
-                            </div>
-                          ) : (
-                            <ReactMarkdown>{resumeContentInput}</ReactMarkdown>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        {resumeMode === "edit" ? (
+                          <span className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 font-mono tracking-wide uppercase">
+                            💡 Use Markdown syntax to format your portfolio text
+                          </span>
+                        ) : (
+                          <span className="text-[8px] font-bold text-purple-500/80 dark:text-purple-400/80 font-mono tracking-wide uppercase animate-pulse">
+                            ✨ Real-time parsed document view active
+                          </span>
+                        )}
                       </div>
+                    </div>
+
+                    {/* DYNAMIC CONTENT PANES BASED ON CHOSEN MODE */}
+                    <div className="pt-3">
+                      {resumeMode === "edit" ? (
+                        <div className="space-y-1.5">
+                          <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono block">
+                            Raw Markdown Editor
+                          </label>
+                          <textarea
+                            value={resumeContentInput}
+                            onChange={(e) => setResumeContentInput(e.target.value)}
+                            placeholder="Draft portfolio content or edit here..."
+                            className="w-full h-[450px] p-5 bg-zinc-900 text-zinc-100 font-mono text-xs rounded-xl border border-zinc-850 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none leading-relaxed shadow-inner"
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <label className="text-[8px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono block">
+                            Live Rendered Document Preview
+                          </label>
+                          <div className="w-full min-h-[450px] max-h-[600px] p-8 md:p-12 bg-white dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-850 rounded-xl overflow-y-auto prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-100 font-sans leading-relaxed shadow-inner transition-colors duration-300">
+                            {resumeContentInput.trim() === "" ? (
+                              <div className="h-full min-h-[350px] flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 font-mono gap-2">
+                                <span className="text-sm">Empty State</span>
+                                <span className="text-[10px]">Your resume is blank. Use &quot;Draft with Gemini&quot; or write something to see it here!</span>
+                              </div>
+                            ) : (
+                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{resumeContentInput}</ReactMarkdown>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Workstation Actions Footer */}
@@ -1154,9 +1198,9 @@ export default function Dashboard() {
                             </div>
 
                             {/* Quick Render preview snippet */}
-                            <p className="text-[9px] text-zinc-500 dark:text-zinc-400 line-clamp-3 font-sans leading-relaxed border-t border-b border-zinc-100 dark:border-zinc-850 py-2.5">
-                              {resItem.content_md}
-                            </p>
+                            <div className="text-[9px] text-zinc-500 dark:text-zinc-400 line-clamp-3 font-sans leading-relaxed border-t border-b border-zinc-100 dark:border-zinc-850 py-2.5 prose dark:prose-invert prose-xs max-w-none pointer-events-none">
+                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{resItem.content_md}</ReactMarkdown>
+                            </div>
 
                             {/* Actions Bar */}
                             <div className="flex justify-between items-center">
@@ -1274,7 +1318,7 @@ export default function Dashboard() {
 
             <div className="p-6 overflow-y-auto flex-1 bg-zinc-50 dark:bg-zinc-950/20 border-b border-zinc-200 dark:border-zinc-800 shadow-inner">
               <div className="prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-200 font-sans text-sm leading-relaxed">
-                <ReactMarkdown>{activeAchievement.content_md}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
               </div>
             </div>
 

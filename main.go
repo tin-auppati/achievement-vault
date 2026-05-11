@@ -59,6 +59,8 @@ func main() {
 	switch command {
 	case "register":
 		handleRegister()
+	case "scan-repo":
+		handleScanRepo()
 	case "install":
 		handleInstall()
 	case "collect":
@@ -123,6 +125,53 @@ func handleRegister() {
 	fmt.Printf("  \033[1mName:\033[0m    %s\n", name)
 	fmt.Printf("  \033[1mPath:\033[0m    %s\n", path)
 	fmt.Printf("  \033[1mSource:\033[0m  %s\n", source)
+}
+
+func handleScanRepo() {
+	// Expecting: main scan-repo <path_to_project>
+	if len(os.Args) != 3 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: scan-repo command requires exactly 1 argument: <path_to_project>\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault scan-repo <path_to_project>")
+		os.Exit(1)
+	}
+
+	targetPath := os.Args[2]
+
+	// Initialize the DB
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	fmt.Println("\033[1;36m┌────────────────────────────────────────────────────────────────────────────────────────┐\033[0m")
+	fmt.Println("\033[1;36m│                       🔍 DEEP CODEBASE ARCHITECTURAL SCANNING ENGINE                   │\033[0m")
+	fmt.Println("\033[1;36m└────────────────────────────────────────────────────────────────────────────────────────┘\033[0m")
+	fmt.Printf("📂 Target Directory:  \033[1m%s\033[0m\n", targetPath)
+	fmt.Println("🚀 Starting walk and code history semantic compilation...")
+
+	projectName, isNew, purpose, techStack, features, err := vault.ScanAndProfileRepository(db.DB, targetPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\n\033[31m❌ Scanning failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("\n\033[1;32m✔ Codebase scanned and profile retroactively compiled successfully!\033[0m")
+	if isNew {
+		fmt.Printf("  ⭐ \033[1mAuto-Registered Project:\033[0m %s (Source: local-scan)\n", projectName)
+	} else {
+		fmt.Printf("  ⭐ \033[1mUpdated Existing Project:\033[0m %s\n", projectName)
+	}
+	fmt.Println()
+
+	fmt.Println("\033[1;35m📝 SYNTHESIZED PROJECT ARCHITECTURAL PROFILE\033[0m")
+	fmt.Println("\033[1;36m========================================================================================\033[0m")
+	fmt.Printf("\033[1mProject Name:\033[0m   %s\n", projectName)
+	fmt.Printf("\033[1mPurpose:\033[0m        %s\n\n", purpose)
+	fmt.Printf("\033[1mConsolidated Tech Stack:\033[0m\n  %s\n\n", techStack)
+	fmt.Printf("\033[1mArchitectural Systems & Key Features:\033[0m\n%s\n", features)
+	fmt.Println("\033[1;36m========================================================================================\033[0m")
 }
 
 func handleInstall() {
@@ -971,6 +1020,7 @@ func printUsage() {
 	// 1. REPOSITORY SETUP & HOOKS (Green)
 	fmt.Println("\033[1;32m📁 REPOSITORY SETUP & HOOKS\033[0m")
 	fmt.Println("  \033[32mregister\033[0m <name> <path> <source>         Register a new local development project")
+	fmt.Println("  \033[32mscan-repo\033[0m <path_to_project>             Deep scan codebase layout & git logs to compile profile")
 	fmt.Println("  \033[32minstall\033[0m <project_name>                  Install Git post-commit hook automatically")
 	fmt.Println("  \033[32msetup-shell\033[0m                             Append pending report check trigger to .bashrc/.zshrc")
 	fmt.Println("  \033[32msetup-global\033[0m                            Configure global 'vault' command and export VAULT_HOME")
