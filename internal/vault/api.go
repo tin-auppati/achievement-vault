@@ -22,7 +22,152 @@ type APILog struct {
 }
 
 // StartAPIServer binds and launches the REST API backend server on the specified port.
-func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, error), refineFn func(currentDraft, prompt string) (string, error), resumeFn func() (string, error)) error {
+func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, error), refineFn func(currentDraft, prompt string) (string, error), resumeFn func() (string, error), generateProfileFn func(projectName string, logs []string) (string, string, string, error)) error {
+	http.HandleFunc("/api/resumes", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			resumes, err := GetResumes(db)
+			if err != nil {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(resumes)
+		case "POST":
+			var payload struct {
+				VersionName string `json:"version_name"`
+				ContentMd   string `json:"content_md"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+				http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+				return
+			}
+			id, err := SaveResume(db, payload.VersionName, payload.ContentMd)
+			if err != nil {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"success": true, "id": %d}`, id)
+		default:
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+		}
+	}))
+
+	http.HandleFunc("/api/resumes/", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) < 4 {
+			http.Error(w, `{"error": "invalid path format"}`, http.StatusBadRequest)
+			return
+		}
+		idStr := parts[3]
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			http.Error(w, `{"error": "invalid resume ID"}`, http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "PUT":
+			var payload struct {
+				VersionName string `json:"version_name"`
+				ContentMd   string `json:"content_md"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+				http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+				return
+			}
+			if err := UpdateResume(db, id, payload.VersionName, payload.ContentMd); err != nil {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"success": true}`)
+		case "DELETE":
+			if err := DeleteResume(db, id); err != nil {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"success": true}`)
+		default:
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+		}
+	}))
+
+	http.HandleFunc("/api/projects", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		projects, err := GetProjects(db)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(projects)
+	}))
+
+	http.HandleFunc("/api/projects/profile", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		idStr := r.URL.Query().Get("id")
+		if idStr == "" {
+			http.Error(w, `{"error": "missing project id query parameter"}`, http.StatusBadRequest)
+			return
+		}
+
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			http.Error(w, `{"error": "invalid project ID"}`, http.StatusBadRequest)
+			return
+		}
+
+		var projectName string
+		err = db.QueryRow("SELECT name FROM projects WHERE id = ?", id).Scan(&projectName)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, `{"error": "project not found"}`, http.StatusNotFound)
+			} else {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		rows, err := db.Query("SELECT content FROM raw_logs WHERE project_id = ? ORDER BY timestamp DESC", id)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var logs []string
+		for rows.Next() {
+			var c string
+			if err := rows.Scan(&c); err == nil {
+				logs = append(logs, c)
+			}
+		}
+
+		purpose, techStack, features, err := generateProfileFn(projectName, logs)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": "AI profile generation failed: %s"}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		if err := UpdateProjectProfile(db, id, purpose, techStack, features); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true, "profile_purpose": %q, "profile_tech_stack": %q, "profile_key_features": %q}`, purpose, techStack, features)
+	}))
+
 	http.HandleFunc("/api/resume", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)

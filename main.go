@@ -642,7 +642,15 @@ func handleServe() {
 		return resume, nil
 	}
 
-	err = vault.StartAPIServer(db.DB, port, summarizeFn, refineFn, resumeFn)
+	generateProfileFn := func(projectName string, logs []string) (string, string, string, error) {
+		purpose, techStack, features, err := ai.GenerateProjectProfile(projectName, logs)
+		if err != nil {
+			return "", "", "", fmt.Errorf("failed to generate project profile: %w", err)
+		}
+		return purpose, techStack, features, nil
+	}
+
+	err = vault.StartAPIServer(db.DB, port, summarizeFn, refineFn, resumeFn, generateProfileFn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mError starting API Server: %v\033[0m\n", err)
 		os.Exit(1)

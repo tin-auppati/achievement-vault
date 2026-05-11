@@ -10,11 +10,14 @@ import (
 
 // Project represents a workspace or code project monitored by the achievement vault.
 type Project struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	Path      string `json:"path"`
-	Source    string `json:"source"`
-	CreatedAt string `json:"created_at"`
+	ID               int64  `json:"id"`
+	Name             string `json:"name"`
+	Path             string `json:"path"`
+	Source           string `json:"source"`
+	CreatedAt        string `json:"created_at"`
+	ProfilePurpose   string `json:"profile_purpose"`
+	ProfileTechStack string `json:"profile_tech_stack"`
+	ProfileFeatures  string `json:"profile_key_features"`
 }
 
 // RegisterProject validates the input and inserts a new project into the SQLite database.
@@ -111,4 +114,50 @@ func SaveGitLog(db *sql.DB, projectID int, message, diff string) (int64, error) 
 	}
 
 	return id, nil
+}
+
+// GetProjects retrieves all registered projects from the database, including profile summaries.
+func GetProjects(db *sql.DB) ([]Project, error) {
+	query := `
+		SELECT id, name, path, source, created_at, 
+		       COALESCE(profile_purpose, ''), COALESCE(profile_tech_stack, ''), COALESCE(profile_key_features, '')
+		FROM projects 
+		ORDER BY id ASC`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query projects: %w", err)
+	}
+	defer rows.Close()
+
+	var list []Project
+	for rows.Next() {
+		var p Project
+		err := rows.Scan(&p.ID, &p.Name, &p.Path, &p.Source, &p.CreatedAt, &p.ProfilePurpose, &p.ProfileTechStack, &p.ProfileFeatures)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan project: %w", err)
+		}
+		list = append(list, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row scanner iteration error: %w", err)
+	}
+
+	return list, nil
+}
+
+// UpdateProjectProfile modifies the Gemini AI-generated permanent profile fields of a project.
+func UpdateProjectProfile(db *sql.DB, id int64, purpose, techStack, features string) error {
+	query := `
+		UPDATE projects 
+		SET profile_purpose = ?, profile_tech_stack = ?, profile_key_features = ?
+		WHERE id = ?`
+
+	_, err := db.Exec(query, purpose, techStack, features, id)
+	if err != nil {
+		return fmt.Errorf("failed to update project profile for project ID %d: %w", id, err)
+	}
+
+	return nil
 }

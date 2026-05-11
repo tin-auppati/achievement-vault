@@ -92,6 +92,14 @@ func createTables(db *sql.DB) error {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
+	resumesSchema := `
+	CREATE TABLE IF NOT EXISTS resumes (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		version_name TEXT NOT NULL,
+		content_md TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
 	if _, err := db.Exec(projectsSchema); err != nil {
 		return fmt.Errorf("failed to create projects table: %w", err)
 	}
@@ -107,6 +115,16 @@ func createTables(db *sql.DB) error {
 	if _, err := db.Exec(draftSummariesSchema); err != nil {
 		return fmt.Errorf("failed to create draft_summaries table: %w", err)
 	}
+
+	if _, err := db.Exec(resumesSchema); err != nil {
+		return fmt.Errorf("failed to create resumes table: %w", err)
+	}
+
+	// Self-healing migrations for pre-existing projects table
+	_ = db.Ping() // ensure active connection
+	db.Exec("ALTER TABLE projects ADD COLUMN profile_purpose TEXT DEFAULT ''")
+	db.Exec("ALTER TABLE projects ADD COLUMN profile_tech_stack TEXT DEFAULT ''")
+	db.Exec("ALTER TABLE projects ADD COLUMN profile_key_features TEXT DEFAULT ''")
 
 	return nil
 }

@@ -445,3 +445,140 @@ Here is the weekly achievement data:
 
 	return "", fmt.Errorf("Gemini API was unavailable for project resume generation. Last error received: %w", lastErr)
 }
+
+// GenerateProjectProfile analyzes all raw logs of a project and compiles them into a structured Project Profile containing Purpose, Tech Stack, and Key Features.
+func GenerateProjectProfile(projectName string, logs []string) (purpose, techStack, features string, err error) {
+	if len(logs) == 0 {
+		return "No logs found for this project.", "N/A", "No features recorded yet.", nil
+	}
+
+	apiKey := loadEnvAPIKey()
+	if apiKey == "" {
+		return "", "", "", fmt.Errorf("GEMINI_API_KEY is not configured. Please add it to system environment variables or your local .env file")
+	}
+
+	// Group logs together
+	var logsText strings.Builder
+	for i, l := range logs {
+		logsText.WriteString(fmt.Sprintf("%d. %s\n", i+1, l))
+	}
+
+	prompt := fmt.Sprintf(`You are an expert Technical Recruiter and Software Architect.
+Analyze the following list of development activity logs for the project named "%s".
+Based on these raw logs, generate a high-quality, professional Project Profile.
+Your response MUST be in raw, valid JSON format (strictly no markdown code fences, no leading/trailing markdown blocks, no extra leading text or explanation) matching this schema exactly:
+{
+  "purpose": "A concise 1-2 sentence high-level summary of what the project does and its core value proposition.",
+  "tech_stack": "A consolidated list of key technologies, frameworks, or libraries inferred from the logs (comma-separated, e.g. Go, SQLite, Next.js, TailWind v4).",
+  "key_features": "- Feature 1: Description\\n- Feature 2: Description\\n- Feature 3: Description"
+}
+
+Activity Logs:
+%s`, projectName, logsText.String())
+
+	reqPayload := geminiRequest{
+		Contents: []geminiContent{
+			{
+				Parts: []geminiPart{
+					{Text: prompt},
+				},
+			},
+		},
+	}
+
+	reqBytes, err := json.Marshal(reqPayload)
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to serialize request content: %w", err)
+	}
+
+	modelsToTry := []string{
+		"gemini-2.5-flash",
+		"gemini-1.5-flash",
+		"gemini-1.5-pro",
+	}
+
+	var lastErr error
+	client := &http.Client{Timeout: 35 * time.Second}
+
+	for _, modelName := range modelsToTry {
+		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
+		
+		maxRetries := 3
+		backoffDuration := 2 * time.Second
+
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
+			if err != nil {
+				return "", "", "", fmt.Errorf("failed to create API HTTP request: %w", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := client.Do(req)
+			if err != nil {
+				lastErr = fmt.Errorf("[%s] network error (attempt %d/%d): %w", modelName, attempt, maxRetries, err)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			respBytes, ioErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if ioErr != nil {
+				lastErr = fmt.Errorf("[%s] failed to read API response body: %w", modelName, ioErr)
+				time.Sleep(backoffDuration)
+				backoffDuration *= 2
+				continue
+			}
+
+			if resp.StatusCode != http.StatusOK {
+				lastErr = fmt.Errorf("[%s] status code %d (attempt %d/%d): %s", modelName, resp.StatusCode, attempt, maxRetries, string(respBytes))
+				if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+					time.Sleep(backoffDuration)
+					backoffDuration *= 2
+					continue
+				}
+				break
+			}
+
+			var geminiResp geminiResponse
+			if err := json.Unmarshal(respBytes, &geminiResp); err != nil {
+				lastErr = fmt.Errorf("[%s] failed to deserialize response: %w", modelName, err)
+				break
+			}
+
+			if len(geminiResp.Candidates) == 0 || len(geminiResp.Candidates[0].Content.Parts) == 0 {
+				lastErr = fmt.Errorf("[%s] empty candidate response: %s", modelName, string(respBytes))
+				break
+			}
+
+			rawText := geminiResp.Candidates[0].Content.Parts[0].Text
+			
+			// Clean up potential markdown wrapper code block (```json ... ```)
+			cleanText := strings.TrimSpace(rawText)
+			if strings.HasPrefix(cleanText, "```json") {
+				cleanText = strings.TrimPrefix(cleanText, "```json")
+				cleanText = strings.TrimSuffix(cleanText, "```")
+				cleanText = strings.TrimSpace(cleanText)
+			} else if strings.HasPrefix(cleanText, "```") {
+				cleanText = strings.TrimPrefix(cleanText, "```")
+				cleanText = strings.TrimSuffix(cleanText, "```")
+				cleanText = strings.TrimSpace(cleanText)
+			}
+
+			var result struct {
+				Purpose    string `json:"purpose"`
+				TechStack  string `json:"tech_stack"`
+				KeyFeatures string `json:"key_features"`
+			}
+
+			if err := json.Unmarshal([]byte(cleanText), &result); err != nil {
+				lastErr = fmt.Errorf("[%s] failed to parse JSON structure from model text: %w (Raw text: %s)", modelName, err, rawText)
+				break
+			}
+
+			return result.Purpose, result.TechStack, result.KeyFeatures, nil
+		}
+	}
+
+	return "", "", "", fmt.Errorf("Gemini API was unavailable for project profile generation. Last error received: %w", lastErr)
+}
