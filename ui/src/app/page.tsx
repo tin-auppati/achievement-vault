@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { Sun, Moon, Laptop, RotateCw, Activity, Award, BarChart3, AlertTriangle, Sparkles, X, ChevronRight, Eye, Code, Search, Copy, Check, Folder, Briefcase, Save, Trash2, Plus } from "lucide-react";
+import { Sun, Moon, Laptop, RotateCw, Activity, Award, BarChart3, AlertTriangle, Sparkles, X, ChevronRight, Eye, Code, Search, Copy, Check, Folder, Briefcase, Save, Trash2, Plus, Terminal } from "lucide-react";
 
 interface Log {
   id: number;
@@ -37,8 +37,96 @@ interface VaultStatus {
   draft_end_date: string;
 }
 
+const CLI_COMMANDS = [
+  {
+    command: "vault register <name> <path> <source>",
+    desc: "Register a new local development project to track its commits in the SQLite database.",
+    category: "setup",
+    example: "vault register \"my-api\" \"/home/tin/projects/my-api\" \"github\""
+  },
+  {
+    command: "vault scan-repo <path_to_project>",
+    desc: "Deep scan codebase layout & git logs to retroactively compile project purpose, features, and tech stack in SQLite.",
+    category: "setup",
+    example: "vault scan-repo /home/tin/projects/achievement-vault"
+  },
+  {
+    command: "vault install <project_name>",
+    desc: "Install Git post-commit hook automatically in the registered project to capture active logs on every commit.",
+    category: "setup",
+    example: "vault install \"my-api\""
+  },
+  {
+    command: "vault setup-shell",
+    desc: "Append pending report check trigger to your shell config file (.bashrc or .zshrc) so you get alerts on login.",
+    category: "setup",
+    example: "vault setup-shell"
+  },
+  {
+    command: "vault setup-global",
+    desc: "Configure global 'vault' command alias and export VAULT_HOME so it is accessible from anywhere.",
+    category: "setup",
+    example: "vault setup-global"
+  },
+  {
+    command: "vault collect --project-id <id> --message <msg> --diff <diff>",
+    desc: "Backend hook utility to ingest activities into the SQLite database. Used automatically by post-commit hooks.",
+    category: "collect",
+    example: "vault collect --project-id 1 --message \"feat: add auth API\" --diff \"+ func Authenticate...\""
+  },
+  {
+    command: "vault summarize [--days <days>]",
+    desc: "Analyze recent git logs via Gemini AI and generate a pending executive weekly progress summary.",
+    category: "summarize",
+    example: "vault summarize --days 7"
+  },
+  {
+    command: "vault summarize-project",
+    desc: "Analyze all approved achievements in weekly_achievements and generate a comprehensive recruiter-ready markdown resume.",
+    category: "summarize",
+    example: "vault summarize-project"
+  },
+  {
+    command: "vault history [<id>]",
+    desc: "List saved weekly achievement summaries or view a detailed entry by SQLite ID in terminal.",
+    category: "summarize",
+    example: "vault history 5"
+  },
+  {
+    command: "vault check-pending",
+    desc: "Scan the database and warn in terminal if a weekly executive summary is due or pending for the current week.",
+    category: "summarize",
+    example: "vault check-pending"
+  },
+  {
+    command: "vault serve [<port>]",
+    desc: "Launch the REST API backend server to handle database requests from the web UI (default port 8001).",
+    category: "services",
+    example: "vault serve 8001"
+  },
+  {
+    command: "vault start-all",
+    desc: "Start both the Go REST API server and Next.js Dev Web Server concurrently for full workstation access.",
+    category: "services",
+    example: "vault start-all"
+  },
+  {
+    command: "vault autostart <enable|disable>",
+    desc: "Configure or remove Systemd background service to automatically boot the vault servers on system startup.",
+    category: "services",
+    example: "vault autostart enable"
+  },
+  {
+    command: "vault help",
+    desc: "Display the premium terminal usage manual and interactive dashboard inside your command line.",
+    category: "services",
+    example: "vault help"
+  }
+];
+
 export default function Dashboard() {
   const [logs, setLogs] = useState<Log[]>([]);
+  const [activeCliCategory, setActiveCliCategory] = useState<"all" | "setup" | "collect" | "summarize" | "services">("all");
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [stats, setStats] = useState<TechStats>({});
   const [status, setStatus] = useState<VaultStatus>({
@@ -883,6 +971,88 @@ export default function Dashboard() {
                   )}
                 </section>
               </div>
+
+              {/* INTERACTIVE CLI QUICK REFERENCE GUIDE */}
+              <section className="glass-glow p-6 rounded-2xl border border-zinc-200 dark:border-zinc-900 mt-6 space-y-5 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-zinc-150 dark:border-zinc-850">
+                  <div className="flex items-center gap-2.5">
+                    <Terminal className="h-5 w-5 text-purple-500 animate-pulse" />
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono">
+                        Vault CLI Quick-Reference Manual
+                      </h3>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">
+                        Interactive console instructions for configuring hooks, collecting logs, and querying Gemini AI
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Category filter tabs */}
+                  <div className="flex flex-wrap gap-1 bg-zinc-100 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-200 dark:border-zinc-850 self-start sm:self-auto">
+                    {(["all", "setup", "collect", "summarize", "services"] as const).map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCliCategory(cat)}
+                        className={`px-2.5 py-1 text-[8px] font-black uppercase tracking-wider rounded-lg transition-all duration-300 cursor-pointer ${
+                          activeCliCategory === cat
+                            ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-sm"
+                            : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Commands listing grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {CLI_COMMANDS.filter(cmd => activeCliCategory === "all" || cmd.category === activeCliCategory).map((cmd, i) => {
+                    const badgeColors = {
+                      setup: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50",
+                      collect: "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-900/50",
+                      summarize: "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900/50",
+                      services: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50"
+                    }[cmd.category as "setup" | "collect" | "summarize" | "services"];
+
+                    return (
+                      <div key={i} className="bg-zinc-50/50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-850 p-4.5 rounded-xl flex flex-col justify-between gap-3 shadow-inner hover:scale-[1.005] hover:border-zinc-300 dark:hover:border-zinc-800 transition-all duration-300">
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center gap-2">
+                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${badgeColors}`}>
+                              {cmd.category}
+                            </span>
+                          </div>
+                          <code className="text-[10px] font-bold font-mono text-zinc-850 dark:text-zinc-200 block break-all bg-white dark:bg-zinc-900/80 p-2.5 rounded border border-zinc-200 dark:border-zinc-850">
+                            {cmd.command}
+                          </code>
+                          <p className="text-[9.5px] leading-relaxed text-zinc-500 dark:text-zinc-400 font-sans">
+                            {cmd.desc}
+                          </p>
+                        </div>
+
+                        {cmd.example && (
+                          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-850 flex items-center justify-between gap-3 text-[9px] font-mono">
+                            <div className="text-zinc-400 dark:text-zinc-500 truncate">
+                              e.g., <span className="text-zinc-600 dark:text-zinc-300 select-all">{cmd.example}</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(cmd.example);
+                                showToast("Example command copied!", "success");
+                              }}
+                              className="text-zinc-400 hover:text-purple-500 transition-colors shrink-0 cursor-pointer"
+                              title="Copy example to clipboard"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
             </div>
           )}
 
