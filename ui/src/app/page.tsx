@@ -156,91 +156,106 @@ const CLI_COMMANDS = [
     command: "vault register <name> <path> <source>",
     desc: "Register a new local development project to track its commits in the SQLite database.",
     category: "setup",
-    example: "vault register \"my-api\" \"/home/tin/projects/my-api\" \"github\""
+    example: "vault register \"my-api\" \"/home/tin/projects/my-api\" \"github\"",
+    tags: ["CLI", "Config", "DB Init"]
   },
   {
     command: "vault scan-repo <path> [--analyze-errors]",
     desc: "Deep scan codebase layout & git history to compile a Project Profile. Safe fallback to static configs, with optional '--analyze-errors' for compiler troubleshooting.",
     category: "setup",
-    example: "vault scan-repo /home/tin/projects/achievement-vault --analyze-errors"
+    example: "vault scan-repo /home/tin/projects/achievement-vault --analyze-errors",
+    tags: ["Scanner", "Git", "AI Summary"]
   },
   {
     command: "vault install <project_name>",
     desc: "Install Git post-commit hook automatically in the registered project to capture active logs on every commit.",
     category: "setup",
-    example: "vault install \"my-api\""
+    example: "vault install \"my-api\"",
+    tags: ["Git Hook", "Automation"]
   },
   {
     command: "vault setup-shell",
     desc: "Append pending report check trigger to your shell config file (.bashrc or .zshrc) so you get alerts on login.",
     category: "setup",
-    example: "vault setup-shell"
+    example: "vault setup-shell",
+    tags: ["Shell", "DX", "Alert"]
   },
   {
     command: "vault setup-global",
     desc: "Configure global 'vault' command alias and export VAULT_HOME so it is accessible from anywhere.",
     category: "setup",
-    example: "vault setup-global"
+    example: "vault setup-global",
+    tags: ["Shell", "Environment"]
   },
   {
     command: "vault collect --project-id <id> --message <msg> --diff <diff>",
     desc: "Backend hook utility to ingest activities into the SQLite database. Used automatically by post-commit hooks.",
     category: "collect",
-    example: "vault collect --project-id 1 --message \"feat: add auth API\" --diff \"+ func Authenticate...\""
+    example: "vault collect --project-id 1 --message \"feat: add auth API\" --diff \"+ func Authenticate...\"",
+    tags: ["Ingest", "Hooks", "SQLite"]
   },
   {
     command: "vault summarize [--days <days>]",
     desc: "Analyze recent git logs via Gemini AI and generate a pending executive weekly progress summary.",
     category: "summarize",
-    example: "vault summarize --days 7"
+    example: "vault summarize --days 7",
+    tags: ["AI", "Gemini", "Markdown"]
   },
   {
     command: "vault summarize-project",
     desc: "Analyze all approved achievements in weekly_achievements and generate a comprehensive recruiter-ready markdown resume.",
     category: "summarize",
-    example: "vault summarize-project"
+    example: "vault summarize-project",
+    tags: ["AI", "Portfolio", "Compiler"]
   },
   {
     command: "vault history [<id>]",
     desc: "List saved weekly achievement summaries or view a detailed entry by SQLite ID in terminal.",
     category: "summarize",
-    example: "vault history 5"
+    example: "vault history 5",
+    tags: ["CLI History", "Markdown"]
   },
   {
     command: "vault check-pending",
     desc: "Scan the database and warn in terminal if a weekly executive summary is due or pending for the current week.",
     category: "summarize",
-    example: "vault check-pending"
+    example: "vault check-pending",
+    tags: ["Scheduler", "DX", "Alert"]
   },
   {
     command: "vault serve [<port>]",
     desc: "Launch the REST API backend server to handle database requests from the web UI (default port 8001).",
     category: "services",
-    example: "vault serve 8001"
+    example: "vault serve 8001",
+    tags: ["HTTP Server", "REST API", "Port 8001"]
   },
   {
     command: "vault start-all",
     desc: "Start both the Go REST API server and Next.js Dev Web Server concurrently for full workstation access.",
     category: "services",
-    example: "vault start-all"
+    example: "vault start-all",
+    tags: ["DevOps", "Launcher"]
   },
   {
     command: "vault autostart <enable|disable>",
     desc: "Configure or remove Systemd background service to automatically boot the vault servers on system startup.",
     category: "services",
-    example: "vault autostart enable"
+    example: "vault autostart enable",
+    tags: ["Systemd", "Background", "Linux"]
   },
   {
     command: "vault test-ui",
     desc: "Execute the automated Next.js headless browser test runner using optimized Chrome flags and capture DOM states to data/test-ui-recovery.html.",
     category: "services",
-    example: "vault test-ui"
+    example: "vault test-ui",
+    tags: ["QA Testing", "Puppeteer", "Chrome Headless"]
   },
   {
     command: "vault help",
     desc: "Display the premium terminal usage manual and interactive dashboard inside your command line.",
     category: "services",
-    example: "vault help"
+    example: "vault help",
+    tags: ["Manual", "Terminal UI"]
   }
 ];
 
@@ -1151,8 +1166,8 @@ export default function Dashboard() {
  
                               {tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1 pt-1">
-                                  {tags.map((tag) => (
-                                    <TechBadge key={tag} tech={tag} />
+                                  {tags.map((tag, tagIdx) => (
+                                    <TechBadge key={`${tag}-${tagIdx}`} tech={tag} />
                                   ))}
                                 </div>
                               )}
@@ -1207,10 +1222,10 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {CLI_COMMANDS.filter(cmd => activeCliCategory === "all" || cmd.category === activeCliCategory).map((cmd, i) => {
                     const badgeColors = {
-                      setup: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60",
-                      collect: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60",
-                      summarize: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60",
-                      services: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60"
+                      setup: "text-cyan-600 bg-cyan-50 border-cyan-200/50 dark:text-cyan-400 dark:bg-cyan-500/10 dark:border-cyan-500/20",
+                      collect: "text-indigo-600 bg-indigo-50 border-indigo-200/50 dark:text-indigo-400 dark:bg-indigo-500/10 dark:border-indigo-500/20",
+                      summarize: "text-emerald-600 bg-emerald-50 border-emerald-200/50 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20",
+                      services: "text-violet-600 bg-violet-50 border-violet-200/50 dark:text-violet-400 dark:bg-violet-500/10 dark:border-violet-500/20"
                     }[cmd.category as "setup" | "collect" | "summarize" | "services"];
  
                     return (
@@ -1220,6 +1235,13 @@ export default function Dashboard() {
                             <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${badgeColors}`}>
                               {cmd.category}
                             </span>
+                            {cmd.tags && (
+                              <div className="flex flex-wrap gap-1">
+                                {cmd.tags.map((tag, tagIdx) => (
+                                  <TechBadge key={`${tag}-${tagIdx}`} tech={tag} />
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <code className="text-[10px] font-bold font-mono text-zinc-850 dark:text-zinc-200 block break-all bg-white dark:bg-zinc-900/80 p-2.5 rounded border border-zinc-200 dark:border-zinc-850">
                             {cmd.command}
@@ -1345,8 +1367,8 @@ export default function Dashboard() {
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 space-y-3">
                                 {parseTechTags(proj.profile_tech_stack).length > 0 ? (
                                   <div className="flex flex-wrap gap-1.5">
-                                    {parseTechTags(proj.profile_tech_stack).map((tag) => (
-                                      <TechBadge key={tag} tech={tag} />
+                                    {parseTechTags(proj.profile_tech_stack).map((tag, tagIdx) => (
+                                      <TechBadge key={`${tag}-${tagIdx}`} tech={tag} />
                                     ))}
                                   </div>
                                 ) : (
@@ -1585,8 +1607,8 @@ export default function Dashboard() {
                               {/* Extracted Tech Keywords as tags */}
                               {extractTechKeywords(resItem.content_md).length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                  {extractTechKeywords(resItem.content_md).map((tech) => (
-                                    <TechBadge key={tech} tech={tech} />
+                                  {extractTechKeywords(resItem.content_md).map((tech, techIdx) => (
+                                    <TechBadge key={`${tech}-${techIdx}`} tech={tech} />
                                   ))}
                                 </div>
                               )}
@@ -1709,8 +1731,8 @@ export default function Dashboard() {
                 {/* Dynamically Extracted Tech Badges in Detail view */}
                 {!isEditingAchievement && extractTechKeywords(activeAchievement.content_md).length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {extractTechKeywords(activeAchievement.content_md).map((tech) => (
-                      <TechBadge key={tech} tech={tech} />
+                    {extractTechKeywords(activeAchievement.content_md).map((tech, techIdx) => (
+                      <TechBadge key={`${tech}-${techIdx}`} tech={tech} />
                     ))}
                   </div>
                 )}
