@@ -1349,7 +1349,7 @@ export default function Dashboard() {
                             value={resumeContentInput}
                             onChange={(e) => setResumeContentInput(e.target.value)}
                             placeholder="Draft portfolio content or edit here..."
-                            className="w-full h-[450px] p-5 bg-zinc-900 text-zinc-100 font-mono text-xs rounded-xl border border-zinc-850 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none leading-relaxed shadow-inner"
+                            className="w-full h-[450px] p-5 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-mono text-xs rounded-xl border border-zinc-300 dark:border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none leading-relaxed shadow-inner transition-colors duration-300"
                           />
                         </div>
                       ) : (
