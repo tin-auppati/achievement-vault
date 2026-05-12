@@ -1049,53 +1049,63 @@ func handleTestUI() {
 }
 
 func printUsage() {
-	fmt.Println("\033[1;36m┌────────────────────────────────────────────────────────────────────────────────────────┐\033[0m")
-	fmt.Println("\033[1;36m│                       🏆  ACHIEVEMENT VAULT - PREMIUM CLI TOOL v1.3                     │\033[0m")
-	fmt.Println("\033[1;36m└────────────────────────────────────────────────────────────────────────────────────────┘\033[0m")
-	fmt.Println("Usage:")
-	fmt.Println("  \033[1;32mvault\033[0m \033[36m<command> [arguments]\033[0m")
-	fmt.Println()
+	manualMarkdown := `# 🏆 ACHIEVEMENT VAULT - PREMIUM CLI TOOL v1.3
 
-	// 1. REPOSITORY SETUP & HOOKS (Green)
-	fmt.Println("\033[1;32m📁 REPOSITORY SETUP & HOOKS\033[0m")
-	fmt.Println("  \033[32mregister\033[0m <name> <path> <source>         Register a new local development project")
-	fmt.Println("  \033[32mscan-repo\033[0m <path_to_project> [--analyze-errors]")
-	fmt.Println("                                          Deep scan layout & git logs (and troubleshoot broken builds if flag set)")
-	fmt.Println("  \033[32minstall\033[0m <project_name>                  Install Git post-commit hook automatically")
-	fmt.Println("  \033[32msetup-shell\033[0m                             Append pending report check trigger to .bashrc/.zshrc")
-	fmt.Println("  \033[32msetup-global\033[0m                            Configure global 'vault' command and export VAULT_HOME")
-	fmt.Println()
+Welcome to the **Achievement Vault** developer workstation control center. This CLI manages automated collection, intelligent profiling, and resume synthesis of your codebase accomplishments.
 
-	// 2. ACTIVITY LOG COLLECTION (Cyan)
-	fmt.Println("\033[1;36m📥 GIT COMMIT LOG COLLECTION\033[0m")
-	fmt.Println("  \033[36mcollect\033[0m --project-id <id> --message <msg> --diff <diff>")
-	fmt.Println("                                          Collect activities to SQLite database (Hook backend)")
-	fmt.Println()
+---
 
-	// 3. AI SUMMARIZATION & APPROVAL WORKFLOWS (Purple)
-	fmt.Println("\033[1;35m✨ AI SUMMARIZATION & EXECUTIVE APPROVALS\033[0m")
-	fmt.Println("  \033[35msummarize\033[0m [--days <days>]               Generate draft weekly summaries via Gemini API")
-	fmt.Println("  \033[35msummarize-project\033[0m                       Generate recruiter-ready project resume from achievements")
-	fmt.Println("  \033[35mhistory\033[0m [<id>]                          List saved weekly achievement summaries or view an entry")
-	fmt.Println("  \033[35mcheck-pending\033[0m                           Scan and warn if weekly summary is due/pending")
-	fmt.Println()
+## 📁 1. SETUP & CONFIGURATION
 
-	// 4. SERVICES & PERSISTENT DEPLOYMENTS (Yellow)
-	fmt.Println("\033[1;33m⚙ SERVICES & BACKGROUND PERSISTENT DEPLOYMENTS\033[0m")
-	fmt.Println("  \033[33mserve\033[0m [<port>]                          Start REST API backend server (default port 8001)")
-	fmt.Println("  \033[33mstart-all\033[0m                               Run both Go REST API and Next.js Web UI concurrently")
-	fmt.Println("  \033[33mautostart\033[0m <enable|disable>              Configure Systemd Service to boot stack on startup")
-	fmt.Println("  \033[33mtest-ui\033[0m                                 Run automated headless Chrome verification of Next.js Web UI")
-	fmt.Println()
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| **register** '<name> <path> <source>' | Register a local development project to track its commits in the SQLite database. | 'vault register "my-api" "/home/tin/projects/my-api" "github"' |
+| **scan-repo** '<path> [--analyze-errors]' | Deep scan a directory structure and Git history to compile a Project Profile. Fallback to static config scan. '--analyze-errors' diagnoses broken builds. | 'vault scan-repo /home/tin/projects/achievement-vault --analyze-errors' |
+| **install** '<project_name>' | Install the Git 'post-commit' hook in the registered project folder to automate future commit log capture. | 'vault install "my-api"' |
+| **setup-shell** | Append an alert trigger to your shell config ('.bashrc' / '.zshrc') to warn you on login if weekly summaries are pending. | 'vault setup-shell' |
+| **setup-global** | Symlink the compiled executable to '/home/tin/go/bin/vault' and configure environment shell exports globally. | 'vault setup-global' |
 
-	// 5. META SYSTEM INFO (Gray)
-	fmt.Println("\033[1;30m📚 SYSTEM SUPPORT & HELP\033[0m")
-	fmt.Println("  \033[1;30mhelp\033[0m                                    Show this premium help dashboard interface")
-	fmt.Println()
-	fmt.Println("\033[1;36m┌────────────────────────────────────────────────────────────────────────────────────────┐\033[0m")
-	fmt.Println("\033[1;36m│ Example:                                                                               │\033[0m")
-	fmt.Println("\033[1;36m│   vault register \"my-api\" \"/absolute/path/my-api\" \"github\"                             │\033[0m")
-	fmt.Println("\033[1;36m│   vault install \"my-api\"                                                               │\033[0m")
-	fmt.Println("\033[1;36m│   vault start-all                                                                      │\033[0m")
-	fmt.Println("\033[1;36m└────────────────────────────────────────────────────────────────────────────────────────┘\033[0m")
+---
+
+## 📥 2. ACTIVITY LOG COLLECTION
+
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| **collect** '--project-id <id> --message <msg> --diff <diff>' | System-facing backend utility to log code achievements. Automatically triggered by the installed post-commit hook. | 'vault collect --project-id 1 --message "feat: auth" --diff "+ func Login()"' |
+
+---
+
+## ✨ 3. AI SUMMARIZATION & REPORTS
+
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| **summarize** '[--days <days>]' | Gather raw logs from the database, query Gemini AI, and draft a formatted, reviewer-ready Weekly Progress Summary. | 'vault summarize --days 7' |
+| **summarize-project** | Gather all approved achievements in 'weekly_achievements' to compile a professional, recruiter-ready Markdown Resume. | 'vault summarize-project' |
+| **history** '[<id>]' | List saved weekly progress summaries or print a full-fidelity rendered summary by its database ID. | 'vault history 5' |
+| **check-pending** | Scan the workspace database and output a warning if no summary has been recorded for the current week. | 'vault check-pending' |
+
+---
+
+## ⚙ 4. SERVICES & WEB PORTAL
+
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| **serve** '[<port>]' | Launch the REST API backend server to expose endpoint data (default port: '8001') for Next.js UI integration. | 'vault serve 8001' |
+| **start-all** | Concurrently launch both the Go API backend ('8001') and the Next.js frontend web interface ('3000') in background sessions. | 'vault start-all' |
+| **autostart** '<enable\|disable>' | Install or remove a persistent Systemd user daemon unit to keep the vault servers running on boot. | 'vault autostart enable' |
+| **test-ui** | Execute headless automated Chrome DOM tests on 'http://localhost:3000' and archive the page state to recovery. | 'vault test-ui' |
+| **help** | Render and present this comprehensive interactive usage manual inside your terminal window. | 'vault help' |
+
+---
+
+> [!NOTE]
+> Database file location defaults to '~/.achievement-vault/data/vault.db' unless specified by the 'VAULT_HOME' environment variable.
+`
+
+	r, err := glamour.Render(manualMarkdown, "dark")
+	if err == nil {
+		fmt.Println(r)
+	} else {
+		fmt.Println(manualMarkdown)
+	}
 }

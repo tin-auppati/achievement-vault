@@ -45,10 +45,10 @@ const CLI_COMMANDS = [
     example: "vault register \"my-api\" \"/home/tin/projects/my-api\" \"github\""
   },
   {
-    command: "vault scan-repo <path_to_project>",
-    desc: "Deep scan codebase layout & git logs to retroactively compile project purpose, features, and tech stack in SQLite.",
+    command: "vault scan-repo <path> [--analyze-errors]",
+    desc: "Deep scan codebase layout & git history to compile a Project Profile. Safe fallback to static configs, with optional '--analyze-errors' for compiler troubleshooting.",
     category: "setup",
-    example: "vault scan-repo /home/tin/projects/achievement-vault"
+    example: "vault scan-repo /home/tin/projects/achievement-vault --analyze-errors"
   },
   {
     command: "vault install <project_name>",
@@ -115,6 +115,12 @@ const CLI_COMMANDS = [
     desc: "Configure or remove Systemd background service to automatically boot the vault servers on system startup.",
     category: "services",
     example: "vault autostart enable"
+  },
+  {
+    command: "vault test-ui",
+    desc: "Execute the automated Next.js headless browser test runner using optimized Chrome flags and capture DOM states to data/test-ui-recovery.html.",
+    category: "services",
+    example: "vault test-ui"
   },
   {
     command: "vault help",
