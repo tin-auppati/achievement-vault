@@ -37,6 +37,120 @@ interface VaultStatus {
   draft_end_date: string;
 }
 
+function TechBadge({ tech }: { tech: string }) {
+  const normalized = tech.trim().toLowerCase();
+  
+  // Choose color configuration
+  let colorClass = "";
+  if (normalized === "go" || normalized === "golang") {
+    // Cyan
+    colorClass = "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20";
+  } else if (normalized === "typescript" || normalized === "ts") {
+    // Blue
+    colorClass = "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
+  } else if (normalized === "python") {
+    // Yellow
+    colorClass = "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20";
+  } else if (normalized === "docker" || normalized === "dockerfile") {
+    // Sky Blue
+    colorClass = "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20";
+  } else if (normalized === "react" || normalized === "next.js" || normalized === "nextjs" || normalized === "javascript" || normalized === "js") {
+    // Indigo
+    colorClass = "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20";
+  } else if (normalized === "tailwind" || normalized === "tailwindcss" || normalized === "css" || normalized === "sass") {
+    // Teal
+    colorClass = "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20";
+  } else if (normalized === "sqlite" || normalized === "sql" || normalized === "postgres" || normalized === "postgresql" || normalized === "database" || normalized === "db") {
+    // Violet
+    colorClass = "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20";
+  } else if (normalized === "git" || normalized === "github") {
+    // Rose
+    colorClass = "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
+  } else if (normalized === "rust") {
+    // Orange
+    colorClass = "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20";
+  } else {
+    // Fallback: neutral Slate/Gray
+    colorClass = "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
+  }
+
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 text-[9px] font-bold rounded-md border font-mono tracking-wide ${colorClass}`}>
+      {tech}
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const normalized = status.trim().toLowerCase();
+  let colorClass = "";
+  
+  if (
+    normalized.includes("pending") || 
+    normalized.includes("in progress") || 
+    normalized.includes("draft") ||
+    normalized.includes("editing")
+  ) {
+    // Amber / Orange
+    colorClass = "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+  } else if (
+    normalized.includes("approved") || 
+    normalized.includes("completed") || 
+    normalized.includes("active") || 
+    normalized.includes("success") || 
+    normalized.includes("saved")
+  ) {
+    // Emerald / Green
+    colorClass = "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+  } else {
+    // Neutral Slate/Gray
+    colorClass = "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
+  }
+
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-md border font-mono ${colorClass}`}>
+      {status}
+    </span>
+  );
+}
+
+function parseTechTags(techStackStr: string): string[] {
+  if (!techStackStr) return [];
+  const items = techStackStr.split(/[\n,;•\-*]+/);
+  return items
+    .map(t => t.replace(/[`*_\s]+/g, " ").trim())
+    .filter(t => t.length > 0 && t.length < 30);
+}
+
+function extractTechKeywords(text: string): string[] {
+  if (!text) return [];
+  const keywords = [
+    { label: "Go", patterns: [/\bgo\b/i, /\bgolang\b/i] },
+    { label: "TypeScript", patterns: [/\btypescript\b/i, /\bts\b/i] },
+    { label: "Python", patterns: [/\bpython\b/i] },
+    { label: "Docker", patterns: [/\bdocker\b/i, /\bdockerfile\b/i] },
+    { label: "Next.js", patterns: [/\bnext\.js\b/i, /\bnextjs\b/i] },
+    { label: "React", patterns: [/\breact\b/i] },
+    { label: "JavaScript", patterns: [/\bjavascript\b/i, /\bjs\b/i] },
+    { label: "Tailwind CSS", patterns: [/\btailwind\b/i, /\btailwindcss\b/i] },
+    { label: "SQLite", patterns: [/\bsqlite\b/i] },
+    { label: "SQL", patterns: [/\bsql\b/i] },
+    { label: "Git", patterns: [/\bgit\b/i] },
+    { label: "Rust", patterns: [/\brust\b/i] },
+  ];
+
+  const found: string[] = [];
+  keywords.forEach(kw => {
+    for (const pattern of kw.patterns) {
+      if (pattern.test(text)) {
+        found.push(kw.label);
+        break;
+      }
+    }
+  });
+  return found;
+}
+
 const CLI_COMMANDS = [
   {
     command: "vault register <name> <path> <source>",
@@ -1010,33 +1124,47 @@ export default function Dashboard() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[500px] pr-2">
-                      {achievements.map((ach) => (
-                        <div
-                          key={ach.id}
-                          onClick={() => setActiveAchievement(ach)}
-                          className="glass-glow p-5 rounded-xl cursor-pointer flex flex-col justify-between space-y-4 hover:scale-[1.01] hover:border-teal-500 dark:hover:border-teal-500 transition-all animate-fade-in"
-                        >
-                          <div>
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="text-[9px] font-bold tracking-widest text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full">
-                                ID: {ach.id}
-                              </span>
-                              <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
-                                {new Date(ach.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <h3 className="text-xs font-black text-zinc-800 dark:text-zinc-200">Weekly Progress Report</h3>
-                            <p className="text-[9px] font-mono text-zinc-500 dark:text-zinc-400 mt-1">
-                              Period: {ach.start_date} to {ach.end_date}
-                            </p>
-                          </div>
+                      {achievements.map((ach) => {
+                        const tags = extractTechKeywords(ach.content_md);
+                        return (
+                          <div
+                            key={ach.id}
+                            onClick={() => setActiveAchievement(ach)}
+                            className="glass-glow p-5 rounded-xl cursor-pointer flex flex-col justify-between space-y-4 hover:scale-[1.01] hover:border-teal-500 dark:hover:border-teal-500 transition-all animate-fade-in"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] font-bold tracking-widest text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full">
+                                    ID: {ach.id}
+                                  </span>
+                                  <StatusBadge status="Approved" />
+                                </div>
+                                <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
+                                  {new Date(ach.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <h3 className="text-xs font-black text-zinc-800 dark:text-zinc-200">Weekly Progress Report</h3>
+                              <p className="text-[9px] font-mono text-zinc-500 dark:text-zinc-400">
+                                Period: {ach.start_date} to {ach.end_date}
+                              </p>
  
-                          {/* Rendered markdown instead of raw text inside gallery previews */}
-                          <div className="pt-3 border-t border-zinc-150 dark:border-zinc-850 text-[10px] text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed font-sans prose dark:prose-invert prose-xs max-w-none pointer-events-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{ach.content_md}</ReactMarkdown>
+                              {tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                  {tags.map((tag) => (
+                                    <TechBadge key={tag} tech={tag} />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+ 
+                            {/* Rendered markdown instead of raw text inside gallery previews */}
+                            <div className="pt-3 border-t border-zinc-150 dark:border-zinc-850 text-[10px] text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed font-sans prose dark:prose-invert prose-xs max-w-none pointer-events-none">
+                              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{ach.content_md}</ReactMarkdown>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </section>
@@ -1172,6 +1300,7 @@ export default function Dashboard() {
                               <h3 className="text-sm font-black text-zinc-800 dark:text-zinc-100 uppercase tracking-wide">
                                 {proj.name}
                               </h3>
+                              <StatusBadge status={hasProfile ? "Completed" : "Pending"} />
                             </div>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-[9px] text-zinc-500 dark:text-zinc-400 font-mono">
                               <span>
@@ -1213,8 +1342,18 @@ export default function Dashboard() {
                                 <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" />
                                 Inferred Tech Stack
                               </h4>
-                              <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 font-mono prose dark:prose-invert prose-xs max-w-none">
-                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_tech_stack}</ReactMarkdown>
+                              <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 space-y-3">
+                                {parseTechTags(proj.profile_tech_stack).length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {parseTechTags(proj.profile_tech_stack).map((tag) => (
+                                      <TechBadge key={tag} tech={tag} />
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 font-mono prose dark:prose-invert prose-xs max-w-none">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_tech_stack}</ReactMarkdown>
+                                  </div>
+                                )}
                               </div>
                             </div>
  
@@ -1373,9 +1512,14 @@ export default function Dashboard() {
  
                     {/* Workstation Actions Footer */}
                     <div className="pt-4 border-t border-zinc-150 dark:border-zinc-850 flex justify-between items-center mt-3">
-                      <span className="text-[8.5px] text-zinc-400 dark:text-zinc-500 font-mono">
-                        {activeResumeId !== null ? `EDITING VERSION: ID #${activeResumeId}` : "STATUS: NEW DRAFT PORTFOLIO"}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[8.5px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Status:</span>
+                        {activeResumeId !== null ? (
+                          <StatusBadge status={`Editing Version #${activeResumeId}`} />
+                        ) : (
+                          <StatusBadge status="New Draft Portfolio" />
+                        )}
+                      </div>
                       <button
                         onClick={handleSaveResume}
                         disabled={savingResume}
@@ -1426,15 +1570,26 @@ export default function Dashboard() {
                                 <h4 className="text-[10px] font-extrabold tracking-wide text-zinc-800 dark:text-zinc-100 uppercase line-clamp-1">
                                   {resItem.version_name}
                                 </h4>
-                                {isActive && (
-                                  <span className="text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 rounded-md shrink-0">
-                                    ACTIVE
-                                  </span>
-                                )}
+                                <div className="flex items-center gap-1 shrink-0">
+                                  {isActive ? (
+                                    <StatusBadge status="Active" />
+                                  ) : (
+                                    <StatusBadge status="Saved" />
+                                  )}
+                                </div>
                               </div>
                               <p className="text-[8px] text-zinc-400 dark:text-zinc-500 font-mono mt-1">
                                 Compiled: {new Date(resItem.created_at).toLocaleString()}
                               </p>
+                              
+                              {/* Extracted Tech Keywords as tags */}
+                              {extractTechKeywords(resItem.content_md).length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {extractTechKeywords(resItem.content_md).map((tech) => (
+                                    <TechBadge key={tech} tech={tech} />
+                                  ))}
+                                </div>
+                              )}
                             </div>
  
                             {/* Quick Render preview snippet */}
@@ -1541,12 +1696,24 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-colors duration-300">
             <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50 rounded-t-2xl">
               <div>
-                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 rounded-md font-mono">
-                  {isEditingAchievement ? "Editing Achievement Summary" : "Achievement Details"}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 rounded-md font-mono">
+                    {isEditingAchievement ? "Editing Achievement Summary" : "Achievement Details"}
+                  </span>
+                  <StatusBadge status={isEditingAchievement ? "Editing" : "Approved"} />
+                </div>
                 <h2 className="text-xs font-bold text-zinc-800 dark:text-zinc-100 mt-2 font-mono">
                   Period: {activeAchievement.start_date} to {activeAchievement.end_date}
                 </h2>
+                
+                {/* Dynamically Extracted Tech Badges in Detail view */}
+                {!isEditingAchievement && extractTechKeywords(activeAchievement.content_md).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {extractTechKeywords(activeAchievement.content_md).map((tech) => (
+                      <TechBadge key={tech} tech={tech} />
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => {
