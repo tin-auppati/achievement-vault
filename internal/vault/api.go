@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -127,8 +128,8 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 			return
 		}
 
-		var projectName string
-		err = db.QueryRow("SELECT name FROM projects WHERE id = ?", id).Scan(&projectName)
+		var projectName, projectPath string
+		err = db.QueryRow("SELECT name, path FROM projects WHERE id = ?", id).Scan(&projectName, &projectPath)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				http.Error(w, `{"error": "project not found"}`, http.StatusNotFound)
@@ -138,6 +139,24 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 			return
 		}
 
+		var purpose, techStack, features string
+
+		// If project has a local path registered, execute our premium deep directory mapping scanner!
+		if projectPath != "" {
+			if info, sErr := os.Stat(projectPath); sErr == nil && info.IsDir() {
+				_, _, purpose, techStack, features, err = ScanAndProfileRepository(db, projectPath, false)
+				if err != nil {
+					http.Error(w, fmt.Sprintf(`{"error": "AI scan-repo profiling failed: %s"}`, err.Error()), http.StatusInternalServerError)
+					return
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprintf(w, `{"success": true, "profile_purpose": %q, "profile_tech_stack": %q, "profile_key_features": %q}`, purpose, techStack, features)
+				return
+			}
+		}
+
+		// Fallback to legacy raw commits parsing if folder is remote/absent
 		rows, err := db.Query("SELECT content FROM raw_logs WHERE project_id = ? ORDER BY timestamp DESC", id)
 		if err != nil {
 			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
@@ -153,7 +172,7 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 			}
 		}
 
-		purpose, techStack, features, err := generateProfileFn(projectName, logs)
+		purpose, techStack, features, err = generateProfileFn(projectName, logs)
 		if err != nil {
 			http.Error(w, fmt.Sprintf(`{"error": "AI profile generation failed: %s"}`, err.Error()), http.StatusInternalServerError)
 			return
