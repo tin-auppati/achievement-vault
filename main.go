@@ -130,14 +130,29 @@ func handleRegister() {
 }
 
 func handleScanRepo() {
-	// Expecting: main scan-repo <path_to_project>
-	if len(os.Args) != 3 {
-		fmt.Fprintln(os.Stderr, "\033[31mError: scan-repo command requires exactly 1 argument: <path_to_project>\033[0m")
-		fmt.Fprintln(os.Stderr, "Usage: achievement-vault scan-repo <path_to_project>")
+	// Expecting: main scan-repo <path_to_project> [--analyze-errors]
+	if len(os.Args) < 3 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: scan-repo command requires at least 1 argument: <path_to_project>\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault scan-repo <path_to_project> [--analyze-errors]")
 		os.Exit(1)
 	}
 
-	targetPath := os.Args[2]
+	targetPath := ""
+	analyzeErrors := false
+
+	for _, arg := range os.Args[2:] {
+		if arg == "--analyze-errors" {
+			analyzeErrors = true
+		} else {
+			targetPath = arg
+		}
+	}
+
+	if targetPath == "" {
+		fmt.Fprintln(os.Stderr, "\033[31mError: Please specify the target project path.\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault scan-repo <path_to_project> [--analyze-errors]")
+		os.Exit(1)
+	}
 
 	// Initialize the DB
 	db, err := database.InitDB(getDBPath())
@@ -151,9 +166,12 @@ func handleScanRepo() {
 	fmt.Println("\033[1;36m│                       🔍 DEEP CODEBASE ARCHITECTURAL SCANNING ENGINE                   │\033[0m")
 	fmt.Println("\033[1;36m└────────────────────────────────────────────────────────────────────────────────────────┘\033[0m")
 	fmt.Printf("📂 Target Directory:  \033[1m%s\033[0m\n", targetPath)
+	if analyzeErrors {
+		fmt.Println("🛠️  Broken Build Analysis: \033[1;32mENABLED\033[0m")
+	}
 	fmt.Println("🚀 Starting walk and code history semantic compilation...")
 
-	projectName, isNew, purpose, techStack, features, err := vault.ScanAndProfileRepository(db.DB, targetPath)
+	projectName, isNew, purpose, techStack, features, err := vault.ScanAndProfileRepository(db.DB, targetPath, analyzeErrors)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\n\033[31m❌ Scanning failed: %v\033[0m\n", err)
 		os.Exit(1)
@@ -1041,7 +1059,8 @@ func printUsage() {
 	// 1. REPOSITORY SETUP & HOOKS (Green)
 	fmt.Println("\033[1;32m📁 REPOSITORY SETUP & HOOKS\033[0m")
 	fmt.Println("  \033[32mregister\033[0m <name> <path> <source>         Register a new local development project")
-	fmt.Println("  \033[32mscan-repo\033[0m <path_to_project>             Deep scan codebase layout & git logs to compile profile")
+	fmt.Println("  \033[32mscan-repo\033[0m <path_to_project> [--analyze-errors]")
+	fmt.Println("                                          Deep scan layout & git logs (and troubleshoot broken builds if flag set)")
 	fmt.Println("  \033[32minstall\033[0m <project_name>                  Install Git post-commit hook automatically")
 	fmt.Println("  \033[32msetup-shell\033[0m                             Append pending report check trigger to .bashrc/.zshrc")
 	fmt.Println("  \033[32msetup-global\033[0m                            Configure global 'vault' command and export VAULT_HOME")

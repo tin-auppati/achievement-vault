@@ -124,11 +124,13 @@ func RunUITest(db *sql.DB) error {
 		"--headless",
 		"--disable-gpu",
 		"--no-sandbox",
+		"--disable-dev-shm-usage",
 		"--dump-dom",
 		"http://localhost:3000",
 	)
 
 	domBytes, err := chromeCmd.Output()
+	var domOutput string
 	if err != nil {
 		report.WriteString(fmt.Sprintf("- ❌ **Headless Chrome invocation failed**: `%v`\n", err))
 		report.WriteString("\n# **❌ Test Suite Result: FAILED**\n")
@@ -136,7 +138,16 @@ func RunUITest(db *sql.DB) error {
 		return fmt.Errorf("chrome headless check failed: %w", err)
 	}
 
-	domOutput := string(domBytes)
+	domOutput = string(domBytes)
+
+	// Always write/archive the current DOM HTML state to data/test-ui-recovery.html
+	_ = os.MkdirAll("data", 0755)
+	recoveryPath := "data/test-ui-recovery.html"
+	if wErr := os.WriteFile(recoveryPath, domBytes, 0644); wErr == nil {
+		report.WriteString(fmt.Sprintf("- ✔ **Recovery Archive**: Archived current state HTML rendering successfully to `%s`.\n", recoveryPath))
+	} else {
+		report.WriteString(fmt.Sprintf("- ⚠️ **Recovery Archive Warning**: Failed to archive HTML rendering: `%v`.\n", wErr))
+	}
 
 	// 5. Verify Content of Rendered DOM
 	report.WriteString("\n## **4. DOM Content Assertion**\n")
