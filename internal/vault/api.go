@@ -307,6 +307,68 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 		json.NewEncoder(w).Encode(achievements)
 	}))
 
+	http.HandleFunc("/api/achievements/", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/achievements/")
+		if idStr == "" || idStr == "approve" {
+			http.Error(w, `{"error": "invalid achievement path"}`, http.StatusBadRequest)
+			return
+		}
+
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			http.Error(w, `{"error": "invalid achievement ID"}`, http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			var ach WeeklyAchievement
+			err = db.QueryRow("SELECT id, content_md, start_date, end_date, created_at FROM weekly_achievements WHERE id = ?", id).
+				Scan(&ach.ID, &ach.ContentMd, &ach.StartDate, &ach.EndDate, &ach.CreatedAt)
+			if err != nil {
+				if err == sql.ErrNoRows {
+					http.Error(w, `{"error": "achievement not found"}`, http.StatusNotFound)
+				} else {
+					http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				}
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(ach)
+
+		case "PUT":
+			var payload struct {
+				ContentMd string `json:"content_md"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+				http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+				return
+			}
+
+			_, err = db.Exec("UPDATE weekly_achievements SET content_md = ? WHERE id = ?", payload.ContentMd, id)
+			if err != nil {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"success": true}`)
+
+		case "DELETE":
+			_, err = db.Exec("DELETE FROM weekly_achievements WHERE id = ?", id)
+			if err != nil {
+				http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"success": true}`)
+
+		default:
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+		}
+	}))
+
 	http.HandleFunc("/api/stats", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		stats, err := getTechStats(db)
 		if err != nil {

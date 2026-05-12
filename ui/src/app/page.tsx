@@ -148,6 +148,10 @@ export default function Dashboard() {
   const [checkingPending, setCheckingPending] = useState(false);
   const [activeLog, setActiveLog] = useState<Log | null>(null);
   const [activeAchievement, setActiveAchievement] = useState<Achievement | null>(null);
+  const [isEditingAchievement, setIsEditingAchievement] = useState(false);
+  const [editedAchievementContent, setEditedAchievementContent] = useState("");
+  const [savingAchievement, setSavingAchievement] = useState(false);
+  const [deletingAchievement, setDeletingAchievement] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [draftViewMode, setDraftViewMode] = useState<"preview" | "raw">("preview");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
@@ -487,6 +491,66 @@ export default function Dashboard() {
       showToast("Error saving summary to vault.", "error");
     } finally {
       setApproving(false);
+    }
+  };
+
+  const handleStartEditAchievement = () => {
+    if (!activeAchievement) return;
+    setEditedAchievementContent(activeAchievement.content_md);
+    setIsEditingAchievement(true);
+  };
+
+  const handleSaveAchievement = async () => {
+    if (!activeAchievement) return;
+    try {
+      setSavingAchievement(true);
+      const res = await fetch(`/api/achievements/${activeAchievement.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content_md: editedAchievementContent }),
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error("Failed to update achievement");
+
+      showToast("Achievement updated successfully!", "success");
+      
+      // Update local state dynamically
+      setActiveAchievement(prev => prev ? { ...prev, content_md: editedAchievementContent } : null);
+      setAchievements(prev => prev.map(a => a.id === activeAchievement.id ? { ...a, content_md: editedAchievementContent } : a));
+      setIsEditingAchievement(false);
+    } catch (err) {
+      console.error("Error saving achievement content:", err);
+      showToast("Failed to save achievement content.", "error");
+    } finally {
+      setSavingAchievement(false);
+    }
+  };
+
+  const handleDeleteAchievement = async () => {
+    if (!activeAchievement) return;
+    if (!window.confirm("Are you sure you want to permanently delete this weekly achievement summary? This cannot be undone.")) return;
+
+    try {
+      setDeletingAchievement(true);
+      const res = await fetch(`/api/achievements/${activeAchievement.id}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete achievement");
+
+      showToast("Achievement summary permanently deleted.", "success");
+      
+      // Update local state dynamically
+      setAchievements(prev => prev.filter(a => a.id !== activeAchievement.id));
+      setActiveAchievement(null);
+      setIsEditingAchievement(false);
+    } catch (err) {
+      console.error("Error deleting achievement:", err);
+      showToast("Failed to delete achievement summary.", "error");
+    } finally {
+      setDeletingAchievement(false);
     }
   };
 
@@ -1474,38 +1538,99 @@ export default function Dashboard() {
       {/* FULL MD MODAL WINDOW FOR ACTIVE WEEKLY ACHIEVEMENT DETAILS */}
       {activeAchievement && (
         <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-colors duration-300">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-colors duration-300">
             <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50 rounded-t-2xl">
               <div>
-                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800 rounded-md font-mono">
-                  Achievement Details
+                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 rounded-md font-mono">
+                  {isEditingAchievement ? "Editing Achievement Summary" : "Achievement Details"}
                 </span>
                 <h2 className="text-xs font-bold text-zinc-800 dark:text-zinc-100 mt-2 font-mono">
                   Period: {activeAchievement.start_date} to {activeAchievement.end_date}
                 </h2>
               </div>
               <button
-                onClick={() => setActiveAchievement(null)}
+                onClick={() => {
+                  setActiveAchievement(null);
+                  setIsEditingAchievement(false);
+                }}
                 className="h-8 w-8 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-750 rounded-full flex items-center justify-center text-zinc-400 dark:text-zinc-500 transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1 bg-zinc-50 dark:bg-zinc-950/20 border-b border-zinc-200 dark:border-zinc-800 shadow-inner">
-              <div className="prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-200 font-sans text-sm leading-relaxed">
-                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
-              </div>
+            <div className="p-6 overflow-y-auto flex-1 bg-zinc-50 dark:bg-zinc-950/20 border-b border-zinc-200 dark:border-zinc-800 shadow-inner flex flex-col">
+              {isEditingAchievement ? (
+                <textarea
+                  value={editedAchievementContent}
+                  onChange={(e) => setEditedAchievementContent(e.target.value)}
+                  className="w-full flex-1 min-h-[350px] p-4 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-mono text-[11px] leading-relaxed border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 shadow-inner resize-none"
+                  placeholder="Type your markdown achievement accomplishments here..."
+                />
+              ) : (
+                <div className="prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-200 font-sans text-sm leading-relaxed">
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
+                </div>
+              )}
             </div>
 
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-b-2xl text-right flex justify-between items-center text-[9px] text-zinc-500 dark:text-zinc-400 font-mono">
-              <span>Saved in vault at: {new Date(activeAchievement.created_at).toLocaleString()}</span>
-              <button
-                onClick={() => setActiveAchievement(null)}
-                className="px-4 py-1.5 bg-cyan-600 dark:bg-cyan-500 hover:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer"
-              >
-                Close
-              </button>
+            <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-b-2xl flex flex-wrap justify-between items-center gap-4 text-[9px] text-zinc-500 dark:text-zinc-400 font-mono">
+              <div>
+                {isEditingAchievement ? (
+                  <span className="text-purple-500 dark:text-purple-400 font-bold">⚠️ Warning: Unsaved edits will be lost on cancel.</span>
+                ) : (
+                  <span>Saved in vault at: {new Date(activeAchievement.created_at).toLocaleString()}</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isEditingAchievement ? (
+                  <>
+                    <button
+                      onClick={() => setIsEditingAchievement(false)}
+                      className="px-4 py-1.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-750 dark:text-zinc-300 font-bold rounded-lg transition-colors cursor-pointer text-[10px]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveAchievement}
+                      disabled={savingAchievement}
+                      className="px-4 py-1.5 bg-purple-600 dark:bg-purple-500 hover:bg-purple-500 dark:hover:bg-purple-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer text-[10px] flex items-center gap-1.5"
+                    >
+                      {savingAchievement && <RotateCw className="h-3 w-3 animate-spin" />}
+                      {savingAchievement ? "Saving..." : "Save Changes"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleDeleteAchievement}
+                      disabled={deletingAchievement}
+                      className="px-4 py-1.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 font-bold rounded-lg transition-colors cursor-pointer text-[10px] flex items-center gap-1.5"
+                    >
+                      {deletingAchievement && <RotateCw className="h-3 w-3 animate-spin" />}
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </button>
+                    <button
+                      onClick={handleStartEditAchievement}
+                      className="px-4 py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-750 text-zinc-750 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-750 font-bold rounded-lg transition-colors cursor-pointer text-[10px] flex items-center gap-1.5"
+                    >
+                      <Save className="h-3.5 w-3.5" />
+                      Edit Content
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveAchievement(null);
+                        setIsEditingAchievement(false);
+                      }}
+                      className="px-4 py-1.5 bg-purple-600 dark:bg-purple-500 hover:bg-purple-500 dark:hover:bg-purple-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer text-[10px]"
+                    >
+                      Close
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
