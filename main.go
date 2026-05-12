@@ -83,6 +83,8 @@ func main() {
 		handleStartAll()
 	case "autostart":
 		handleAutostart()
+	case "test-ui":
+		handleTestUI()
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -1009,6 +1011,25 @@ func handleSetupGlobal() {
 	fmt.Println("\n  You can then run \033[32mvault\033[0m from absolutely ANY directory globally!")
 }
 
+func handleTestUI() {
+	if len(os.Args) != 2 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: test-ui command takes no arguments\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault test-ui")
+		os.Exit(1)
+	}
+
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	if err := vault.RunUITest(db.DB); err != nil {
+		os.Exit(1)
+	}
+}
+
 func printUsage() {
 	fmt.Println("\033[1;36m┌────────────────────────────────────────────────────────────────────────────────────────┐\033[0m")
 	fmt.Println("\033[1;36m│                       🏆  ACHIEVEMENT VAULT - PREMIUM CLI TOOL v1.3                     │\033[0m")
@@ -1045,6 +1066,7 @@ func printUsage() {
 	fmt.Println("  \033[33mserve\033[0m [<port>]                          Start REST API backend server (default port 8001)")
 	fmt.Println("  \033[33mstart-all\033[0m                               Run both Go REST API and Next.js Web UI concurrently")
 	fmt.Println("  \033[33mautostart\033[0m <enable|disable>              Configure Systemd Service to boot stack on startup")
+	fmt.Println("  \033[33mtest-ui\033[0m                                 Run automated headless Chrome verification of Next.js Web UI")
 	fmt.Println()
 
 	// 5. META SYSTEM INFO (Gray)
