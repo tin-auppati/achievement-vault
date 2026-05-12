@@ -618,14 +618,14 @@ export default function Dashboard() {
   const totalStatPoints = Object.values(stats).reduce((a, b) => a + b, 0) || 1;
 
   return (
-    <div className="min-h-screen flex flex-col p-6 md:p-8 selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen flex flex-col p-6 md:p-8 selection:bg-teal-500 selection:text-black">
       
       {/* HEADER SECTION */}
-      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-900 relative">
+      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-8 pb-6 border-b border-slate-200 dark:border-slate-900 relative">
         <div>
           <div className="flex items-center gap-3">
-            <div className="h-3 w-3 bg-cyan-500 dark:bg-cyan-400 rounded-full animate-pulse" />
-            <h1 className="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 dark:from-cyan-400 dark:via-indigo-400 dark:to-purple-500 uppercase">
+            <div className="h-3 w-3 bg-teal-500 dark:bg-teal-400 rounded-full animate-pulse" />
+            <h1 className="text-2xl font-black tracking-wider text-slate-900 dark:text-slate-100 uppercase">
               ACHIEVEMENT VAULT
             </h1>
           </div>
@@ -641,7 +641,7 @@ export default function Dashboard() {
           <button
             onClick={handleCheckPendingStatus}
             disabled={checkingPending || loading || summarizing}
-            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/15 text-amber-700 dark:text-amber-400 rounded-lg hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-100/30 dark:hover:bg-amber-950/30 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 rounded-lg hover:border-teal-500 dark:hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50/50 dark:hover:bg-teal-950/20 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
           >
             <Search className={`h-3.5 w-3.5 ${checkingPending ? "animate-bounce" : ""}`} />
             {checkingPending ? "Scanning..." : "Check Pending"}
@@ -651,37 +651,37 @@ export default function Dashboard() {
           <button
             onClick={handleTriggerSummarize}
             disabled={summarizing || loading || checkingPending}
-            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-purple-200 dark:border-purple-900/60 bg-purple-50/40 dark:bg-purple-950/15 text-purple-700 dark:text-purple-400 rounded-lg hover:border-purple-500 dark:hover:border-purple-500 hover:bg-purple-100/30 dark:hover:bg-purple-950/30 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/15 text-teal-700 dark:text-teal-400 rounded-lg hover:border-teal-500 dark:hover:border-teal-500 hover:bg-teal-100/30 dark:hover:bg-teal-950/30 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
           >
             <Sparkles className={`h-3.5 w-3.5 ${summarizing ? "animate-spin" : "animate-pulse"}`} />
             {summarizing ? "Generating AI Draft..." : "AI Summarize"}
           </button>
-
+ 
           {/* Project Resume Button */}
           <button
             onClick={handleFetchProjectResume}
             disabled={compilingResumeAI || loading || summarizing || checkingPending}
-            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-cyan-200 dark:border-cyan-900/60 bg-cyan-50/40 dark:bg-cyan-950/15 text-cyan-700 dark:text-cyan-400 rounded-lg hover:border-cyan-500 dark:hover:border-cyan-400 hover:bg-cyan-100/30 dark:hover:bg-cyan-950/30 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-black uppercase tracking-wider border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/15 text-teal-700 dark:text-teal-400 rounded-lg hover:border-teal-500 dark:hover:border-teal-500 hover:bg-teal-100/30 dark:hover:bg-teal-950/30 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
           >
             <Award className={`h-3.5 w-3.5 ${compilingResumeAI ? "animate-spin" : ""}`} />
             {compilingResumeAI ? "Compiling Resume..." : "Project Resume"}
           </button>
-
+ 
           {/* Refresh Feed Button */}
           <button
             onClick={() => fetchDashboardData()}
             disabled={loading || summarizing || checkingPending}
-            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg hover:border-cyan-500 dark:hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-50/50 dark:hover:bg-cyan-950/20 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg hover:border-teal-500 dark:hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50/50 dark:hover:bg-teal-950/20 disabled:opacity-40 transition-all duration-300 shadow-sm cursor-pointer"
           >
             <RotateCw className="h-3.5 w-3.5" />
             Refresh Feed
           </button>
-
+ 
           {/* PREMIUM TWO-STATE EXPLICIT THEME SWITCHER */}
           {mounted && (
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg hover:border-cyan-500 dark:hover:border-cyan-400 text-zinc-600 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all duration-300 shadow-sm cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-lg hover:border-teal-500 dark:hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-300 shadow-sm cursor-pointer"
               title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
             >
               {theme === "dark" ? (
@@ -691,7 +691,7 @@ export default function Dashboard() {
                 </>
               ) : (
                 <>
-                  <Moon className="h-3.5 w-3.5 text-indigo-450 dark:text-indigo-400" />
+                  <Moon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-300" />
                   <span>Dark Mode</span>
                 </>
               )}
@@ -699,42 +699,42 @@ export default function Dashboard() {
           )}
         </div>
       </header>
-
-
+ 
+ 
       {/* TABS NAVIGATION */}
       {mounted && (
-        <div className="flex border-b border-zinc-200 dark:border-zinc-900 mb-6 gap-2">
+        <div className="flex border-b border-slate-200 dark:border-slate-900 mb-6 gap-2">
           <button
             onClick={() => setCurrentTab("dashboard")}
             className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-wider border-b-2 transition-all duration-300 cursor-pointer ${
               currentTab === "dashboard"
-                ? "border-cyan-500 text-cyan-600 dark:text-cyan-400 font-extrabold"
-                : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                ? "border-teal-500 text-teal-600 dark:text-teal-400 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            <Activity className="h-3.5 w-3.5 text-cyan-500" />
+            <Activity className="h-3.5 w-3.5 text-teal-500" />
             Weekly Achievements
           </button>
           <button
             onClick={() => setCurrentTab("projects")}
             className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-wider border-b-2 transition-all duration-300 cursor-pointer ${
               currentTab === "projects"
-                ? "border-indigo-500 text-indigo-600 dark:text-indigo-400 font-extrabold"
-                : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                ? "border-teal-500 text-teal-600 dark:text-teal-400 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            <Folder className="h-3.5 w-3.5 text-indigo-500" />
+            <Folder className="h-3.5 w-3.5 text-teal-500" />
             Project Profiles
           </button>
           <button
             onClick={() => setCurrentTab("resumes")}
             className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-wider border-b-2 transition-all duration-300 cursor-pointer ${
               currentTab === "resumes"
-                ? "border-purple-500 text-purple-600 dark:text-purple-400 font-extrabold"
-                : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                ? "border-teal-500 text-teal-600 dark:text-teal-400 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            <Briefcase className="h-3.5 w-3.5 text-purple-500" />
+            <Briefcase className="h-3.5 w-3.5 text-teal-500" />
             Resume Workstation
           </button>
         </div>
@@ -742,8 +742,8 @@ export default function Dashboard() {
 
       {loading && !approving ? (
         <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-          <div className="h-8 w-8 border-t-2 border-r-2 border-cyan-500 dark:border-cyan-400 rounded-full animate-spin" />
-          <p className="text-xs text-cyan-600 dark:text-cyan-450 font-mono">Syncing with local vault database...</p>
+          <div className="h-8 w-8 border-t-2 border-r-2 border-teal-500 rounded-full animate-spin" />
+          <p className="text-xs text-teal-600 dark:text-teal-400 font-mono">Syncing with local vault database...</p>
         </div>
       ) : (
         <div className="space-y-8 flex-1 flex flex-col">
@@ -756,13 +756,13 @@ export default function Dashboard() {
                 <section className="animate-slide-down">
                   {status.has_pending_draft ? (
                     // 1. Pending Draft Ready for Review Option
-                    <div className="border border-purple-300 dark:border-purple-900/60 bg-gradient-to-br from-purple-50 via-white to-cyan-50/20 dark:from-purple-950/15 dark:via-zinc-900/90 dark:to-cyan-950/5 p-6 rounded-2xl shadow-lg dark:shadow-purple-950/10 space-y-5 transition-colors duration-300">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                    <div className="border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-6 rounded-2xl shadow-lg space-y-5 transition-colors duration-300">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                           <div className="flex items-center gap-3">
-                            <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400 animate-pulse" />
+                            <Sparkles className="h-5 w-5 text-teal-500 dark:text-teal-400 animate-pulse" />
                             <div>
-                              <h2 className="text-xs font-black tracking-wider text-purple-700 dark:text-purple-400 uppercase">
+                              <h2 className="text-xs font-black tracking-wider text-slate-800 dark:text-slate-100 uppercase">
                                 Action Center: Weekly Summary Ready for Review
                               </h2>
                               <p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -770,15 +770,15 @@ export default function Dashboard() {
                               </p>
                             </div>
                           </div>
-
+ 
                           {/* View Mode Switcher */}
-                          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 p-0.5 rounded-lg text-[9px] font-mono shadow-inner">
+                          <div className="flex items-center border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 p-0.5 rounded-lg text-[9px] font-mono shadow-inner">
                             <button
                               onClick={() => setDraftViewMode("preview")}
                               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
                                 draftViewMode === "preview"
-                                  ? "bg-white dark:bg-zinc-800 text-purple-700 dark:text-purple-400 shadow-sm"
-                                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-350"
+                                  ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm"
+                                  : "text-zinc-500 hover:text-zinc-750 dark:hover:text-zinc-300"
                               }`}
                             >
                               <Eye className="h-3 w-3" /> Preview
@@ -787,27 +787,27 @@ export default function Dashboard() {
                               onClick={() => setDraftViewMode("raw")}
                               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
                                 draftViewMode === "raw"
-                                  ? "bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-sm"
-                                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                                  ? "bg-white dark:bg-slate-800 text-zinc-800 dark:text-zinc-200 shadow-sm"
+                                  : "text-zinc-500 hover:text-zinc-750 dark:hover:text-zinc-300"
                               }`}
                             >
                               <Code className="h-3 w-3" /> Raw Markdown
                             </button>
                           </div>
                         </div>
-
+ 
                         <button
                           onClick={handleApproveDraft}
                           disabled={approving}
-                          className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-500 dark:to-teal-500 text-white dark:text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md shadow-emerald-200 dark:shadow-emerald-950/20 hover:scale-[1.02] disabled:opacity-50 transition-all duration-300 self-end md:self-auto cursor-pointer"
+                          className="px-5 py-2.5 bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md hover:bg-teal-500 dark:hover:bg-teal-400 hover:scale-[1.02] disabled:opacity-50 transition-all duration-300 self-end md:self-auto cursor-pointer"
                         >
                           {approving ? "⏳ Saving to Vault..." : "✓ Approve & Save to Vault"}
                         </button>
                       </div>
                       
-                      <div className="bg-zinc-100/50 dark:bg-black/60 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl max-h-[250px] overflow-y-auto text-xs leading-relaxed shadow-inner font-mono text-zinc-700 dark:text-zinc-300">
+                      <div className="bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 p-5 rounded-xl max-h-[250px] overflow-y-auto text-xs leading-relaxed shadow-inner font-mono text-slate-700 dark:text-slate-300">
                         {draftViewMode === "preview" ? (
-                          <div className="prose dark:prose-invert prose-xs max-w-none text-zinc-800 dark:text-zinc-200 font-sans leading-relaxed">
+                          <div className="prose dark:prose-invert prose-xs max-w-none text-slate-800 dark:text-slate-200 font-sans leading-relaxed">
                             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{status.draft_content}</ReactMarkdown>
                           </div>
                         ) : (
@@ -815,38 +815,38 @@ export default function Dashboard() {
                             <textarea
                               value={editedDraft}
                               onChange={(e) => setEditedDraft(e.target.value)}
-                              className="w-full min-h-[150px] p-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-xs resize-y animate-fade-in"
+                              className="w-full min-h-[150px] p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-xs resize-y animate-fade-in"
                               placeholder="Edit your draft here..."
                             />
                             <button
                               onClick={handleSaveDraft}
                               disabled={savingDraft || editedDraft === status.draft_content}
-                              className="self-end px-4 py-2 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-black font-bold text-[10px] uppercase rounded-lg hover:bg-zinc-700 dark:hover:bg-white disabled:opacity-50 transition-colors cursor-pointer"
+                              className="self-end px-4 py-2 bg-slate-850 dark:bg-slate-200 text-white dark:text-slate-900 hover:bg-slate-750 dark:hover:bg-white disabled:opacity-50 transition-colors cursor-pointer"
                             >
                               {savingDraft ? "Saving..." : "Save Changes"}
                             </button>
                           </div>
                         )}
                       </div>
-
+ 
                       {/* AI Refine Prompt Bar */}
-                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-purple-200 dark:border-purple-900/60">
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <input
                           type="text"
                           value={aiPrompt}
                           onChange={(e) => setAiPrompt(e.target.value)}
                           placeholder="Prompt AI to refine this draft (e.g., 'Make it more professional', 'Add emojis')"
-                          className="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-purple-200 dark:border-purple-800/50 text-zinc-800 dark:text-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-purple-500 font-sans"
+                          className="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 text-slate-800 dark:text-slate-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans"
                           onKeyDown={(e) => {
                             if (e.key === "Enter" && !refining && aiPrompt.trim()) {
-                              handleRefineDraft();
+                                handleRefineDraft();
                             }
                           }}
                         />
                         <button
                           onClick={handleRefineDraft}
                           disabled={refining || !aiPrompt.trim()}
-                          className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-bold text-[10px] uppercase rounded-lg border border-purple-200 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-800/50 disabled:opacity-50 transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350 font-bold text-[10px] uppercase rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700/50 hover:text-teal-500 dark:hover:text-teal-400 transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                         >
                           <Sparkles className={`h-3 w-3 ${refining ? "animate-spin" : ""}`} />
                           {refining ? "Refining..." : "AI Refine"}
@@ -855,11 +855,11 @@ export default function Dashboard() {
                     </div>
                   ) : (
                     // 2. No Draft but Weekly Summary is past-due (check-pending)
-                    <div className="border border-amber-300 dark:border-amber-900/60 bg-gradient-to-br from-amber-50 via-white to-amber-50/10 dark:from-amber-950/10 dark:via-zinc-900/90 dark:to-amber-950/5 p-5 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-300">
+                    <div className="border border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 p-5 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-300">
                       <div className="flex items-center gap-3.5">
-                        <AlertTriangle className="h-6 w-6 text-amber-500 dark:text-amber-400" />
+                        <AlertTriangle className="h-6 w-6 text-teal-500 dark:text-teal-400" />
                         <div>
-                          <h3 className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                          <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
                             Action Required: Your Weekly Summary is Pending!
                           </h3>
                           <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono">
@@ -871,45 +871,45 @@ export default function Dashboard() {
                         <button
                           onClick={handleTriggerSummarize}
                           disabled={summarizing}
-                          className="px-4 py-2 bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-500 text-white dark:text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md transition-all duration-300 cursor-pointer"
+                          className="px-4 py-2 bg-teal-600 dark:bg-teal-500 hover:bg-teal-500 dark:hover:bg-teal-400 text-white dark:text-slate-950 font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md transition-all duration-300 cursor-pointer"
                         >
                           {summarizing ? "⏳ Compiling..." : "⚡ Summarize Now"}
                         </button>
                         <div className="text-[9px] font-mono text-zinc-500 dark:text-zinc-400 hidden md:block">
-                          or run <code className="text-amber-600 dark:text-amber-400 font-bold font-mono">vault summarize</code> in terminal
+                          or run <code className="text-teal-600 dark:text-teal-400 font-bold font-mono">vault summarize</code> in terminal
                         </div>
                       </div>
                     </div>
                   )}
                 </section>
               )}
-
+ 
               {/* STATS OVERVIEW CARDS & TECH METRICS */}
               <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1 grid grid-cols-3 gap-4">
                   <div className="glass-glow p-4 rounded-xl flex flex-col justify-center items-center text-center">
                     <span className="text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase flex items-center gap-1">
-                      <Activity className="h-2.5 w-2.5 text-cyan-500" /> Projects
+                      <Activity className="h-2.5 w-2.5 text-teal-500" /> Projects
                     </span>
-                    <span className="text-2xl font-black text-cyan-600 dark:text-cyan-400 mt-1">{uniqueProjects}</span>
+                    <span className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">{uniqueProjects}</span>
                   </div>
                   <div className="glass-glow p-4 rounded-xl flex flex-col justify-center items-center text-center">
                     <span className="text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase flex items-center gap-1">
-                      <BarChart3 className="h-2.5 w-2.5 text-indigo-500" /> Raw Logs
+                      <BarChart3 className="h-2.5 w-2.5 text-teal-500" /> Raw Logs
                     </span>
-                    <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{totalLogs}</span>
+                    <span className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">{totalLogs}</span>
                   </div>
                   <div className="glass-glow p-4 rounded-xl flex flex-col justify-center items-center text-center">
                     <span className="text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase flex items-center gap-1">
-                      <Award className="h-2.5 w-2.5 text-purple-500" /> Summaries
+                      <Award className="h-2.5 w-2.5 text-teal-500" /> Summaries
                     </span>
-                    <span className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">{totalAchievements}</span>
+                    <span className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">{totalAchievements}</span>
                   </div>
                 </div>
-
+ 
                 <div className="lg:col-span-2 glass-glow p-5 rounded-xl flex flex-col justify-between">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-mono">Technology Impact Footprint</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono">Technology Impact Footprint</span>
                     <span className="text-[8px] font-mono text-zinc-500 dark:text-zinc-400">Inferred from commit changesets</span>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -920,11 +920,11 @@ export default function Dashboard() {
                         <div key={lang} className="space-y-1">
                           <div className="flex justify-between text-[10px] font-mono">
                             <span className="text-zinc-600 dark:text-zinc-300 font-semibold">{lang}</span>
-                            <span className="text-cyan-600 dark:text-cyan-400 font-bold">{pct}%</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-bold">{pct}%</span>
                           </div>
                           <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 dark:from-cyan-400 dark:to-indigo-400 rounded-full transition-all duration-500"
+                              className="h-full bg-teal-500 rounded-full transition-all duration-500"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -934,20 +934,20 @@ export default function Dashboard() {
                   </div>
                 </div>
               </section>
-
+ 
               {/* MAIN COLUMN CONTENT */}
               <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 flex-1">
                 {/* LEFT COLUMN: Scrollable Raw Logs Feed */}
                 <section className="xl:col-span-2 flex flex-col space-y-4">
                   <div className="flex justify-between items-center">
-                    <h2 className="text-xs font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400 flex items-center gap-2 font-mono">
+                    <h2 className="text-xs font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 flex items-center gap-2 font-mono">
                       <span>📥</span> Raw Log Feed
                     </h2>
                     <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-200 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-300 dark:border-zinc-800">
                       {logs.length} logged events
                     </span>
                   </div>
-
+ 
                   <div className="flex-1 overflow-y-auto max-h-[500px] pr-2 space-y-3">
                     {logs.length === 0 ? (
                       <div className="h-40 border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl flex items-center justify-center text-zinc-400 dark:text-zinc-500 text-xs font-mono">
@@ -960,12 +960,12 @@ export default function Dashboard() {
                           onClick={() => setActiveLog(activeLog?.id === log.id ? null : log)}
                           className={`p-4 rounded-xl cursor-pointer transition-all duration-300 border ${
                             activeLog?.id === log.id
-                              ? "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-400 dark:border-indigo-500/80 shadow-md"
-                              : "bg-white dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-900 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/80 hover:border-zinc-300 dark:hover:border-zinc-800"
+                              ? "bg-slate-100 dark:bg-slate-800/40 border-teal-500 dark:border-teal-500/80 shadow-md"
+                              : "bg-white dark:bg-zinc-900/40 border-slate-200 dark:border-slate-800 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/80 hover:border-slate-300 dark:hover:border-slate-750"
                           }`}
                         >
                           <div className="flex justify-between items-start gap-2">
-                            <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-300 rounded border border-zinc-200 dark:border-zinc-700 uppercase font-semibold">
+                            <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 rounded border border-zinc-200 dark:border-zinc-700 uppercase font-semibold">
                               {log.project_name}
                             </span>
                             <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
@@ -980,7 +980,7 @@ export default function Dashboard() {
                           <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-200 mt-2 line-clamp-2">{log.content}</p>
                           
                           {activeLog?.id === log.id && log.metadata && (
-                            <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 text-[10px] font-mono bg-zinc-50 dark:bg-black/60 p-2.5 rounded-lg text-emerald-700 dark:text-emerald-400 overflow-x-auto whitespace-pre">
+                            <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 text-[10px] font-mono bg-zinc-50 dark:bg-black/60 p-2.5 rounded-lg text-teal-700 dark:text-teal-400 overflow-x-auto whitespace-pre">
                               <div className="text-zinc-400 dark:text-zinc-400 mb-1 font-semibold">// Git commit diff stats</div>
                               {log.metadata}
                             </div>
@@ -994,14 +994,14 @@ export default function Dashboard() {
                 {/* RIGHT COLUMN: Achievement Cards Grid */}
                 <section className="xl:col-span-3 flex flex-col space-y-4">
                   <div className="flex justify-between items-center">
-                    <h2 className="text-xs font-bold tracking-wider uppercase text-purple-600 dark:text-purple-400 flex items-center gap-2 font-mono">
+                    <h2 className="text-xs font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 flex items-center gap-2 font-mono">
                       <span>🏆</span> Weekly Achievements Vault
                     </h2>
                     <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-200 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-300 dark:border-zinc-800">
                       {achievements.length} approved periods
                     </span>
                   </div>
-
+ 
                   {achievements.length === 0 ? (
                     <div className="h-[350px] border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl flex flex-col items-center justify-center text-center p-6 text-zinc-400 dark:text-zinc-500">
                       <span className="text-3xl mb-3 animate-bounce">📭</span>
@@ -1014,11 +1014,11 @@ export default function Dashboard() {
                         <div
                           key={ach.id}
                           onClick={() => setActiveAchievement(ach)}
-                          className="glass-glow p-5 rounded-xl cursor-pointer flex flex-col justify-between space-y-4 hover:scale-[1.01] hover:border-purple-400 dark:hover:border-purple-850 transition-all animate-fade-in"
+                          className="glass-glow p-5 rounded-xl cursor-pointer flex flex-col justify-between space-y-4 hover:scale-[1.01] hover:border-teal-500 dark:hover:border-teal-500 transition-all animate-fade-in"
                         >
                           <div>
                             <div className="flex justify-between items-center mb-3">
-                              <span className="text-[9px] font-bold tracking-widest text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 px-2 py-0.5 rounded-full">
+                              <span className="text-[9px] font-bold tracking-widest text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full">
                                 ID: {ach.id}
                               </span>
                               <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
@@ -1030,7 +1030,7 @@ export default function Dashboard() {
                               Period: {ach.start_date} to {ach.end_date}
                             </p>
                           </div>
-
+ 
                           {/* Rendered markdown instead of raw text inside gallery previews */}
                           <div className="pt-3 border-t border-zinc-150 dark:border-zinc-850 text-[10px] text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed font-sans prose dark:prose-invert prose-xs max-w-none pointer-events-none">
                             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{ach.content_md}</ReactMarkdown>
@@ -1041,12 +1041,12 @@ export default function Dashboard() {
                   )}
                 </section>
               </div>
-
+ 
               {/* INTERACTIVE CLI QUICK REFERENCE GUIDE */}
-              <section className="glass-glow p-6 rounded-2xl border border-zinc-200 dark:border-zinc-900 mt-6 space-y-5 animate-fade-in">
+              <section className="glass-glow p-6 rounded-2xl border border-slate-200 dark:border-slate-900 mt-6 space-y-5 animate-fade-in">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-zinc-150 dark:border-zinc-850">
                   <div className="flex items-center gap-2.5">
-                    <Terminal className="h-5 w-5 text-purple-500 animate-pulse" />
+                    <Terminal className="h-5 w-5 text-teal-500 animate-pulse" />
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono">
                         Vault CLI Quick-Reference Manual
@@ -1056,7 +1056,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-
+ 
                   {/* Category filter tabs */}
                   <div className="flex flex-wrap gap-1 bg-zinc-100 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-200 dark:border-zinc-850 self-start sm:self-auto">
                     {(["all", "setup", "collect", "summarize", "services"] as const).map((cat) => (
@@ -1065,7 +1065,7 @@ export default function Dashboard() {
                         onClick={() => setActiveCliCategory(cat)}
                         className={`px-2.5 py-1 text-[8px] font-black uppercase tracking-wider rounded-lg transition-all duration-300 cursor-pointer ${
                           activeCliCategory === cat
-                            ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-sm"
+                            ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm"
                             : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                         }`}
                       >
@@ -1074,17 +1074,17 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </div>
-
+ 
                 {/* Commands listing grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {CLI_COMMANDS.filter(cmd => activeCliCategory === "all" || cmd.category === activeCliCategory).map((cmd, i) => {
                     const badgeColors = {
-                      setup: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50",
-                      collect: "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-900/50",
-                      summarize: "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900/50",
-                      services: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/50"
+                      setup: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60",
+                      collect: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60",
+                      summarize: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60",
+                      services: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800/60"
                     }[cmd.category as "setup" | "collect" | "summarize" | "services"];
-
+ 
                     return (
                       <div key={i} className="bg-zinc-50/50 dark:bg-black/40 border border-zinc-150 dark:border-zinc-850 p-4.5 rounded-xl flex flex-col justify-between gap-3 shadow-inner hover:scale-[1.005] hover:border-zinc-300 dark:hover:border-zinc-800 transition-all duration-300">
                         <div className="space-y-2">
@@ -1111,7 +1111,7 @@ export default function Dashboard() {
                                 navigator.clipboard.writeText(cmd.example);
                                 showToast("Example command copied!", "success");
                               }}
-                              className="text-zinc-400 hover:text-purple-500 transition-colors shrink-0 cursor-pointer"
+                              className="text-zinc-400 hover:text-teal-500 transition-colors shrink-0 cursor-pointer"
                               title="Copy example to clipboard"
                             >
                               <Copy className="h-3.5 w-3.5" />
@@ -1125,14 +1125,14 @@ export default function Dashboard() {
               </section>
             </div>
           )}
-
+ 
           {/* PROJECTS TAB CONTENT */}
           {currentTab === "projects" && (
             <div className="space-y-6 flex-1 flex flex-col animate-fade-in">
-              <div className="flex justify-between items-center pb-3 border-b border-zinc-200 dark:border-zinc-900">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
                 <div>
                   <h2 className="text-xs font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2 font-mono">
-                    <Folder className="h-4 w-4 text-indigo-500" />
+                    <Folder className="h-4 w-4 text-teal-500" />
                     Registered Projects & Profiles
                   </h2>
                   <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">
@@ -1143,11 +1143,11 @@ export default function Dashboard() {
                   {projects.length} Active
                 </span>
               </div>
-
+ 
               {loadingProjects ? (
                 <div className="flex-1 flex flex-col items-center justify-center space-y-3 py-16">
-                  <div className="h-6 w-6 border-t-2 border-indigo-500 rounded-full animate-spin" />
-                  <p className="text-[10px] font-mono text-indigo-500">Querying registered targets...</p>
+                  <div className="h-6 w-6 border-t-2 border-teal-500 rounded-full animate-spin" />
+                  <p className="text-[10px] font-mono text-teal-500">Querying registered targets...</p>
                 </div>
               ) : projects.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-12 bg-white dark:bg-zinc-950/15 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-850 text-center max-w-xl mx-auto my-12">
@@ -1182,46 +1182,46 @@ export default function Dashboard() {
                               </span>
                             </div>
                           </div>
-
+ 
                           <button
                             onClick={() => handleGenerateProjectProfile(proj.id)}
                             disabled={isCompiling}
-                            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white dark:text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5 self-end md:self-auto cursor-pointer hover:scale-[1.01]"
+                            className="px-4 py-2 bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5 self-end md:self-auto cursor-pointer hover:scale-[1.01]"
                           >
                             <Sparkles className={`h-3.5 w-3.5 ${isCompiling ? "animate-spin" : ""}`} />
                             {isCompiling ? "Compiling Profile..." : hasProfile ? "Re-Compile with AI" : "AI Compile Profile"}
                           </button>
                         </div>
-
+ 
                         {/* Profile Information Sub-Sections */}
                         {hasProfile ? (
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Project Purpose */}
                             <div className="space-y-2">
                               <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 bg-indigo-500 rounded-full" />
+                                <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" />
                                 Project Purpose
                               </h4>
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert prose-xs max-w-none">
                                 <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_purpose}</ReactMarkdown>
                               </div>
                             </div>
-
+ 
                             {/* Tech Stack */}
                             <div className="space-y-2">
                               <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 bg-cyan-500 rounded-full" />
+                                <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" />
                                 Inferred Tech Stack
                               </h4>
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 font-mono prose dark:prose-invert prose-xs max-w-none">
                                 <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{proj.profile_tech_stack}</ReactMarkdown>
                               </div>
                             </div>
-
+ 
                             {/* Key Features */}
                             <div className="space-y-2">
                               <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 bg-purple-500 rounded-full" />
+                                <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" />
                                 Key Systems & Features
                               </h4>
                               <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-xl border border-zinc-150 dark:border-zinc-850 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert prose-xs max-w-none">
@@ -1259,7 +1259,7 @@ export default function Dashboard() {
                   <div className="glass-glow p-5 rounded-2xl border border-zinc-200 dark:border-zinc-900 space-y-4">
                     <div className="flex justify-between items-center pb-3 border-b border-zinc-150 dark:border-zinc-850">
                       <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-mono flex items-center gap-2">
-                        <Briefcase className="h-4 w-4 text-purple-500" />
+                        <Briefcase className="h-4 w-4 text-teal-500" />
                         Portfolio Resume Compiler Workbench
                       </h3>
                       <button
@@ -1269,7 +1269,7 @@ export default function Dashboard() {
                         <Plus className="h-3 w-3" /> New Version Draft
                       </button>
                     </div>
-
+ 
                     <div className="flex flex-col md:flex-row gap-4">
                       {/* Version Name input */}
                       <div className="flex-1 space-y-1.5">
@@ -1281,23 +1281,23 @@ export default function Dashboard() {
                           value={resumeTitleInput}
                           onChange={(e) => setResumeTitleInput(e.target.value)}
                           placeholder="e.g., Senior Fullstack Engineer Portfolio v1"
-                          className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-250 dark:border-zinc-800 rounded-lg text-zinc-800 dark:text-zinc-100 text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none font-sans"
+                          className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-250 dark:border-zinc-800 rounded-lg text-zinc-800 dark:text-zinc-100 text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none font-sans"
                         />
                       </div>
-
+ 
                       {/* Drafting Options */}
                       <div className="flex items-end gap-2.5">
                         <button
                           onClick={handleDraftResumeAI}
                           disabled={compilingResumeAI}
-                          className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 text-white dark:text-black font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.01]"
+                          className="px-4 py-2 bg-teal-600 dark:bg-teal-500 text-white dark:text-slate-950 hover:bg-teal-500 dark:hover:bg-teal-400 font-extrabold text-[10px] uppercase tracking-wider rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.01]"
                         >
                           <Sparkles className={`h-3.5 w-3.5 ${compilingResumeAI ? "animate-spin" : ""}`} />
                           {compilingResumeAI ? "Drafting Portfolio..." : "Draft with Gemini AI"}
                         </button>
                       </div>
                     </div>
-
+ 
                     {/* MODE TOGGLE SEGMENTED CONTROL */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-zinc-150 dark:border-zinc-850">
                       <div className="flex bg-zinc-100 dark:bg-zinc-900/60 p-1 rounded-xl border border-zinc-200/50 dark:border-zinc-800/80 w-fit">
@@ -1306,7 +1306,7 @@ export default function Dashboard() {
                           onClick={() => setResumeMode("edit")}
                           className={`px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-lg transition-all duration-300 cursor-pointer ${
                             resumeMode === "edit"
-                              ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-sm animate-fade-in"
+                              ? "bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 shadow-sm animate-fade-in"
                               : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                           }`}
                         >
@@ -1317,27 +1317,27 @@ export default function Dashboard() {
                           onClick={() => setResumeMode("preview")}
                           className={`px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-lg transition-all duration-300 cursor-pointer ${
                             resumeMode === "preview"
-                              ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-sm animate-fade-in"
+                              ? "bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 shadow-sm animate-fade-in"
                               : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                           }`}
                         >
                           Document Preview
                         </button>
                       </div>
-
+ 
                       <div className="flex items-center gap-2">
                         {resumeMode === "edit" ? (
                           <span className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 font-mono tracking-wide uppercase">
                             💡 Use Markdown syntax to format your portfolio text
                           </span>
                         ) : (
-                          <span className="text-[8px] font-bold text-purple-500/80 dark:text-purple-400/80 font-mono tracking-wide uppercase animate-pulse">
+                          <span className="text-[8px] font-bold text-teal-600/80 dark:text-teal-400/80 font-mono tracking-wide uppercase animate-pulse">
                             ✨ Real-time parsed document view active
                           </span>
                         )}
                       </div>
                     </div>
-
+ 
                     {/* DYNAMIC CONTENT PANES BASED ON CHOSEN MODE */}
                     <div className="pt-3">
                       {resumeMode === "edit" ? (
@@ -1349,7 +1349,7 @@ export default function Dashboard() {
                             value={resumeContentInput}
                             onChange={(e) => setResumeContentInput(e.target.value)}
                             placeholder="Draft portfolio content or edit here..."
-                            className="w-full h-[450px] p-5 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-mono text-xs rounded-xl border border-zinc-300 dark:border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none leading-relaxed shadow-inner transition-colors duration-300"
+                            className="w-full h-[450px] p-5 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-mono text-xs rounded-xl border border-zinc-300 dark:border-zinc-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed shadow-inner transition-colors duration-300"
                           />
                         </div>
                       ) : (
@@ -1370,7 +1370,7 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-
+ 
                     {/* Workstation Actions Footer */}
                     <div className="pt-4 border-t border-zinc-150 dark:border-zinc-850 flex justify-between items-center mt-3">
                       <span className="text-[8.5px] text-zinc-400 dark:text-zinc-500 font-mono">
@@ -1379,7 +1379,7 @@ export default function Dashboard() {
                       <button
                         onClick={handleSaveResume}
                         disabled={savingResume}
-                        className="px-5 py-2 bg-purple-600 text-white dark:bg-purple-500 dark:text-black hover:bg-purple-500 dark:hover:bg-purple-400 text-[9px] font-black uppercase tracking-wider rounded-lg shadow-md cursor-pointer transition-all flex items-center gap-1.5"
+                        className="px-5 py-2 bg-teal-600 text-white dark:bg-teal-500 dark:text-black hover:bg-teal-500 dark:hover:bg-teal-400 text-[9px] font-black uppercase tracking-wider rounded-lg shadow-md cursor-pointer transition-all flex items-center gap-1.5"
                       >
                         <Save className="h-3.5 w-3.5" />
                         {savingResume ? "Saving..." : "Save Portfolio Version"}
@@ -1387,23 +1387,23 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-
+ 
                 {/* Right Side: Saved Portfolio Resumes Versions Gallery (4/12 width) */}
                 <div className="xl:col-span-4 space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-900">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-900">
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2 font-mono">
-                      <Award className="h-4 w-4 text-purple-500" />
+                      <Award className="h-4 w-4 text-teal-500" />
                       Saved Versions Gallery
                     </span>
                     <span className="text-[9px] bg-zinc-150 dark:bg-zinc-900 px-2.5 py-0.5 rounded-full font-mono text-zinc-500 dark:text-zinc-400">
                       {resumes.length} Saved
                     </span>
                   </div>
-
+ 
                   <div className="space-y-3 max-h-[570px] overflow-y-auto pr-2">
                     {loadingResumes ? (
                       <div className="text-center py-12">
-                        <div className="h-5 w-5 border-t-2 border-purple-500 rounded-full animate-spin mx-auto" />
+                        <div className="h-5 w-5 border-t-2 border-teal-500 rounded-full animate-spin mx-auto" />
                       </div>
                     ) : resumes.length === 0 ? (
                       <div className="text-center py-12 bg-white dark:bg-zinc-900/20 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
@@ -1417,7 +1417,7 @@ export default function Dashboard() {
                             key={resItem.id}
                             className={`p-4 rounded-xl border shadow-sm flex flex-col gap-3.5 transition-all duration-300 relative group ${
                               isActive
-                                ? "bg-purple-50/40 dark:bg-purple-950/15 border-purple-400 dark:border-purple-500/50"
+                                ? "bg-slate-100/50 dark:bg-slate-900/30 border-teal-500 dark:border-teal-500/50"
                                 : "bg-white dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-800"
                             }`}
                           >
@@ -1427,7 +1427,7 @@ export default function Dashboard() {
                                   {resItem.version_name}
                                 </h4>
                                 {isActive && (
-                                  <span className="text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-md shrink-0">
+                                  <span className="text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 rounded-md shrink-0">
                                     ACTIVE
                                   </span>
                                 )}
@@ -1436,12 +1436,12 @@ export default function Dashboard() {
                                 Compiled: {new Date(resItem.created_at).toLocaleString()}
                               </p>
                             </div>
-
+ 
                             {/* Quick Render preview snippet */}
-                            <div className="text-[9px] text-zinc-500 dark:text-zinc-400 line-clamp-3 font-sans leading-relaxed border-t border-b border-zinc-100 dark:border-zinc-850 py-2.5 prose dark:prose-invert prose-xs max-w-none pointer-events-none">
+                            <div className="text-[9px] text-zinc-500 dark:text-zinc-400 line-clamp-3 font-sans leading-relaxed border-t border-b border-zinc-150 dark:border-zinc-850 py-2.5 prose dark:prose-invert prose-xs max-w-none pointer-events-none">
                               <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{resItem.content_md}</ReactMarkdown>
                             </div>
-
+ 
                             {/* Actions Bar */}
                             <div className="flex justify-between items-center">
                               <button
@@ -1449,7 +1449,7 @@ export default function Dashboard() {
                                   navigator.clipboard.writeText(resItem.content_md);
                                   showToast("Markdown copied to clipboard!", "success");
                                 }}
-                                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors cursor-pointer"
+                                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-teal-500 dark:hover:text-teal-400 transition-colors cursor-pointer"
                                 title="Copy Full Markdown"
                               >
                                 <Copy className="h-3.5 w-3.5" />
@@ -1458,7 +1458,7 @@ export default function Dashboard() {
                               <div className="flex gap-1.5">
                                 <button
                                   onClick={() => handleLoadResume(resItem)}
-                                  className="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-400 text-[8px] font-black uppercase tracking-wider border border-zinc-200 dark:border-zinc-850 rounded-md cursor-pointer transition-colors"
+                                  className="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-teal-600 dark:hover:text-teal-400 text-[8px] font-black uppercase tracking-wider border border-zinc-200 dark:border-zinc-850 rounded-md cursor-pointer transition-colors"
                                 >
                                   Load
                                 </button>
@@ -1491,7 +1491,7 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-lg w-full flex flex-col shadow-2xl overflow-hidden">
             <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50">
               <div>
-                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800 rounded-md font-mono">
+                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 rounded-md font-mono">
                   LOG DETAILS: ID #{activeLog.id}
                 </span>
                 <h3 className="text-xs font-bold text-zinc-800 dark:text-zinc-100 mt-2 font-mono">
@@ -1526,7 +1526,7 @@ export default function Dashboard() {
               <span>Logged at: {new Date(activeLog.timestamp).toLocaleString()}</span>
               <button
                 onClick={() => setActiveLog(null)}
-                className="px-4 py-1.5 bg-cyan-600 dark:bg-cyan-500 hover:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-1.5 bg-teal-600 dark:bg-teal-500 hover:bg-teal-500 dark:hover:bg-teal-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -1534,14 +1534,14 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
+ 
       {/* FULL MD MODAL WINDOW FOR ACTIVE WEEKLY ACHIEVEMENT DETAILS */}
       {activeAchievement && (
         <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 animate-fade-in">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl transition-colors duration-300">
             <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950/50 rounded-t-2xl">
               <div>
-                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 rounded-md font-mono">
+                <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 rounded-md font-mono">
                   {isEditingAchievement ? "Editing Achievement Summary" : "Achievement Details"}
                 </span>
                 <h2 className="text-xs font-bold text-zinc-800 dark:text-zinc-100 mt-2 font-mono">
@@ -1558,13 +1558,13 @@ export default function Dashboard() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-
+ 
             <div className="p-6 overflow-y-auto flex-1 bg-zinc-50 dark:bg-zinc-950/20 border-b border-zinc-200 dark:border-zinc-800 shadow-inner flex flex-col">
               {isEditingAchievement ? (
                 <textarea
                   value={editedAchievementContent}
                   onChange={(e) => setEditedAchievementContent(e.target.value)}
-                  className="w-full flex-1 min-h-[350px] p-4 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-mono text-[11px] leading-relaxed border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 shadow-inner resize-none"
+                  className="w-full flex-1 min-h-[350px] p-4 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 font-mono text-[11px] leading-relaxed border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner resize-none"
                   placeholder="Type your markdown achievement accomplishments here..."
                 />
               ) : (
@@ -1573,16 +1573,16 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-
+ 
             <div className="p-4 bg-zinc-50 dark:bg-zinc-950/40 rounded-b-2xl flex flex-wrap justify-between items-center gap-4 text-[9px] text-zinc-500 dark:text-zinc-400 font-mono">
               <div>
                 {isEditingAchievement ? (
-                  <span className="text-purple-500 dark:text-purple-400 font-bold">⚠️ Warning: Unsaved edits will be lost on cancel.</span>
+                  <span className="text-teal-500 dark:text-teal-400 font-bold">⚠️ Warning: Unsaved edits will be lost on cancel.</span>
                 ) : (
                   <span>Saved in vault at: {new Date(activeAchievement.created_at).toLocaleString()}</span>
                 )}
               </div>
-
+ 
               <div className="flex items-center gap-2">
                 {isEditingAchievement ? (
                   <>
@@ -1595,7 +1595,7 @@ export default function Dashboard() {
                     <button
                       onClick={handleSaveAchievement}
                       disabled={savingAchievement}
-                      className="px-4 py-1.5 bg-purple-600 dark:bg-purple-500 hover:bg-purple-500 dark:hover:bg-purple-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer text-[10px] flex items-center gap-1.5"
+                      className="px-4 py-1.5 bg-teal-600 dark:bg-teal-500 hover:bg-teal-500 dark:hover:bg-teal-400 text-white dark:text-slate-950 font-bold rounded-lg transition-colors cursor-pointer text-[10px] flex items-center gap-1.5"
                     >
                       {savingAchievement && <RotateCw className="h-3 w-3 animate-spin" />}
                       {savingAchievement ? "Saving..." : "Save Changes"}
@@ -1624,7 +1624,7 @@ export default function Dashboard() {
                         setActiveAchievement(null);
                         setIsEditingAchievement(false);
                       }}
-                      className="px-4 py-1.5 bg-purple-600 dark:bg-purple-500 hover:bg-purple-500 dark:hover:bg-purple-400 text-white dark:text-black font-bold rounded-lg transition-colors cursor-pointer text-[10px]"
+                      className="px-4 py-1.5 bg-teal-600 dark:bg-teal-500 hover:bg-teal-500 dark:hover:bg-teal-400 text-white dark:text-slate-950 font-bold rounded-lg transition-colors cursor-pointer text-[10px]"
                     >
                       Close
                     </button>
@@ -1640,10 +1640,10 @@ export default function Dashboard() {
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-xl animate-slide-up text-[10px] font-mono font-semibold transition-all max-w-xs md:max-w-sm ${
           toast.type === "success"
-            ? "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300"
+            ? "bg-teal-50 dark:bg-teal-950/80 border-teal-300 dark:border-teal-800/80 text-teal-850 dark:text-teal-300"
             : toast.type === "error"
             ? "bg-rose-50 dark:bg-rose-950/80 border-rose-350 dark:border-rose-800/80 text-rose-800 dark:text-rose-300"
-            : "bg-cyan-50 dark:bg-cyan-950/80 border-cyan-300 dark:border-cyan-800/80 text-cyan-800 dark:text-cyan-300"
+            : "bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-300"
         }`}>
           <div className="h-2 w-2 rounded-full bg-current animate-pulse shrink-0" />
           <span>{toast.message}</span>

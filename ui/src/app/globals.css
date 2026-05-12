@@ -4,20 +4,20 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #fafafa;
-  --foreground: #09090b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --card-bg: #ffffff;
-  --card-border: #e4e4e7;
-  --glass-border: rgba(228, 228, 231, 0.8);
-  --glass-shadow: rgba(0, 0, 0, 0.03);
+  --card-border: #cbd5e1;
+  --glass-border: rgba(203, 213, 225, 0.8);
+  --glass-shadow: rgba(0, 0, 0, 0.02);
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #f4f4f5;
-  --card-bg: #18181b;
-  --card-border: #27272a;
-  --glass-border: rgba(39, 39, 42, 0.7);
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --glass-border: rgba(51, 65, 85, 0.7);
   --glass-shadow: rgba(0, 0, 0, 0.4);
 }
 
@@ -62,13 +62,13 @@ body {
 }
 
 .glass-glow:hover {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+  border-color: rgba(20, 184, 166, 0.5);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.15);
 }
 
 .dark .glass-glow:hover {
-  border-color: rgba(6, 182, 212, 0.6);
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+  border-color: rgba(20, 184, 166, 0.6);
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
 }
 
 /* Premium live parsed Markdown styling overrides */
@@ -153,16 +153,16 @@ body {
 }
 
 .prose blockquote {
-  border-left: 4px solid rgb(139, 92, 246) !important; /* purple-500 */
+  border-left: 4px solid rgb(20, 184, 166) !important; /* teal-500 */
   padding-left: 1.1rem !important;
-  color: #71717a !important; /* zinc-500 */
+  color: #64748b !important; /* slate-500 */
   font-style: italic !important;
   margin-top: 1.25rem !important;
   margin-bottom: 1.25rem !important;
 }
 
 .dark .prose blockquote {
-  color: #a1a1aa !important; /* zinc-400 */
+  color: #94a3b8 !important; /* slate-400 */
 }
 
 
