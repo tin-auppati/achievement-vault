@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+	_ "time/tzdata"
 )
 
 // RawLog represents a log record stored in the raw_logs table.
@@ -99,7 +100,10 @@ func GetLogsBetweenTimestamps(db *sql.DB, startUTC, endUTC string) ([]RawLog, er
 // the start and end of the week as time.Time objects in Bangkok time, and as UTC format strings
 // for SQL querying.
 func GetFridayEndingWeekBounds(refTime time.Time) (time.Time, time.Time, string, string) {
-	loc := time.FixedZone("Asia/Bangkok", 7*60*60)
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		loc = time.FixedZone("Asia/Bangkok", 7*60*60)
+	}
 	refBangkok := refTime.In(loc)
 
 	// Calculate Saturday to Friday range

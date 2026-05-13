@@ -14,6 +14,13 @@ import (
 	"github.com/tin-auppati/achievement-vault/internal/vault"
 )
 
+// Global AI Model fallback chain configured strictly based on current API tier quotas
+var modelChain = []string{"gemini-3-flash", "gemini-2.5-flash", "gemini-3.1-flash-lite"}
+
+func init() {
+	fmt.Println("[AI Engine] Loaded model chain: Gemini 3 Flash -> 2.5 Flash -> 3.1 Flash Lite")
+}
+
 // Gemini API REST Structures
 type geminiRequest struct {
 	Contents []geminiContent `json:"contents"`
@@ -141,22 +148,14 @@ Here is the log data:
 		return "", fmt.Errorf("failed to serialize request content: %w", err)
 	}
 
-	// Dynamic Fallback Models Chain to guarantee high availability (Guards against temporary 503 Overloads)
-	modelsToTry := []string{
-		"gemini-2.0-flash",
-		"gemini-1.5-flash",
-		"gemini-1.5-flash-latest",
-		"gemini-1.5-pro-latest",
-	}
-
 	var lastErr error
 	client := &http.Client{Timeout: 30 * time.Second}
 
-	for _, modelName := range modelsToTry {
+	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 2
-		backoffDuration := 1 * time.Second
+		maxRetries := 3
+		backoffDuration := 3 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
@@ -212,7 +211,7 @@ Here is the log data:
 			}
 
 			// Success! Inform which model succeeded if we fell back
-			if modelName != modelsToTry[0] {
+			if modelName != modelChain[0] {
 				fmt.Printf("\033[32m✔ Fallback succeeded! Successfully compiled summary via model: %s\033[0m\n", modelName)
 			}
 			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
@@ -256,21 +255,14 @@ Return ONLY the refined Markdown content. Do not include any conversational fill
 		return "", fmt.Errorf("failed to serialize request content: %w", err)
 	}
 
-	modelsToTry := []string{
-		"gemini-2.0-flash",
-		"gemini-1.5-flash",
-		"gemini-1.5-flash-latest",
-		"gemini-1.5-pro-latest",
-	}
-
 	var lastErr error
 	client := &http.Client{Timeout: 30 * time.Second}
 
-	for _, modelName := range modelsToTry {
+	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 2
-		backoffDuration := 1 * time.Second
+		maxRetries := 3
+		backoffDuration := 3 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
@@ -381,21 +373,14 @@ Here is the weekly achievement data:
 		return "", fmt.Errorf("failed to serialize request content: %w", err)
 	}
 
-	modelsToTry := []string{
-		"gemini-2.0-flash",
-		"gemini-1.5-flash",
-		"gemini-1.5-flash-latest",
-		"gemini-1.5-pro-latest",
-	}
-
 	var lastErr error
 	client := &http.Client{Timeout: 35 * time.Second}
 
-	for _, modelName := range modelsToTry {
+	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 2
-		backoffDuration := 1 * time.Second
+		maxRetries := 3
+		backoffDuration := 3 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
@@ -494,21 +479,14 @@ Activity Logs:
 		return "", "", "", fmt.Errorf("failed to serialize request content: %w", err)
 	}
 
-	modelsToTry := []string{
-		"gemini-2.0-flash",
-		"gemini-1.5-flash",
-		"gemini-1.5-flash-latest",
-		"gemini-1.5-pro-latest",
-	}
-
 	var lastErr error
 	client := &http.Client{Timeout: 35 * time.Second}
 
-	for _, modelName := range modelsToTry {
+	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 2
-		backoffDuration := 1 * time.Second
+		maxRetries := 3
+		backoffDuration := 3 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))

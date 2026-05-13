@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/tin-auppati/achievement-vault/internal/ai"
@@ -50,6 +51,14 @@ func getDBPath() string {
 }
 
 func main() {
+	// Force the application to use the Asia/Bangkok timezone globally
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err == nil {
+		time.Local = loc
+	} else {
+		time.Local = time.FixedZone("Asia/Bangkok", 7*60*60)
+	}
+
 	if len(os.Args) < 2 {
 		printUsage()
 		os.Exit(0)
@@ -386,12 +395,13 @@ func handleSummarize() {
 
 	// Interactive Approval Prompt with Glamour Markdown Preview Renderer
 	for {
-		fmt.Print("\n\033[1;33mDo you want to save this summary to the vault? (y/n/r for Render Review): \033[0m")
+		fmt.Print("\n\033[1;33mDo you want to save this summary to the vault? ((a)pprove, (r)eview, (r)eject): \033[0m")
 		reader := bufio.NewReader(os.Stdin)
 		answer, _ := reader.ReadString('\n')
 		answer = strings.TrimSpace(strings.ToLower(answer))
 
-		if answer == "r" || answer == "review" {
+		// Render Markdown review
+		if answer == "review" || answer == "v" || answer == "view" {
 			rendered, err := glamour.Render(summary, "dark")
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "\033[31mError rendering preview: %v\033[0m\n", err)
@@ -404,7 +414,19 @@ func handleSummarize() {
 			continue
 		}
 
-		if answer == "y" || answer == "yes" {
+		// Reject and explicitly discard the draft
+		if answer == "r" || answer == "reject" {
+			err := vault.RejectDraftSummary(db.DB)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "\033[31mError rejecting/discarding draft summary: %v\033[0m\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("\n\033[31m✔ Draft summary rejected and explicitly discarded from database.\033[0m")
+			os.Exit(0)
+		}
+
+		// Approve and seal vault
+		if answer == "a" || answer == "approve" || answer == "y" || answer == "yes" {
 			id, err := vault.ApproveDraftSummary(db.DB)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "\033[31mError saving/approving summary: %v\033[0m\n", err)
@@ -415,10 +437,10 @@ func handleSummarize() {
 			fmt.Printf("  \033[1mAchievement ID:\033[0m  %d\n", id)
 			fmt.Printf("  \033[1mPeriod:\033[0m          %s to %s\n", startDateStr, endDateStr)
 			break
-		} else {
-			fmt.Println("\033[33mDraft summary discarded (retained in draft table for web approval until next summary run).\033[0m")
-			break
 		}
+
+		// Unknown option instruction
+		fmt.Println("\033[33mInvalid option. Please type 'a' to approve, 'review' (or 'v') to render a formatted preview, or 'r' to reject/discard the draft.\033[0m")
 	}
 }
 
