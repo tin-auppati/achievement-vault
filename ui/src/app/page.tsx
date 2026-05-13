@@ -361,7 +361,7 @@ export default function DashboardHome() {
       {/* 2. EXECUTIVE METRICS BOARD */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Folder className="h-4 w-4 text-teal-500 animate-pulse" /> Active Codebases
           </span>
@@ -369,7 +369,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Git hooks targets</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Activity className="h-4 w-4 text-teal-500" /> Total Raw Commits
           </span>
@@ -379,7 +379,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Ingested Telemetry</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Award className="h-4 w-4 text-teal-500 animate-pulse" /> Milestones Vaulted
           </span>
@@ -389,7 +389,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Approved Summaries</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Layers className="h-4 w-4 text-teal-500" /> Primary Tech stack
           </span>
@@ -434,10 +434,11 @@ export default function DashboardHome() {
               return (
                 <div
                   key={proj.id}
-                  className={`bg-white dark:bg-slate-950 border rounded-3xl p-5 space-y-3.5 shadow-sm transition-all duration-300 relative group overflow-hidden ${
+                  onClick={() => setActiveProject(proj)}
+                  className={`bg-white dark:bg-slate-950 border rounded-3xl p-5 space-y-3.5 shadow-sm transition-all duration-300 relative group overflow-hidden cursor-pointer ${
                     isTop 
-                      ? "border-amber-200 dark:border-amber-500/30 ring-1 ring-amber-100/50 dark:ring-amber-500/5 hover:border-amber-350 dark:hover:border-amber-500/50" 
-                      : "border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800"
+                      ? "border-amber-200 dark:border-amber-500/30 ring-1 ring-amber-100/50 dark:ring-amber-500/5 hover:border-amber-350 dark:hover:border-amber-500/50 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50" 
+                      : "border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50"
                   }`}
                 >
                   {isTop && (
@@ -495,7 +496,7 @@ export default function DashboardHome() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Recent Ingestion Logs (Colspan 5) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50 transition-all duration-300">
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
               <span className="text-xs font-bold text-zinc-700 dark:text-zinc-400 flex items-center gap-2 uppercase">
@@ -527,7 +528,7 @@ export default function DashboardHome() {
         </div>
 
         {/* Recent Approved Achievements Milestones (Colspan 7) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm hover:border-slate-350 dark:hover:border-slate-800 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-slate-950/50 transition-all duration-300">
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
               <span className="text-xs font-bold text-zinc-700 dark:text-zinc-400 flex items-center gap-2 uppercase">
@@ -660,6 +661,113 @@ export default function DashboardHome() {
             <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
               <span>Saved in vault database ID: #{activeAchievement.id}</span>
               <span>Committed: {new Date(activeAchievement.created_at).toLocaleString()}</span>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {activeProject && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-mono text-left">
+            
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/60">
+              <div className="flex items-center gap-3">
+                <Laptop className="h-5 w-5 text-teal-500" />
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    📁 {activeProject.name}
+                  </h3>
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-450 uppercase mt-1 tracking-wider font-bold">
+                    Source Host: {activeProject.source || "github"}
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setActiveProject(null)}
+                className="h-8 w-8 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-550 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8 overflow-y-auto flex-1 bg-white dark:bg-slate-950 flex flex-col space-y-6">
+              
+              {/* Path and Score Section */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-850 rounded-2xl">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-black">Workspace path</span>
+                  <code className="text-xs text-zinc-650 dark:text-zinc-300 block font-bold select-all break-all">
+                    {activeProject.path}
+                  </code>
+                </div>
+                {calculateWorkspaceQualityScore(activeProject) > 0 && (
+                  <div className="flex flex-col items-center justify-center bg-amber-500/10 border border-amber-500/25 px-4 py-2 rounded-xl text-center">
+                    <span className="text-[9px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest">Profile Score</span>
+                    <span className="text-lg font-black text-amber-500">{calculateWorkspaceQualityScore(activeProject)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Purpose */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+                  <Laptop className="h-4 w-4 text-teal-500" /> Workspace Purpose
+                </h4>
+                {activeProject.profile_purpose ? (
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed bg-slate-50/50 dark:bg-slate-900/10 p-4 border border-slate-150 dark:border-slate-900 rounded-2xl font-semibold">
+                    {activeProject.profile_purpose}
+                  </p>
+                ) : (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-650 italic leading-relaxed font-sans">
+                    No purpose description compiled for this repository.
+                  </p>
+                )}
+              </div>
+
+              {/* Profile Tech Stack */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+                  <Code className="h-4 w-4 text-teal-500" /> Tech Stack & Dialects
+                </h4>
+                {activeProject.profile_tech_stack ? (
+                  <div className="flex flex-wrap gap-1.5 p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl">
+                    {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
+                      <TechBadge key={`${tag}-${i}`} tech={tag} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-650 italic leading-relaxed font-sans">
+                    No tech stack identified yet.
+                  </p>
+                )}
+              </div>
+
+              {/* Profile Key Features */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+                  <Layers className="h-4 w-4 text-teal-500" /> Key Features & Architecture
+                </h4>
+                {activeProject.profile_key_features ? (
+                  <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl prose dark:prose-invert max-w-none text-xs font-sans text-zinc-700 dark:text-zinc-300">
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-650 italic leading-relaxed font-sans">
+                    No key architectural features compiled yet. Run a Deep Scan on Workspaces to extract them.
+                  </p>
+                )}
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-500 flex justify-between items-center">
+              <span>Workspace ID: #{activeProject.id}</span>
+              <span>Registered: {new Date(activeProject.created_at).toLocaleDateString()}</span>
             </div>
 
           </div>
