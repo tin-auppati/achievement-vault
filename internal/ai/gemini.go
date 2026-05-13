@@ -15,10 +15,10 @@ import (
 )
 
 // Global AI Model fallback chain configured strictly based on current API tier quotas
-var modelChain = []string{"gemini-3-flash", "gemini-2.5-flash", "gemini-3.1-flash-lite"}
+var modelChain = []string{"gemini-3-flash-preview", "gemini-2.5-flash", "gemini-3.1-flash-lite"}
 
 func init() {
-	fmt.Println("[AI Engine] Loaded model chain: Gemini 3 Flash -> 2.5 Flash -> 3.1 Flash Lite")
+	fmt.Println("[AI Engine] Loaded model chain: Gemini 3 Flash Preview -> 2.5 Flash -> 3.1 Flash Lite")
 }
 
 // Gemini API REST Structures
@@ -153,7 +153,7 @@ Here is the log data:
 
 	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
-		
+
 		maxRetries := 3
 		backoffDuration := 3 * time.Second
 
@@ -184,7 +184,7 @@ Here is the log data:
 			// Handle service overload/limit errors gracefully by retrying
 			if resp.StatusCode != http.StatusOK {
 				lastErr = fmt.Errorf("[%s] status code %d (attempt %d/%d): %s", modelName, resp.StatusCode, attempt, maxRetries, string(respBytes))
-				
+
 				// Retry on temporary server overloads (503) or rate limits (429)
 				if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
 					fmt.Printf("\033[33m[GEMINI ALERT] Model %s experiencing temporary spikes (code %d). Retrying in %v...\033[0m\n", modelName, resp.StatusCode, backoffDuration)
@@ -192,7 +192,7 @@ Here is the log data:
 					backoffDuration *= 2
 					continue
 				}
-				
+
 				// Break loop immediately on unrecoverable errors (e.g., bad API Key 400, auth issues 403)
 				break
 			}
@@ -216,7 +216,7 @@ Here is the log data:
 			}
 			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
 		}
-		
+
 		fmt.Printf("\033[31m[GEMINI ERROR] Model %s failed: %v. Switching...\033[0m\n", modelName, lastErr)
 	}
 
@@ -260,7 +260,7 @@ Return ONLY the refined Markdown content. Do not include any conversational fill
 
 	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
-		
+
 		maxRetries := 3
 		backoffDuration := 3 * time.Second
 
@@ -379,7 +379,7 @@ Here is the weekly achievement data:
 
 	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
-		
+
 		maxRetries := 3
 		backoffDuration := 3 * time.Second
 
@@ -486,7 +486,7 @@ Activity Logs:
 
 	for _, modelName := range modelChain {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
-		
+
 		maxRetries := 3
 		backoffDuration := 3 * time.Second
 
@@ -536,7 +536,7 @@ Activity Logs:
 			}
 
 			rawText := geminiResp.Candidates[0].Content.Parts[0].Text
-			
+
 			// Clean up potential markdown wrapper code block (```json ... ```)
 			cleanText := strings.TrimSpace(rawText)
 			if strings.HasPrefix(cleanText, "```json") {
@@ -550,8 +550,8 @@ Activity Logs:
 			}
 
 			var result struct {
-				Purpose    string `json:"purpose"`
-				TechStack  string `json:"tech_stack"`
+				Purpose     string `json:"purpose"`
+				TechStack   string `json:"tech_stack"`
 				KeyFeatures string `json:"key_features"`
 			}
 
