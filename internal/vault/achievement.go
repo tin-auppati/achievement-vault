@@ -166,3 +166,12 @@ func ApproveDraftSummary(db *sql.DB) (int64, error) {
 
 	return id, nil
 }
+
+// RejectDraftSummary deletes the current draft summary from the database.
+func RejectDraftSummary(db *sql.DB) error {
+	_, err := db.Exec("DELETE FROM draft_summaries")
+	if err != nil {
+		return fmt.Errorf("failed to delete draft summary: %w", err)
+	}
+	return nil
+}

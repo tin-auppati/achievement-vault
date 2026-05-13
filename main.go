@@ -297,6 +297,7 @@ func handleSummarize() {
 	// Expecting: main summarize [--days <n>]
 	days := 7
 	var err error
+	daysPassed := false
 
 	for i := 2; i < len(os.Args); i++ {
 		if os.Args[i] == "--days" && i+1 < len(os.Args) {
@@ -305,6 +306,7 @@ func handleSummarize() {
 				fmt.Fprintf(os.Stderr, "\033[31mError: invalid value for --days %q: must be an integer\033[0m\n", os.Args[i+1])
 				os.Exit(1)
 			}
+			daysPassed = true
 			i++
 		}
 	}
@@ -317,16 +319,43 @@ func handleSummarize() {
 	}
 	defer db.Close()
 
-	fmt.Printf("\033[36m⚡ Fetching raw logs from the last %d days...\033[0m\n", days)
+	var logs []vault.RawLog
+	var startSat, endFri time.Time
+	var startDateStr, endDateStr string
 
-	logs, err := vault.GetLogsFromLastDays(db.DB, days)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "\033[31mError retrieving logs: %v\033[0m\n", err)
-		os.Exit(1)
+	if daysPassed {
+		fmt.Printf("\033[36m⚡ Fetching raw logs from the last %d days...\033[0m\n", days)
+		logs, err = vault.GetLogsFromLastDays(db.DB, days)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError retrieving logs: %v\033[0m\n", err)
+			os.Exit(1)
+		}
+
+		now := time.Now()
+		endFri = now
+		startSat = now.AddDate(0, 0, -days)
+		endDateStr = endFri.Format("2006-01-02")
+		startDateStr = startSat.Format("2006-01-02")
+	} else {
+		// Use Friday-ending week calculation in Bangkok timezone!
+		fmt.Printf("\033[36m⚡ Fetching raw logs for current Bangkok Friday-ending week...\033[0m\n")
+		logs, startSat, endFri, err = vault.GetLogsForFridayEndingWeek(db.DB, time.Now())
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mError retrieving logs: %v\033[0m\n", err)
+			os.Exit(1)
+		}
+
+		startDateStr = startSat.Format("2006-01-02")
+		endDateStr = endFri.Format("2006-01-02")
+		fmt.Printf("\033[32m✔ Week Interval selected: %s to %s (Bangkok Time)\033[0m\n", startDateStr, endDateStr)
 	}
 
 	if len(logs) == 0 {
-		fmt.Printf("\033[33m⚠ No logs registered in the database for the last %d days. Try committing code first!\033[0m\n", days)
+		if daysPassed {
+			fmt.Printf("\033[33m⚠ No logs registered in the database for the last %d days. Try committing code first!\033[0m\n", days)
+		} else {
+			fmt.Printf("\033[33m⚠ No logs registered in the database for the week %s to %s. Try committing code first!\033[0m\n", startDateStr, endDateStr)
+		}
 		return
 	}
 
@@ -338,10 +367,6 @@ func handleSummarize() {
 		os.Exit(1)
 	}
 
-	now := time.Now()
-	endDateStr := now.Format("2006-01-02")
-	startDateStr := now.AddDate(0, 0, -days).Format("2006-01-02")
-
 	// Save draft state in SQLite database for state-aware Web Dashboard access
 	err = vault.SaveDraftSummary(db.DB, summary, startDateStr, endDateStr)
 	if err != nil {
@@ -350,7 +375,11 @@ func handleSummarize() {
 
 	// Premium Report Output
 	fmt.Println("\033[1;36m==================================================================\033[0m")
-	fmt.Printf(" \033[1m🚀 Gemini Weekly Summarizer Draft (Last %d Days Preview)\033[0m\n", days)
+	if daysPassed {
+		fmt.Printf(" \033[1m🚀 Gemini Weekly Summarizer Draft (Last %d Days Preview)\033[0m\n", days)
+	} else {
+		fmt.Printf(" \033[1m🚀 Gemini Weekly Summarizer Draft (Week %s to %s)\033[0m\n", startDateStr, endDateStr)
+	}
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 	fmt.Println(summary)
 	fmt.Println("\033[1;36m==================================================================\033[0m")
@@ -528,7 +557,8 @@ func handleCheckPending() {
 	}
 	defer db.Close()
 
-	now := time.Now()
+	loc := time.FixedZone("Asia/Bangkok", 7*60*60)
+	now := time.Now().In(loc)
 	weekday := now.Weekday()
 
 	// Only alert on Friday, Saturday, or Sunday
@@ -654,23 +684,22 @@ func handleServe() {
 
 	// Dynamic summarize callback function using Dependency Injection Pattern to avoid circular packages dependency
 	summarizeFn := func(days int) (string, error) {
-		logs, err := vault.GetLogsFromLastDays(db.DB, days)
+		logs, startSat, endFri, err := vault.GetLogsForFridayEndingWeek(db.DB, time.Now())
 		if err != nil {
 			return "", fmt.Errorf("failed to retrieve logs: %w", err)
 		}
 
+		startDateStr := startSat.Format("2006-01-02")
+		endDateStr := endFri.Format("2006-01-02")
+
 		if len(logs) == 0 {
-			return "", fmt.Errorf("no logs registered in the database for the last %d days", days)
+			return "", fmt.Errorf("no logs registered in the database for the week %s to %s", startDateStr, endDateStr)
 		}
 
 		summary, err := ai.SummarizeLogs(logs)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate AI summary: %w", err)
 		}
-
-		now := time.Now()
-		endDateStr := now.Format("2006-01-02")
-		startDateStr := now.AddDate(0, 0, -days).Format("2006-01-02")
 
 		err = vault.SaveDraftSummary(db.DB, summary, startDateStr, endDateStr)
 		if err != nil {

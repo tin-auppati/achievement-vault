@@ -251,6 +251,21 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 		fmt.Fprintf(w, `{"success": true}`)
 	}))
 
+	http.HandleFunc("/api/draft/reject", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		if err := RejectDraftSummary(db); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true}`)
+	}))
+
 	http.HandleFunc("/api/draft/refine", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
@@ -449,7 +464,8 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 	}))
 
 	http.HandleFunc("/api/status", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		now := time.Now()
+		loc := time.FixedZone("Asia/Bangkok", 7*60*60)
+		now := time.Now().In(loc)
 		weekday := now.Weekday()
 		isWeeklyPending := false
 

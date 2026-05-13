@@ -84,6 +84,7 @@ export default function DashboardHome() {
     triggerRefine,
     saveDraftChanges,
     approveDraft,
+    rejectDraft,
     deleteAchievement,
     updateAchievement,
   } = useApp();
@@ -161,6 +162,13 @@ export default function DashboardHome() {
   const handleMilestoneApproval = async () => {
     await approveDraft(editedDraftInput, status.draft_start_date, status.draft_end_date);
     fetchCompactFeeds();
+  };
+
+  const handleMilestoneRejection = async () => {
+    if (confirm("Are you sure you want to discard this draft summary? This cannot be undone.")) {
+      await rejectDraft();
+      fetchCompactFeeds();
+    }
   };
 
   const handleRegisterProject = async (e: React.FormEvent) => {
@@ -262,6 +270,14 @@ export default function DashboardHome() {
                       Markdown Source
                     </button>
                   </div>
+
+                  <button
+                    onClick={handleMilestoneRejection}
+                    disabled={approving}
+                    className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:text-rose-500 dark:hover:text-rose-300 font-extrabold uppercase rounded-lg shadow-sm disabled:opacity-40 cursor-pointer transition-all"
+                  >
+                    Reject & Discard
+                  </button>
 
                   <button
                     onClick={handleMilestoneApproval}

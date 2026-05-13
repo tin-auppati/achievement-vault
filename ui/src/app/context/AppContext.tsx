@@ -82,6 +82,7 @@ interface AppContextType {
   triggerRefine: (prompt: string) => Promise<void>;
   saveDraftChanges: (content: string) => Promise<void>;
   approveDraft: (content: string, startDate: string, endDate: string) => Promise<void>;
+  rejectDraft: () => Promise<void>;
   deleteAchievement: (id: number) => Promise<void>;
   updateAchievement: (id: number, content: string) => Promise<void>;
   triggerProjectProfiling: (projectId: number) => Promise<void>;
@@ -310,6 +311,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const rejectDraft = async () => {
+    try {
+      setApproving(true);
+      showToast("Rejecting and discarding draft weekly summaries...", "info");
+      const res = await fetch("/api/draft/reject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!res.ok) throw new Error("Failed to reject draft summary");
+      showToast("Draft weekly summaries discarded successfully.", "success");
+      await fetchAllGlobalData();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || "Failed to reject draft.", "error");
+    } finally {
+      setApproving(false);
+    }
+  };
+
   const deleteAchievement = async (id: number) => {
     try {
       const res = await fetch(`/api/achievements/${id}`, {
@@ -412,6 +432,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         triggerRefine,
         saveDraftChanges,
         approveDraft,
+        rejectDraft,
         deleteAchievement,
         updateAchievement,
         triggerProjectProfiling,
