@@ -29,6 +29,16 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+::selection {
+  background-color: #0ea5e9 !important; /* sky-500 */
+  color: #ffffff !important;
+}
+
+.dark ::selection {
+  background-color: #38bdf8 !important; /* sky-400 */
+  color: #0f172a !important;
+}
+
 /* Custom scrollbar style */
 ::-webkit-scrollbar {
   width: 6px;
