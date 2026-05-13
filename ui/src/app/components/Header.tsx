@@ -50,7 +50,7 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-slate-200 dark:border-slate-900 bg-white/85 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-10 px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 font-mono transition-colors">
+    <header className="border-b border-slate-200 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-10 px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 font-mono transition-colors">
       
       {/* BRANDING */}
       <div>

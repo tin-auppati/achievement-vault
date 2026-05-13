@@ -19,13 +19,13 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950 flex flex-col justify-between h-screen sticky top-0 font-mono z-20 transition-colors">
+    <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col justify-between h-screen sticky top-0 font-mono z-20 transition-colors">
       
       {/* Sidebar Navigation */}
       <div className="p-6 flex-1 flex flex-col space-y-8">
         
         {/* Branding Title */}
-        <div className="pb-4 border-b border-slate-200 dark:border-slate-900">
+        <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <span className="text-xl">🛡️</span>
             <div>
@@ -50,10 +50,10 @@ export default function Sidebar() {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
                   isActive
                     ? "bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900/50 border border-transparent"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-500/5 dark:hover:bg-teal-500/5 border border-transparent hover:border-teal-500/10 dark:hover:border-teal-500/10"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? "text-teal-500 dark:text-teal-400" : "text-zinc-500"}`} />
+                <Icon className={`h-4 w-4 ${isActive ? "text-teal-500 dark:text-teal-400" : "text-zinc-500 group-hover:text-teal-500"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -73,10 +73,10 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-6 border-t border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/40 text-xs text-zinc-500 dark:text-zinc-600 flex flex-col space-y-1">
+      <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 text-xs text-zinc-550 dark:text-zinc-500 flex flex-col space-y-1">
         <div>Logged in developer workspace:</div>
         <div className="font-bold text-zinc-700 dark:text-zinc-400 select-all">tin@projects/achievement-vault</div>
-        <div className="pt-2 text-[10px] text-zinc-400 dark:text-zinc-500 select-none">Powered by Gemini Pro 1.5</div>
+        <div className="pt-2 text-[10px] text-zinc-450 dark:text-zinc-550 select-none">Powered by Gemini Pro 1.5</div>
       </div>
 
     </aside>

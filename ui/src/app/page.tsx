@@ -224,11 +224,11 @@ export default function DashboardHome() {
       
       {/* 1. STATE-AWARE ACTION CENTER (GEMINI WEEKLY summaries WORKBENCH) */}
       {(status.has_pending_draft || status.is_weekly_pending) && (
-        <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 shadow-xl animate-slide-down space-y-6">
+        <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl animate-slide-down space-y-6">
           {status.has_pending_draft ? (
             <>
               {/* Draft Ready for Approval Panel */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-250 dark:border-slate-900">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-250 dark:border-slate-800">
                 <div className="space-y-1">
                   <span className="text-xs text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold animate-pulse">
                     <Sparkles className="h-4 w-4" /> Action Center: Weekly Summary Compiled
@@ -277,9 +277,9 @@ export default function DashboardHome() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 
                 {/* Draft Content Panel (8/12) */}
-                <div className="lg:col-span-8 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
+                <div className="lg:col-span-8 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
-                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-250 dark:border-slate-900">Milestone Report Draft</h4>
+                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-250 dark:border-slate-800">Milestone Report Draft</h4>
                     <div className="pt-4 max-h-[350px] overflow-y-auto text-base font-sans leading-relaxed text-zinc-800 dark:text-zinc-300">
                       {draftViewMode === "preview" ? (
                         <div className="prose dark:prose-invert prose-base max-w-none text-zinc-800 dark:text-zinc-300">
@@ -289,7 +289,7 @@ export default function DashboardHome() {
                         <textarea
                           value={editedDraftInput}
                           onChange={(e) => setEditedDraftInput(e.target.value)}
-                          className="w-full h-72 p-4 bg-white dark:bg-slate-950 text-zinc-800 dark:text-zinc-100 font-mono text-sm rounded-xl border border-slate-200 dark:border-slate-900 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed"
+                          className="w-full h-72 p-4 bg-white dark:bg-slate-950 text-zinc-800 dark:text-zinc-100 font-mono text-sm rounded-xl border border-slate-200 dark:border-slate-800 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed"
                           placeholder="Edit report draft..."
                         />
                       )}
@@ -298,7 +298,7 @@ export default function DashboardHome() {
 
                   {/* Manual Save Draft Trigger */}
                   {draftViewMode === "raw" && (
-                    <div className="pt-4 border-t border-slate-200 dark:border-slate-900 flex justify-end mt-4">
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end mt-4">
                       <button
                         onClick={handleManualDraftSave}
                         disabled={savingDraft}
@@ -311,9 +311,9 @@ export default function DashboardHome() {
                 </div>
 
                 {/* AI Instruction / Refine Panel (4/12) */}
-                <div className="lg:col-span-4 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
+                <div className="lg:col-span-4 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
                   <div className="space-y-4">
-                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-200 dark:border-slate-900 flex items-center gap-1.5">
+                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-200 dark:border-slate-800 flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-teal-500 dark:text-teal-400" /> Refine Draft with Gemini AI
                     </h4>
                     <p className="text-xs text-zinc-550 dark:text-zinc-400 font-sans leading-relaxed">
@@ -323,7 +323,7 @@ export default function DashboardHome() {
                       value={aiRefinePrompt}
                       onChange={(e) => setAiRefinePrompt(e.target.value)}
                       placeholder="e.g. rewrite in a professional tone, focusing on backend refactors..."
-                      className="w-full h-32 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-xl text-sm text-zinc-800 dark:text-zinc-300 placeholder-zinc-450 focus:ring-1 focus:ring-teal-500 outline-none font-mono"
+                      className="w-full h-32 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-zinc-800 dark:text-zinc-300 placeholder-zinc-450 focus:ring-1 focus:ring-teal-500 outline-none font-mono"
                     />
                   </div>
 
