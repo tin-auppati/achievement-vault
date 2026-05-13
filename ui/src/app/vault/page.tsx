@@ -174,13 +174,13 @@ export default function VaultGallery() {
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-zinc-800 dark:text-zinc-350 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer"
+              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer"
             >
-              <option value="all">📅 All Time</option>
-              <option value="week">📅 Last 7 Days</option>
-              <option value="month">📅 Last 30 Days</option>
-              <option value="three_months">📅 Last 3 Months</option>
-              <option value="custom">📅 Custom Date Range...</option>
+              <option value="all" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 All Time</option>
+              <option value="week" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Last 7 Days</option>
+              <option value="month" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Last 30 Days</option>
+              <option value="three_months" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Last 3 Months</option>
+              <option value="custom" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Custom Date Range...</option>
             </select>
           </div>
 
