@@ -149,7 +149,7 @@ export default function WorkspacesPage() {
     <div className="space-y-8 font-mono pb-12 p-8 max-w-7xl mx-auto animate-fade-in transition-colors">
       
       {/* 1. HEADER SECTION */}
-      <section className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-900">
+      <section className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-700">
         <div className="space-y-1">
           <span className="text-xs text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold tracking-wider">
             <Cpu className="h-4 w-4 animate-pulse" /> Codebases Architecture Profiles
@@ -163,7 +163,7 @@ export default function WorkspacesPage() {
         </div>
         <button
           onClick={() => setShowRegForm(!showRegForm)}
-          className="px-4 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-zinc-650 dark:text-zinc-300 hover:text-zinc-800 dark:hover:text-white font-bold uppercase transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+          className="px-4 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-zinc-650 dark:text-zinc-300 hover:text-zinc-800 dark:hover:text-white font-bold uppercase transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
         >
           <PlusCircle className="h-4 w-4" /> Register Repository
         </button>
@@ -173,7 +173,7 @@ export default function WorkspacesPage() {
       {showRegForm && (
         <form
           onSubmit={handleRegisterProject}
-          className="p-6 bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-900 rounded-3xl grid grid-cols-1 md:grid-cols-4 gap-6 animate-slide-down shadow-xl"
+          className="p-6 bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-700 rounded-3xl grid grid-cols-1 md:grid-cols-4 gap-6 animate-slide-down shadow-xl"
         >
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 block">Workspace Title</label>
@@ -217,7 +217,7 @@ export default function WorkspacesPage() {
             <p className="text-xs text-teal-600 dark:text-teal-400 font-bold">Querying enrolled workspaces...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="p-24 border border-dashed border-slate-200 dark:border-slate-900 rounded-3xl text-center text-zinc-500 text-sm leading-relaxed max-w-4xl mx-auto">
+          <div className="p-24 border border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-center text-zinc-500 text-sm leading-relaxed max-w-4xl mx-auto">
             📭 No workspace codebases registered yet. Use the registration panel to mount interceptor hooks.
           </div>
         ) : (
@@ -231,7 +231,7 @@ export default function WorkspacesPage() {
                     setActiveProject(proj);
                     setProfilingMode("none");
                   }}
-                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 rounded-3xl p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 flex flex-col justify-between gap-5 shadow-sm"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 rounded-3xl p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 flex flex-col justify-between gap-5 shadow-sm"
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-center font-mono">
@@ -243,17 +243,17 @@ export default function WorkspacesPage() {
 
                     <div className="space-y-2">
                       <h4 className="text-sm font-black text-slate-850 dark:text-zinc-100 truncate uppercase tracking-wider">{proj.name}</h4>
-                      <code className="text-xs bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-150 dark:border-slate-880 text-zinc-500 dark:text-zinc-450 truncate block select-all font-bold">
+                      <code className="text-xs bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-150 dark:border-slate-700 text-zinc-550 dark:text-zinc-400 truncate block select-all font-bold">
                         {proj.path}
                       </code>
                     </div>
 
                     {hasProfile ? (
-                      <p className="text-xs text-zinc-650 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-3 border-t border-slate-150 dark:border-slate-900">
+                      <p className="text-xs text-zinc-650 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-3 border-t border-slate-150 dark:border-slate-700">
                         {proj.profile_purpose}
                       </p>
                     ) : (
-                      <p className="text-xs text-zinc-450 dark:text-zinc-600 font-sans italic leading-relaxed pt-3 border-t border-slate-150 dark:border-slate-900">
+                      <p className="text-xs text-zinc-450 dark:text-zinc-600 font-sans italic leading-relaxed pt-3 border-t border-slate-150 dark:border-slate-700">
                         No AI compiled profile description. Click card to run Standard Profile or deep filesystem Directory Scans.
                       </p>
                     )}
@@ -274,14 +274,14 @@ export default function WorkspacesPage() {
       {/* 4. IMMERSIVE LIGHTBOX DEEP PROFILE VIEW WITH DUAL PROFILING CHANNELS */}
       {activeProject && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
             
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
               <div className="flex items-center gap-3">
                 <Folder className="h-5 w-5 text-teal-500 dark:text-teal-400 animate-pulse" />
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-850 dark:text-slate-100">{activeProject.name}</h3>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-855 dark:text-zinc-100">{activeProject.name}</h3>
                   <p className="text-xs text-zinc-550 dark:text-zinc-450 mt-1 select-all">Path: {activeProject.path}</p>
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function WorkspacesPage() {
                 <button
                   onClick={() => triggerProfilingWithOption(activeProject.id, false)}
                   disabled={profilingMode !== "none"}
-                  className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-350 hover:text-slate-800 dark:hover:text-white font-extrabold text-xs uppercase rounded-lg shadow-sm transition-all flex items-center gap-1 disabled:opacity-40 cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-650 dark:text-zinc-350 hover:text-slate-800 dark:hover:text-white font-extrabold text-xs uppercase rounded-lg shadow-sm transition-all flex items-center gap-1 disabled:opacity-40 cursor-pointer"
                   title="Generate profile based solely on SQLite commit logs"
                 >
                   <FileCode className={`h-3.5 w-3.5 ${profilingMode === "standard" ? "animate-spin text-teal-500" : "text-teal-500"}`} />
@@ -310,7 +310,7 @@ export default function WorkspacesPage() {
 
                 <button
                   onClick={() => setActiveProject(null)}
-                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -321,7 +321,7 @@ export default function WorkspacesPage() {
             <div className="p-8 overflow-y-auto flex-1 bg-white dark:bg-slate-950 flex flex-col space-y-6 text-left">
               
               {/* Path and Score Section */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-850 rounded-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-700 rounded-2xl">
                 <div className="space-y-1">
                   <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-black font-mono">Workspace path</span>
                   <code className="text-xs text-zinc-650 dark:text-zinc-300 block font-bold select-all break-all font-mono">
@@ -345,7 +345,7 @@ export default function WorkspacesPage() {
                       <Laptop className="h-4 w-4 text-teal-500" /> Workspace Purpose
                     </h4>
                     {activeProject.profile_purpose ? (
-                      <p className="text-sm text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed bg-slate-50/50 dark:bg-slate-900/10 p-4 border border-slate-150 dark:border-slate-900 rounded-2xl font-semibold">
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed bg-slate-50/50 dark:bg-slate-900/10 p-4 border border-slate-150 dark:border-slate-700 rounded-2xl font-semibold">
                         {activeProject.profile_purpose}
                       </p>
                     ) : (
@@ -361,7 +361,7 @@ export default function WorkspacesPage() {
                       <Code className="h-4 w-4 text-teal-500" /> Tech Stack & Dialects
                     </h4>
                     {activeProject.profile_tech_stack ? (
-                      <div className="flex flex-wrap gap-1.5 p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl">
+                      <div className="flex flex-wrap gap-1.5 p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-700 rounded-2xl">
                         {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
                           <TechBadge key={`${tag}-${i}`} tech={tag} />
                         ))}
@@ -379,7 +379,7 @@ export default function WorkspacesPage() {
                       <Layers className="h-4 w-4 text-teal-500" /> Key Features & Architecture
                     </h4>
                     {activeProject.profile_key_features ? (
-                      <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl prose dark:prose-invert max-w-none text-xs font-sans text-zinc-700 dark:text-zinc-300">
+                      <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-700 rounded-2xl prose dark:prose-invert max-w-none text-xs font-sans text-zinc-700 dark:text-zinc-300">
                         <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
                       </div>
                     ) : (

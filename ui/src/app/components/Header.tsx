@@ -117,7 +117,7 @@ export default function Header() {
             showToast("Global data caches synchronized with SQLite db.", "success");
           }}
           disabled={refreshing}
-          className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer shadow-sm disabled:opacity-50"
+          className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-teal-500/10 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer shadow-sm disabled:opacity-50"
           title="Refresh Global Feeds"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-teal-500" : ""}`} />
@@ -127,7 +127,7 @@ export default function Header() {
         {mounted && (
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer shadow-sm"
+            className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-teal-500/10 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer shadow-sm"
             title="Toggle theme"
           >
             {theme === "dark" ? (
@@ -143,10 +143,10 @@ export default function Header() {
       {/* IMMERSIVE GLOBAL PROJECT SUMMARY PORTFOLIO LIGHTBOX */}
       {showProjectSummaryModal && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono text-left">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono text-left">
             
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-violet-500" />
                 <div>
@@ -161,13 +161,13 @@ export default function Header() {
                     navigator.clipboard.writeText(projectSummaryContent);
                     showToast("✓ Markdown resume copied to clipboard!", "success");
                   }}
-                  className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                  className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
                 >
                   <Copy className="h-3.5 w-3.5 text-teal-500" /> Copy Markdown
                 </button>
                 <button
                   onClick={() => setShowProjectSummaryModal(false)}
-                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-550 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-550 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -186,7 +186,7 @@ export default function Header() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-700 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
               <span>Source: sqlite://weekly_achievements</span>
               <span>Generated on: {new Date().toLocaleDateString()}</span>
             </div>

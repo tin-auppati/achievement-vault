@@ -19,13 +19,13 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col justify-between h-screen sticky top-0 font-mono z-20 transition-colors">
+    <aside className="w-64 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 flex flex-col justify-between h-screen sticky top-0 font-mono z-20 transition-colors">
       
       {/* Sidebar Navigation */}
       <div className="p-6 flex-1 flex flex-col space-y-8">
         
         {/* Branding Title */}
-        <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="pb-4 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2">
             <span className="text-xl">🛡️</span>
             <div>
@@ -73,7 +73,7 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 text-xs text-zinc-550 dark:text-zinc-500 flex flex-col space-y-1">
+      <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/40 text-xs text-zinc-550 dark:text-zinc-500 flex flex-col space-y-1">
         <div>Logged in developer workspace:</div>
         <div className="font-bold text-zinc-700 dark:text-zinc-400 select-all">tin@projects/achievement-vault</div>
         <div className="pt-2 text-[10px] text-zinc-450 dark:text-zinc-550 select-none">Powered by Gemini Pro 1.5</div>

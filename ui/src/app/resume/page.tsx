@@ -137,15 +137,15 @@ export default function ResumePage() {
         <div className="xl:col-span-8 space-y-5 flex flex-col">
           
           {/* Workspace Setup Panel */}
-          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-5 rounded-3xl space-y-4 shadow-sm">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900 font-mono">
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 p-5 rounded-3xl space-y-4 shadow-sm">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700 font-mono">
               <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <Briefcase className="h-4 w-4 text-teal-500" />
                 Portfolio Resume Compiler Workbench
               </h3>
               <button
                 onClick={handleResetEditor}
-                className="text-xs font-bold text-zinc-500 hover:text-rose-550 uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                className="text-xs font-bold text-zinc-500 hover:text-rose-555 uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" /> New Version Draft
               </button>
@@ -162,7 +162,7 @@ export default function ResumePage() {
                   value={resumeTitleInput}
                   onChange={(e) => setResumeTitleInput(e.target.value)}
                   placeholder="e.g., Senior Fullstack Engineer Portfolio v1"
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-850 dark:text-slate-100 text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-855 dark:text-slate-100 text-xs focus:ring-1 focus:ring-teal-500 focus:outline-none"
                 />
               </div>
 
@@ -171,7 +171,7 @@ export default function ResumePage() {
                 <button
                   onClick={handleDraftResumeAI}
                   disabled={compilingResumeAI}
-                  className="px-4 py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer h-9"
+                  className="px-4 py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer h-9"
                 >
                   <Sparkles className={`h-3.5 w-3.5 ${compilingResumeAI ? "animate-spin" : ""}`} />
                   {compilingResumeAI ? "Drafting Portfolio..." : "Draft with Gemini AI"}
@@ -180,8 +180,8 @@ export default function ResumePage() {
             </div>
 
             {/* MODE TOGGLE SEGMENTED CONTROL */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-900 font-mono">
-              <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-fit">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 font-mono">
+              <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 w-fit">
                 <button
                   type="button"
                   onClick={() => setResumeMode("edit")}
@@ -230,7 +230,7 @@ export default function ResumePage() {
                     value={resumeContentInput}
                     onChange={(e) => setResumeContentInput(e.target.value)}
                     placeholder="Draft portfolio content or edit here..."
-                    className="w-full h-[520px] p-5 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-mono text-sm rounded-xl border border-slate-200 dark:border-slate-900 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed shadow-inner"
+                    className="w-full h-[520px] p-5 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-mono text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed shadow-inner"
                   />
                 </div>
               ) : (
@@ -238,11 +238,11 @@ export default function ResumePage() {
                   <label className="text-xs font-black uppercase tracking-widest text-zinc-500 block">
                     Live Rendered Document Preview
                   </label>
-                  <div className="w-full min-h-[520px] max-h-[600px] p-8 md:p-12 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 rounded-xl overflow-y-auto prose dark:prose-invert prose-base lg:prose-lg max-w-none text-zinc-800 dark:text-zinc-300 font-sans leading-relaxed shadow-inner">
+                  <div className="w-full min-h-[520px] max-h-[600px] p-8 md:p-12 bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-xl overflow-y-auto prose dark:prose-invert prose-base lg:prose-lg max-w-none text-zinc-800 dark:text-zinc-300 font-sans leading-relaxed shadow-inner">
                     {resumeContentInput.trim() === "" ? (
                       <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-zinc-500 font-mono gap-2 select-none">
                         <span className="text-sm font-bold">Empty State</span>
-                        <span className="text-xs text-zinc-650 dark:text-zinc-450">Your resume is blank. Use &quot;Draft with Gemini&quot; or write something to see it here!</span>
+                        <span className="text-xs text-zinc-650 dark:text-zinc-455">Your resume is blank. Use &quot;Draft with Gemini&quot; or write something to see it here!</span>
                       </div>
                     ) : (
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{resumeContentInput}</ReactMarkdown>
@@ -253,7 +253,7 @@ export default function ResumePage() {
             </div>
 
             {/* Workstation Actions Footer */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-900 flex justify-between items-center mt-3 font-mono">
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center mt-3 font-mono">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-zinc-550 dark:text-zinc-500 uppercase font-bold">Status:</span>
                 {activeResumeId !== null ? (
@@ -276,12 +276,12 @@ export default function ResumePage() {
 
         {/* Right Side: Saved Portfolio Resumes Versions Gallery (4/12 width) */}
         <div className="xl:col-span-4 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-900 font-mono">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700 font-mono">
             <span className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
               <Award className="h-4 w-4 text-teal-500" />
               Saved Versions Gallery
             </span>
-            <span className="text-xs bg-slate-50 dark:bg-slate-900 px-2.5 py-0.5 border border-slate-200 dark:border-slate-800 rounded-full text-zinc-650 dark:text-zinc-400 font-bold">
+            <span className="text-xs bg-slate-50 dark:bg-slate-900 px-2.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded-full text-zinc-650 dark:text-zinc-400 font-bold">
               {resumes.length} Saved
             </span>
           </div>
@@ -292,7 +292,7 @@ export default function ResumePage() {
                 <div className="h-5 w-5 border-t-2 border-teal-500 rounded-full animate-spin mx-auto" />
               </div>
             ) : resumes.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-900 rounded-2xl select-none shadow-inner">
+              <div className="text-center py-12 bg-white dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl select-none shadow-inner">
                 <p className="text-xs text-zinc-500">No portfolios saved inside SQLite yet.</p>
               </div>
             ) : (
@@ -304,7 +304,7 @@ export default function ResumePage() {
                     className={`p-4 rounded-2xl border shadow-sm flex flex-col gap-3.5 transition-all duration-300 relative group ${
                       isActive
                         ? "bg-slate-50 dark:bg-slate-900/30 border-teal-500"
-                        : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800"
+                        : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600"
                     }`}
                   >
                     <div>
@@ -335,7 +335,7 @@ export default function ResumePage() {
                     </div>
 
                     {/* Quick Render preview snippet */}
-                    <div className="text-xs text-zinc-650 dark:text-zinc-550 line-clamp-3 font-sans leading-relaxed border-t border-b border-slate-200 dark:border-slate-900 py-2.5 max-w-none pointer-events-none prose dark:prose-invert prose-xs">
+                    <div className="text-xs text-zinc-650 dark:text-zinc-550 line-clamp-3 font-sans leading-relaxed border-t border-b border-slate-200 dark:border-slate-700 py-2.5 max-w-none pointer-events-none prose dark:prose-invert prose-xs">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{resItem.content_md}</ReactMarkdown>
                     </div>
 
@@ -346,7 +346,7 @@ export default function ResumePage() {
                           navigator.clipboard.writeText(resItem.content_md);
                           showToast("Markdown copied to clipboard!", "success");
                         }}
-                        className="p-1.5 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg text-zinc-500 hover:text-teal-500 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                        className="p-1.5 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg text-zinc-500 hover:text-teal-500 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                         title="Copy Full Markdown"
                       >
                         <Copy className="h-4 w-4" />
@@ -355,7 +355,7 @@ export default function ResumePage() {
                       <div className="flex gap-1.5">
                         <button
                           onClick={() => handleLoadResume(resItem)}
-                          className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-slate-850 dark:hover:text-white text-[10px] font-bold uppercase transition-colors"
+                          className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-slate-850 dark:hover:text-white text-[10px] font-bold uppercase transition-colors"
                         >
                           Load
                         </button>

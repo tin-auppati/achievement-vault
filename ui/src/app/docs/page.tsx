@@ -170,7 +170,7 @@ export default function DocsPage() {
     <div className="p-8 max-w-7xl mx-auto space-y-6 font-mono transition-all">
       
       {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center bg-white dark:bg-slate-950/40 p-5 border border-slate-200 dark:border-slate-900 rounded-3xl gap-4 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center bg-white dark:bg-slate-950/40 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl gap-4 shadow-sm">
         <div className="flex items-center gap-3">
           <BookOpen className="h-5 w-5 text-teal-500" />
           <div>
@@ -178,7 +178,7 @@ export default function DocsPage() {
             <p className="text-xs text-zinc-550 dark:text-zinc-400 mt-0.5 font-bold">Explore terminal instructions, usage parameters, and shell integrations manuals.</p>
           </div>
         </div>
-        <div className="text-xs text-zinc-650 dark:text-zinc-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg font-bold self-start sm:self-auto">
+        <div className="text-xs text-zinc-650 dark:text-zinc-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg font-bold self-start sm:self-auto">
           v{version} Stable CLI Manual
         </div>
       </div>
@@ -195,7 +195,7 @@ export default function DocsPage() {
               className={`px-3 py-2 text-xs font-black rounded-lg border uppercase tracking-wider transition-all cursor-pointer ${
                 activeCategory === cat
                   ? "bg-teal-500/10 text-teal-600 dark:text-teal-455 border-teal-500/30"
-                  : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-900 text-zinc-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-55 dark:hover:bg-slate-900/50"
+                  : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-zinc-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-55 dark:hover:bg-slate-900/50"
               }`}
             >
               {cat}
@@ -213,7 +213,7 @@ export default function DocsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search CLI parameters..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-lg text-slate-800 dark:text-slate-100 placeholder-zinc-550 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-zinc-550 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all"
           />
         </div>
 
@@ -222,14 +222,14 @@ export default function DocsPage() {
       {/* COMMANDS DETAIL GRID */}
       <div className="space-y-4">
         {filteredCommands.length === 0 ? (
-          <div className="p-16 border border-dashed border-slate-200 dark:border-slate-900 rounded-3xl text-center text-zinc-500 text-xs">
+          <div className="p-16 border border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-center text-zinc-500 text-xs">
             📭 No matching CLI command signatures found.
           </div>
         ) : (
           filteredCommands.map((cmd) => (
             <div
               key={cmd.command}
-              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 hover:border-slate-350 dark:hover:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 relative group overflow-hidden shadow-sm"
+              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 hover:border-slate-350 dark:hover:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 relative group overflow-hidden shadow-sm"
             >
               <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                 <div className="space-y-2.5 flex-1">
@@ -237,7 +237,7 @@ export default function DocsPage() {
                   {/* Command Title & Category Badge */}
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-teal-500 text-sm">$&gt;</span>
-                    <h3 className="text-sm font-black text-slate-850 dark:text-slate-100 select-all">{cmd.command}</h3>
+                    <h3 className="text-sm font-black text-slate-855 dark:text-slate-100 select-all">{cmd.command}</h3>
                     <span className={`px-2.5 py-0.5 text-xs uppercase tracking-wider font-bold rounded-md border ${getCategoryColor(cmd.category)}`}>
                       {cmd.category}
                     </span>
@@ -250,7 +250,7 @@ export default function DocsPage() {
                   {cmd.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {cmd.tags.map((tag) => (
-                        <span key={tag} className="text-xs px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950 text-zinc-550 dark:text-zinc-500 font-bold shadow-inner">
+                        <span key={tag} className="text-xs px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-zinc-555 dark:text-zinc-500 font-bold shadow-inner">
                           {tag}
                         </span>
                       ))}
@@ -260,8 +260,8 @@ export default function DocsPage() {
                 </div>
 
                 {/* Example box / run sandbox section */}
-                <div className="xl:w-96 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-900 p-4 rounded-2xl space-y-2 relative">
-                  <div className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-550 uppercase tracking-widest pb-1 border-b border-slate-200 dark:border-slate-900 font-bold">
+                <div className="xl:w-96 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl space-y-2 relative">
+                  <div className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-550 uppercase tracking-widest pb-1 border-b border-slate-200 dark:border-slate-700 font-bold">
                     <span className="flex items-center gap-1"><Code className="h-3.5 w-3.5 text-teal-500" /> Syntax Example</span>
                     <span className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors cursor-pointer select-none" onClick={() => {
                       navigator.clipboard.writeText(cmd.example);

@@ -361,7 +361,7 @@ export default function DashboardHome() {
       {/* 2. EXECUTIVE METRICS BOARD */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Folder className="h-4 w-4 text-teal-500 animate-pulse" /> Active Codebases
           </span>
@@ -369,7 +369,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Git hooks targets</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Activity className="h-4 w-4 text-teal-500" /> Total Raw Commits
           </span>
@@ -379,7 +379,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Ingested Telemetry</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Award className="h-4 w-4 text-teal-500 animate-pulse" /> Milestones Vaulted
           </span>
@@ -389,7 +389,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Approved Summaries</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300 shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Layers className="h-4 w-4 text-teal-500" /> Primary Tech stack
           </span>
@@ -422,7 +422,7 @@ export default function DashboardHome() {
             Loading workspaces catalog...
           </div>
         ) : projects.length === 0 ? (
-          <div className="p-8 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl text-center text-zinc-500 text-xs">
+          <div className="p-8 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-3xl text-center text-zinc-500 text-xs">
             📭 No workspace codebases registered yet. Go to Workspaces to add one.
           </div>
         ) : (
@@ -438,7 +438,7 @@ export default function DashboardHome() {
                   className={`bg-white dark:bg-slate-950 border rounded-3xl p-5 space-y-3.5 shadow-sm transition-all duration-300 relative group overflow-hidden cursor-pointer ${
                     isTop 
                       ? "border-amber-200 dark:border-amber-500/30 ring-1 ring-amber-100/50 dark:ring-amber-500/5 hover:border-amber-350 dark:hover:border-amber-500/50 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-amber-500/10" 
-                      : "border-slate-200 dark:border-slate-800/60 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5"
+                      : "border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5"
                   }`}
                 >
                   {isTop && (
@@ -496,9 +496,9 @@ export default function DashboardHome() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Recent Ingestion Logs (Colspan 5) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
               <span className="text-xs font-bold text-zinc-700 dark:text-zinc-400 flex items-center gap-2 uppercase">
                 <Activity className="h-4 w-4 text-teal-500" /> Recent Ingestion Activity
               </span>
@@ -514,7 +514,7 @@ export default function DashboardHome() {
                 <div className="py-12 text-center text-zinc-500 dark:text-zinc-650 text-xs">No telemetry logged.</div>
               ) : (
                 recentLogs.map((log) => (
-                  <div key={log.id} className="p-3.5 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2">
+                  <div key={log.id} className="p-3.5 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-700 rounded-xl space-y-2">
                     <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-555 font-mono">
                       <span className="font-bold text-zinc-700 dark:text-zinc-400">📁 {log.project_name}</span>
                       <span>{new Date(log.timestamp).toLocaleDateString()}</span>
@@ -528,9 +528,9 @@ export default function DashboardHome() {
         </div>
 
         {/* Recent Approved Achievements Milestones (Colspan 7) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 transition-all duration-300">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700">
               <span className="text-xs font-bold text-zinc-700 dark:text-zinc-400 flex items-center gap-2 uppercase">
                 <Award className="h-4 w-4 text-teal-500 animate-pulse" /> Approved Milestones Vault
               </span>
@@ -553,7 +553,7 @@ export default function DashboardHome() {
                       setEditedAchievementContent(ach.content_md);
                       setIsEditingAchievement(false);
                     }}
-                    className="p-4 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors cursor-pointer"
+                    className="p-4 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-700 rounded-xl space-y-2 hover:border-slate-350 dark:hover:border-slate-600 transition-colors cursor-pointer"
                   >
                     <div className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-500">
                       <span className="font-bold text-teal-600 dark:text-teal-400">
@@ -561,7 +561,7 @@ export default function DashboardHome() {
                       </span>
                       <span>ID: #{ach.id}</span>
                     </div>
-                    <div className="text-xs font-sans text-zinc-700 dark:text-zinc-400 line-clamp-2 leading-relaxed border-t border-slate-200 dark:border-slate-900/80 pt-2 prose dark:prose-invert max-w-none">
+                    <div className="text-xs font-sans text-zinc-700 dark:text-zinc-400 line-clamp-2 leading-relaxed border-t border-slate-200 dark:border-slate-700 pt-2 prose dark:prose-invert max-w-none">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{ach.content_md}</ReactMarkdown>
                     </div>
                   </div>
@@ -718,7 +718,7 @@ export default function DashboardHome() {
                   <Laptop className="h-4 w-4 text-teal-500" /> Workspace Purpose
                 </h4>
                 {activeProject.profile_purpose ? (
-                  <p className="text-sm text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed bg-slate-50/50 dark:bg-slate-900/10 p-4 border border-slate-150 dark:border-slate-900 rounded-2xl font-semibold">
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed bg-slate-50/50 dark:bg-slate-900/10 p-4 border border-slate-150 dark:border-slate-700 rounded-2xl font-semibold">
                     {activeProject.profile_purpose}
                   </p>
                 ) : (
@@ -734,7 +734,7 @@ export default function DashboardHome() {
                   <Code className="h-4 w-4 text-teal-500" /> Tech Stack & Dialects
                 </h4>
                 {activeProject.profile_tech_stack ? (
-                  <div className="flex flex-wrap gap-1.5 p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl">
+                  <div className="flex flex-wrap gap-1.5 p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-700 rounded-2xl">
                     {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
                       <TechBadge key={`${tag}-${i}`} tech={tag} />
                     ))}
@@ -752,7 +752,7 @@ export default function DashboardHome() {
                   <Layers className="h-4 w-4 text-teal-500" /> Key Features & Architecture
                 </h4>
                 {activeProject.profile_key_features ? (
-                  <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl prose dark:prose-invert max-w-none text-xs font-sans text-zinc-700 dark:text-zinc-300">
+                  <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-700 rounded-2xl prose dark:prose-invert max-w-none text-xs font-sans text-zinc-700 dark:text-zinc-300">
                     <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
                   </div>
                 ) : (

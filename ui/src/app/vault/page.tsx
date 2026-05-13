@@ -137,7 +137,7 @@ export default function VaultGallery() {
     <div className="space-y-8 font-mono pb-12 p-8 max-w-7xl mx-auto animate-fade-in transition-colors">
       
       {/* HEADER SECTION */}
-      <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-900">
+      <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-700">
         <div className="space-y-1">
           <span className="text-xs text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold tracking-wider">
             <Award className="h-4 w-4" /> Weekly Milestones Archives
@@ -152,20 +152,20 @@ export default function VaultGallery() {
       </section>
 
       {/* ADVANCED FILTERING CONTROL BOARD */}
-      <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl shadow-sm space-y-4">
+      <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl shadow-sm space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           
           {/* SEARCH BAR */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-550 pointer-events-none">
-              <Search className="h-4 w-4 text-zinc-550" />
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-555 pointer-events-none">
+              <Search className="h-4 w-4 text-zinc-555" />
             </span>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search weekly summaries..."
-              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-150 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-150 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all"
             />
           </div>
 
@@ -174,7 +174,7 @@ export default function VaultGallery() {
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-zinc-800 dark:text-zinc-350 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer"
+              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-zinc-800 dark:text-zinc-350 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer"
             >
               <option value="all">📅 All Time</option>
               <option value="week">📅 Last 7 Days</option>
@@ -185,7 +185,7 @@ export default function VaultGallery() {
           </div>
 
           {/* TOTAL SUMMARY COUNTER */}
-          <div className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900 px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-mono">
+          <div className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono">
             <span className="text-zinc-550 dark:text-zinc-455 uppercase font-black tracking-wider">Milestones Vault:</span>
             <span className="font-black text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/20">
               {achievements.length} loaded
@@ -196,7 +196,7 @@ export default function VaultGallery() {
 
         {/* CUSTOM DATE RANGE ROW */}
         {dateRange === "custom" && (
-          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-900 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-down">
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-down">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-500 dark:text-zinc-450 uppercase block">From Date</label>
               <div className="relative">
@@ -207,7 +207,7 @@ export default function VaultGallery() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-lg text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
                 />
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function VaultGallery() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-lg text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
                 />
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function VaultGallery() {
             <p className="text-xs text-teal-600 dark:text-teal-400 font-bold">Loading achievements archive...</p>
           </div>
         ) : achievements.length === 0 ? (
-          <div className="p-24 border border-dashed border-slate-200 dark:border-slate-900 rounded-3xl text-center text-zinc-500 text-sm leading-relaxed">
+          <div className="p-24 border border-dashed border-slate-200 dark:border-slate-700 rounded-3xl text-center text-zinc-500 text-sm leading-relaxed">
             📭 No approved milestone summaries stored inside the SQLite vault database yet.
           </div>
         ) : (
@@ -247,7 +247,7 @@ export default function VaultGallery() {
                 <div
                   key={item.id}
                   onClick={() => setActiveAchievement(item)}
-                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-3xl p-6 transition-all duration-300 shadow-sm cursor-pointer relative group flex flex-col justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40 animate-fade-in"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-teal-500/30 rounded-3xl p-6 transition-all duration-300 shadow-sm cursor-pointer relative group flex flex-col justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40 animate-fade-in"
                 >
                   <div className="space-y-4">
                     {/* Badge and Title Row */}
@@ -264,7 +264,7 @@ export default function VaultGallery() {
                     </div>
 
                     {/* Markdown snippet container */}
-                    <div className="text-sm text-zinc-800 dark:text-zinc-300 line-clamp-5 leading-relaxed prose dark:prose-invert prose-base max-w-none font-sans py-3 border-t border-slate-200 dark:border-slate-900 border-b">
+                    <div className="text-sm text-zinc-800 dark:text-zinc-300 line-clamp-5 leading-relaxed prose dark:prose-invert prose-base max-w-none font-sans py-3 border-t border-slate-200 dark:border-slate-700 border-b">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{item.content_md}</ReactMarkdown>
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export default function VaultGallery() {
               <div className="text-center pt-6 font-mono">
                 <button
                   onClick={handleLoadMore}
-                  className="px-6 py-2.5 bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-zinc-700 dark:text-zinc-300 border border-slate-200 dark:border-slate-800 rounded-xl transition-all cursor-pointer font-black text-xs uppercase tracking-wider inline-flex items-center gap-2 shadow-sm hover:shadow-md"
+                  className="px-6 py-2.5 bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 text-zinc-700 dark:text-zinc-300 border border-slate-200 dark:border-slate-700 rounded-xl transition-all cursor-pointer font-black text-xs uppercase tracking-wider inline-flex items-center gap-2 shadow-sm hover:shadow-md"
                 >
                   <ArrowDownCircle className="h-4 w-4 text-teal-500 animate-bounce" /> Load More Milestones
                 </button>
@@ -307,10 +307,10 @@ export default function VaultGallery() {
       {/* IMMERSIVE LIGHTBOX DETAIL MODAL - INTEGRATED DUAL-MODE EDIT/PREVIEW */}
       {activeAchievement && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
             
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <Award className="h-5 w-5 text-teal-500" />
                 <div>
@@ -333,7 +333,7 @@ export default function VaultGallery() {
                 ) : (
                   <button
                     onClick={handleStartEdit}
-                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
                   >
                     <Edit3 className="h-3.5 w-3.5 text-teal-500" /> Edit Milestone
                   </button>
@@ -342,7 +342,7 @@ export default function VaultGallery() {
                 {isEditing && (
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1 transition-colors cursor-pointer text-xs font-bold"
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1 transition-colors cursor-pointer text-xs font-bold"
                   >
                     Cancel
                   </button>
@@ -360,7 +360,7 @@ export default function VaultGallery() {
                     setActiveAchievement(null);
                     setIsEditing(false);
                   }}
-                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-700 text-zinc-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -377,7 +377,7 @@ export default function VaultGallery() {
                   <textarea
                     value={editedContent}
                     onChange={(e) => setEditedContent(e.target.value)}
-                    className="flex-1 min-h-[350px] w-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans leading-relaxed text-base shadow-inner"
+                    className="flex-1 min-h-[350px] w-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans leading-relaxed text-base shadow-inner"
                     placeholder="Edit milestone description in markdown..."
                   />
                 </div>
@@ -389,7 +389,7 @@ export default function VaultGallery() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-700 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
               <span>Saved in vault database ID: #{activeAchievement.id}</span>
               <span>Committed: {new Date(activeAchievement.created_at).toLocaleString()}</span>
             </div>
