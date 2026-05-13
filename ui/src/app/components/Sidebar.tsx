@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Activity, Award, Briefcase, Terminal, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Activity, Award, Briefcase, Terminal, ShieldAlert, FolderOpen } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 export default function Sidebar() {
@@ -11,6 +11,7 @@ export default function Sidebar() {
 
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
+    { label: "Codebases Catalog", href: "/workspaces", icon: FolderOpen },
     { label: "Logs Ingestion", href: "/logs", icon: Activity },
     { label: "Milestones Vault", href: "/vault", icon: Award },
     { label: "Resume Workstation", href: "/resume", icon: Briefcase },

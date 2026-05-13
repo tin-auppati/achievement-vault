@@ -2,49 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Folder, Search, Calendar, ChevronLeft, ChevronRight, Activity, Terminal, Code, Clock } from "lucide-react";
-import { useApp } from "../context/AppContext";
-
-interface Log {
-  id: number;
-  project_id: number;
-  project_name: string;
-  type: string;
-  content: string;
-  metadata: string;
-  timestamp: string;
-}
-
-function TechBadge({ tech }: { tech: string }) {
-  const normalized = tech.trim().toLowerCase();
-  let colorClass = "";
-  if (normalized === "go" || normalized === "golang") {
-    colorClass = "bg-cyan-50/70 text-cyan-800 border-cyan-200/60 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20";
-  } else if (normalized === "typescript" || normalized === "ts") {
-    colorClass = "bg-blue-50/70 text-blue-800 border-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
-  } else if (normalized === "python") {
-    colorClass = "bg-yellow-50/70 text-yellow-800 border-yellow-200/60 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20";
-  } else if (normalized === "docker" || normalized === "dockerfile") {
-    colorClass = "bg-sky-50/70 text-sky-800 border-sky-200/60 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20";
-  } else if (normalized === "react" || normalized === "next.js" || normalized === "nextjs" || normalized === "javascript" || normalized === "js") {
-    colorClass = "bg-indigo-50/70 text-indigo-800 border-indigo-200/60 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20";
-  } else if (normalized === "tailwind" || normalized === "tailwindcss" || normalized === "css" || normalized === "sass") {
-    colorClass = "bg-teal-50/70 text-teal-800 border-teal-200/60 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20";
-  } else if (normalized === "sqlite" || normalized === "sql" || normalized === "postgres" || normalized === "postgresql" || normalized === "database" || normalized === "db") {
-    colorClass = "bg-violet-50/70 text-violet-800 border-violet-200/60 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20";
-  } else if (normalized === "git" || normalized === "github") {
-    colorClass = "bg-rose-50/70 text-rose-800 border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
-  } else if (normalized === "rust") {
-    colorClass = "bg-orange-50/70 text-orange-800 border-orange-200/60 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20";
-  } else {
-    colorClass = "bg-slate-100 text-slate-850 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
-  }
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md border font-mono tracking-wide ${colorClass}`}>
-      {tech}
-    </span>
-  );
-}
+import { useApp, Log } from "../context/AppContext";
+import TechBadge from "../components/TechBadge";
 
 function extractTechKeywords(text: string): string[] {
   if (!text) return [];

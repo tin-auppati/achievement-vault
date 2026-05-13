@@ -1,47 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Folder, Search, Calendar, ChevronLeft, ChevronRight, Activity, Award, X, Clock, ArrowDownCircle, Trash2, Edit3, Save, Eye } from "lucide-react";
+import { useApp, Achievement } from "../context/AppContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { Award, Search, Calendar, Sparkles, X, Clock, ArrowDownCircle, Trash2 } from "lucide-react";
-import { useApp, Achievement } from "../context/AppContext";
-
-function TechBadge({ tech }: { tech: string }) {
-  const normalized = tech.trim().toLowerCase();
-  let colorClass = "";
-  if (normalized === "go" || normalized === "golang") {
-    colorClass = "bg-cyan-50/70 text-cyan-800 border-cyan-200/60 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20";
-  } else if (normalized === "typescript" || normalized === "ts") {
-    colorClass = "bg-blue-50/70 text-blue-800 border-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
-  } else if (normalized === "python") {
-    colorClass = "bg-yellow-50/70 text-yellow-800 border-yellow-200/60 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20";
-  } else if (normalized === "docker" || normalized === "dockerfile") {
-    colorClass = "bg-sky-50/70 text-sky-800 border-sky-200/60 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20";
-  } else if (normalized === "react" || normalized === "next.js" || normalized === "nextjs" || normalized === "javascript" || normalized === "js") {
-    colorClass = "bg-indigo-50/70 text-indigo-800 border-indigo-200/60 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20";
-  } else if (normalized === "tailwind" || normalized === "tailwindcss" || normalized === "css" || normalized === "sass") {
-    colorClass = "bg-teal-50/70 text-teal-800 border-teal-200/60 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20";
-  } else if (normalized === "sqlite" || normalized === "sql" || normalized === "postgres" || normalized === "postgresql" || normalized === "database" || normalized === "db") {
-    colorClass = "bg-violet-50/70 text-violet-800 border-violet-200/60 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20";
-  } else if (normalized === "git" || normalized === "github") {
-    colorClass = "bg-rose-50/70 text-rose-800 border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
-  } else if (normalized === "rust") {
-    colorClass = "bg-orange-50/70 text-orange-800 border-orange-200/60 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20";
-  } else {
-    colorClass = "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
-  }
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md border font-mono tracking-wide ${colorClass}`}>
-      {tech}
-    </span>
-  );
-}
+import TechBadge from "../components/TechBadge";
 
 function StatusBadge({ status }: { status: string }) {
   const normalized = status.trim().toLowerCase();
-  let colorClass = "bg-emerald-50 text-emerald-850 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+  let colorClass = "";
+  if (normalized === "completed" || normalized === "active" || normalized === "sealed" || normalized === "synced") {
+    colorClass = "bg-emerald-50 text-emerald-850 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+  } else if (normalized === "pending" || normalized === "reviewing") {
+    colorClass = "bg-amber-50 text-amber-850 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+  } else {
+    colorClass = "bg-slate-50 text-slate-705 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
+  }
   return (
     <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border font-mono ${colorClass}`}>
       {status}
@@ -78,139 +54,155 @@ function extractTechKeywords(text: string): string[] {
   return found;
 }
 
-export default function AchievementsVault() {
-  const { deleteAchievement } = useApp();
+export default function VaultGallery() {
+  const { deleteAchievement, updateAchievement, showToast } = useApp();
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState("all");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
-  
+
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+
+  // IMMERSIVE LIGHTBOX STATE
   const [activeAchievement, setActiveAchievement] = useState<Achievement | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
 
-  const limit = 12;
+  const limit = 9;
 
-  // Initial fetch when filters change
-  const fetchInitialAchievements = () => {
-    setLoading(true);
-    let startStr = "";
-    let endStr = "";
+  const fetchAchievements = async (currentPage: number, append: boolean = false) => {
+    try {
+      setLoading(true);
+      let startStr = "";
+      let endStr = "";
 
-    if (dateRange === "week") {
-      const d = new Date();
-      d.setDate(d.getDate() - 7);
-      startStr = d.toISOString().split("T")[0];
-    } else if (dateRange === "month") {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 1);
-      startStr = d.toISOString().split("T")[0];
-    } else if (dateRange === "three_months") {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 3);
-      startStr = d.toISOString().split("T")[0];
-    } else if (dateRange === "custom") {
-      startStr = customStartDate;
-      endStr = customEndDate;
-    }
+      if (dateRange === "week") {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        startStr = d.toISOString().split("T")[0];
+      } else if (dateRange === "month") {
+        const d = new Date();
+        d.setMonth(d.getMonth() - 1);
+        startStr = d.toISOString().split("T")[0];
+      } else if (dateRange === "three_months") {
+        const d = new Date();
+        d.setMonth(d.getMonth() - 3);
+        startStr = d.toISOString().split("T")[0];
+      } else if (dateRange === "custom") {
+        startStr = customStartDate;
+        endStr = customEndDate;
+      }
 
-    const params = new URLSearchParams();
-    if (search.trim()) params.set("q", search.trim());
-    params.set("limit", limit.toString());
-    params.set("offset", "0");
-    if (startStr) params.set("start_date", startStr);
-    if (endStr) params.set("end_date", endStr);
+      const offset = (currentPage - 1) * limit;
+      const params = new URLSearchParams();
+      if (search.trim()) params.set("q", search.trim());
+      params.set("limit", limit.toString());
+      params.set("offset", offset.toString());
+      if (startStr) params.set("start_date", startStr);
+      if (endStr) params.set("end_date", endStr);
 
-    fetch(`/api/achievements?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setAchievements(data);
-          setHasMore(data.length === limit);
+      const res = await fetch(`/api/achievements?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to load approved milestones");
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        if (append) {
+          setAchievements(prev => [...prev, ...data]);
         } else {
-          setAchievements([]);
-          setHasMore(false);
+          setAchievements(data);
         }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to load achievements", err);
-        setAchievements([]);
+        setHasMore(data.length === limit);
+      } else {
+        if (!append) setAchievements([]);
         setHasMore(false);
-        setLoading(false);
-      });
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Could not retrieve milestones list.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Reset page and reload on search/filter changes
   useEffect(() => {
-    fetchInitialAchievements();
+    setPage(1);
+    fetchAchievements(1, false);
   }, [search, dateRange, customStartDate, customEndDate]);
 
-  // Handle Load More (Incremental appending for Infinite Scroll style)
   const handleLoadMore = () => {
-    let startStr = "";
-    let endStr = "";
-
-    if (dateRange === "week") {
-      const d = new Date();
-      d.setDate(d.getDate() - 7);
-      startStr = d.toISOString().split("T")[0];
-    } else if (dateRange === "month") {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 1);
-      startStr = d.toISOString().split("T")[0];
-    } else if (dateRange === "three_months") {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 3);
-      startStr = d.toISOString().split("T")[0];
-    } else if (dateRange === "custom") {
-      startStr = customStartDate;
-      endStr = customEndDate;
-    }
-
-    const currentOffset = achievements.length;
-    const params = new URLSearchParams();
-    if (search.trim()) params.set("q", search.trim());
-    params.set("limit", limit.toString());
-    params.set("offset", currentOffset.toString());
-    if (startStr) params.set("start_date", startStr);
-    if (endStr) params.set("end_date", endStr);
-
-    fetch(`/api/achievements?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setAchievements(prev => [...prev, ...data]);
-          setHasMore(data.length === limit);
-        } else {
-          setHasMore(false);
-        }
-      })
-      .catch(err => {
-        console.error("Failed to load more achievements", err);
-        setHasMore(false);
-      });
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchAchievements(nextPage, true);
   };
 
-  const handleDelete = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm("Are you sure you want to delete this achievement milestone?")) return;
-    await deleteAchievement(id);
-    fetchInitialAchievements();
+  const handleDelete = async (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!confirm("Are you sure you want to remove this milestone from the Vault permanently?")) return;
+    
+    try {
+      await deleteAchievement(id);
+      if (activeAchievement && activeAchievement.id === id) {
+        setActiveAchievement(null);
+        setIsEditing(false);
+      }
+      // Reload current list
+      setPage(1);
+      fetchAchievements(1, false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleStartEdit = () => {
+    if (!activeAchievement) return;
+    setEditedContent(activeAchievement.content_md);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!activeAchievement) return;
+    try {
+      await updateAchievement(activeAchievement.id, editedContent);
+      setActiveAchievement((prev: Achievement | null) => prev ? { ...prev, content_md: editedContent } : null);
+      setIsEditing(false);
+      // Refresh database records
+      fetchAchievements(1, false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 font-mono transition-all">
+    <div className="space-y-8 font-mono pb-12 p-8 max-w-7xl mx-auto animate-fade-in transition-colors">
       
-      {/* FILTER CONTROLS GRID */}
-      <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* HEADER SECTION */}
+      <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-900">
+        <div className="space-y-1">
+          <span className="text-xs text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold tracking-wider">
+            <Award className="h-4 w-4" /> Weekly Milestones Archives
+          </span>
+          <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 uppercase">
+            Milestones Gallery
+          </h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-450 font-sans leading-relaxed">
+            Browse and refine finalized accomplishment reports captured from repository git activity feeds.
+          </p>
+        </div>
+      </section>
+
+      {/* ADVANCED FILTERING CONTROL BOARD */}
+      <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl shadow-sm space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           
           {/* SEARCH BAR */}
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-550 pointer-events-none">
-              <Search className="h-4 w-4 text-zinc-500" />
+              <Search className="h-4 w-4 text-zinc-550" />
             </span>
             <input
               type="text"
@@ -238,7 +230,7 @@ export default function AchievementsVault() {
 
           {/* TOTAL SUMMARY COUNTER */}
           <div className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900 px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-mono">
-            <span className="text-zinc-550 dark:text-zinc-450 uppercase font-black tracking-wider">Milestones Vault:</span>
+            <span className="text-zinc-550 dark:text-zinc-455 uppercase font-black tracking-wider">Milestones Vault:</span>
             <span className="font-black text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/20">
               {achievements.length} loaded
             </span>
@@ -283,7 +275,7 @@ export default function AchievementsVault() {
 
       {/* CORE GRID GALLERY */}
       <section className="space-y-6">
-        {loading ? (
+        {loading && achievements.length === 0 ? (
           <div className="py-24 text-center space-y-3">
             <div className="h-6 w-6 border-t-2 border-r-2 border-teal-500 rounded-full animate-spin mx-auto" />
             <p className="text-xs text-teal-600 dark:text-teal-400 font-bold">Loading achievements archive...</p>
@@ -299,7 +291,7 @@ export default function AchievementsVault() {
                 <div
                   key={item.id}
                   onClick={() => setActiveAchievement(item)}
-                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-3xl p-6 transition-all duration-300 shadow-sm cursor-pointer relative group flex flex-col justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-3xl p-6 transition-all duration-300 shadow-sm cursor-pointer relative group flex flex-col justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40 animate-fade-in"
                 >
                   <div className="space-y-4">
                     {/* Badge and Title Row */}
@@ -356,7 +348,7 @@ export default function AchievementsVault() {
         )}
       </section>
 
-      {/* IMMERSIVE LIGHTBOX DETAIL MODAL */}
+      {/* IMMERSIVE LIGHTBOX DETAIL MODAL - INTEGRATED DUAL-MODE EDIT/PREVIEW */}
       {activeAchievement && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
@@ -372,19 +364,72 @@ export default function AchievementsVault() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setActiveAchievement(null)}
-                className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              
+              <div className="flex items-center gap-2">
+                {/* Save/Edit Mode Toggle Buttons */}
+                {isEditing ? (
+                  <button
+                    onClick={handleSaveEdit}
+                    className="h-8 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-650 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                  >
+                    <Save className="h-3.5 w-3.5 text-emerald-500" /> Save Changes
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleStartEdit}
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                  >
+                    <Edit3 className="h-3.5 w-3.5 text-teal-500" /> Edit Milestone
+                  </button>
+                )}
+
+                {isEditing && (
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1 transition-colors cursor-pointer text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                )}
+
+                <button
+                  onClick={() => handleDelete(activeAchievement.id)}
+                  className="h-8 px-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                >
+                  <Trash2 className="h-3.5 w-3.5 text-rose-500" /> Delete
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveAchievement(null);
+                    setIsEditing(false);
+                  }}
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Content */}
             <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950 shadow-inner flex flex-col">
-              <div className="prose dark:prose-invert prose-base lg:prose-lg max-w-none text-zinc-800 dark:text-zinc-300 font-sans leading-relaxed">
-                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
-              </div>
+              {isEditing ? (
+                <div className="flex-1 flex flex-col h-full space-y-4">
+                  <div className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1">
+                    <Edit3 className="h-3.5 w-3.5 text-teal-500" /> Markdown Source Editor
+                  </div>
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    className="flex-1 min-h-[350px] w-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans leading-relaxed text-base shadow-inner"
+                    placeholder="Edit milestone description in markdown..."
+                  />
+                </div>
+              ) : (
+                <div className="prose dark:prose-invert prose-base lg:prose-lg max-w-none text-zinc-800 dark:text-zinc-300 font-sans leading-relaxed">
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}

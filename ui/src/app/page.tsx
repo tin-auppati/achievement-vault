@@ -19,41 +19,14 @@ import {
   Database,
   PlusCircle,
   FileText,
-  X
+  X,
+  Trash2,
+  Edit3,
+  Save,
+  Laptop
 } from "lucide-react";
 import { useApp, Log, Achievement } from "./context/AppContext";
-
-function TechBadge({ tech }: { tech: string }) {
-  const normalized = tech.trim().toLowerCase();
-  let colorClass = "";
-  if (normalized === "go" || normalized === "golang") {
-    colorClass = "bg-cyan-50/70 text-cyan-800 border-cyan-200/60 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20";
-  } else if (normalized === "typescript" || normalized === "ts") {
-    colorClass = "bg-blue-50/70 text-blue-800 border-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
-  } else if (normalized === "python") {
-    colorClass = "bg-yellow-50/70 text-yellow-800 border-yellow-200/60 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20";
-  } else if (normalized === "docker" || normalized === "dockerfile") {
-    colorClass = "bg-sky-50/70 text-sky-800 border-sky-200/60 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20";
-  } else if (normalized === "react" || normalized === "next.js" || normalized === "nextjs" || normalized === "javascript" || normalized === "js") {
-    colorClass = "bg-indigo-50/70 text-indigo-800 border-indigo-200/60 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20";
-  } else if (normalized === "tailwind" || normalized === "tailwindcss" || normalized === "css" || normalized === "sass") {
-    colorClass = "bg-teal-50/70 text-teal-800 border-teal-200/60 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20";
-  } else if (normalized === "sqlite" || normalized === "sql" || normalized === "postgres" || normalized === "postgresql" || normalized === "database" || normalized === "db") {
-    colorClass = "bg-violet-50/70 text-violet-800 border-violet-200/60 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20";
-  } else if (normalized === "git" || normalized === "github") {
-    colorClass = "bg-rose-50/70 text-rose-800 border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
-  } else if (normalized === "rust") {
-    colorClass = "bg-orange-50/70 text-orange-800 border-orange-200/60 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20";
-  } else {
-    colorClass = "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
-  }
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md border font-mono tracking-wide ${colorClass}`}>
-      {tech}
-    </span>
-  );
-}
+import TechBadge from "./components/TechBadge";
 
 function StatusBadge({ status }: { status: string }) {
   const normalized = status.trim().toLowerCase();
@@ -124,8 +97,14 @@ export default function DashboardHome() {
     triggerRefine,
     saveDraftChanges,
     approveDraft,
-    triggerProjectProfiling
+    deleteAchievement,
+    updateAchievement,
   } = useApp();
+
+  const sortedStats = Object.entries(stats || {})
+    .filter(([_, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([tech, count]) => `${tech} (${count})`);
 
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([]);
@@ -143,6 +122,11 @@ export default function DashboardHome() {
   const [regPath, setRegPath] = useState("");
   const [regSource, setRegSource] = useState("github");
   const [registering, setRegistering] = useState(false);
+
+  // States for dynamic drill-down modal editing
+  const [activeAchievement, setActiveAchievement] = useState<Achievement | null>(null);
+  const [isEditingAchievement, setIsEditingAchievement] = useState(false);
+  const [editedAchievementContent, setEditedAchievementContent] = useState("");
 
   // Sync draft local state once draft changes globally
   useEffect(() => {
@@ -216,6 +200,31 @@ export default function DashboardHome() {
     }
   };
 
+  // Lightbox editing methods
+  const handleDashboardDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to remove this milestone from the Vault permanently?")) return;
+    try {
+      await deleteAchievement(id);
+      setActiveAchievement(null);
+      setIsEditingAchievement(false);
+      fetchCompactFeeds();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDashboardSaveEdit = async () => {
+    if (!activeAchievement) return;
+    try {
+      await updateAchievement(activeAchievement.id, editedAchievementContent);
+      setActiveAchievement(prev => prev ? { ...prev, content_md: editedAchievementContent } : null);
+      setIsEditingAchievement(false);
+      fetchCompactFeeds();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="space-y-8 font-mono pb-12 p-8 max-w-7xl mx-auto animate-fade-in transition-all">
       
@@ -237,7 +246,7 @@ export default function DashboardHome() {
 
                 {/* Switcher Mode / Approve Action Row */}
                 <div className="flex flex-wrap items-center gap-3 self-end md:self-auto text-xs">
-                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-inner">
+                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-880 shadow-inner">
                     <button
                       onClick={() => setDraftViewMode("preview")}
                       className={`px-3 py-1.5 rounded-md transition-all font-bold cursor-pointer ${
@@ -299,7 +308,7 @@ export default function DashboardHome() {
                       <button
                         onClick={handleManualDraftSave}
                         disabled={savingDraft}
-                        className="px-3.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-850 rounded text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs font-bold uppercase transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-805 border border-slate-200 dark:border-slate-850 rounded text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs font-bold uppercase transition-colors cursor-pointer"
                       >
                         {savingDraft ? "Saving..." : "Save Draft Changes"}
                       </button>
@@ -327,7 +336,7 @@ export default function DashboardHome() {
                   <button
                     onClick={handleAIRefinement}
                     disabled={refining || !aiRefinePrompt.trim()}
-                    className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-extrabold uppercase rounded-lg shadow-sm text-xs disabled:opacity-45 mt-4 cursor-pointer transition-all"
+                    className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-extrabold uppercase rounded-lg shadow-sm text-xs disabled:opacity-45 mt-4 cursor-pointer transition-all"
                   >
                     {refining ? "Refining..." : "Apply AI Instructions"}
                   </button>
@@ -346,7 +355,7 @@ export default function DashboardHome() {
               <button
                 onClick={useApp().triggerSummarize}
                 disabled={summarizing}
-                className="px-5 py-2.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 font-extrabold uppercase text-xs rounded-xl tracking-wider shadow-sm animate-pulse disabled:opacity-40 cursor-pointer"
+                className="px-5 py-2.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 font-extrabold uppercase text-xs rounded-xl tracking-wider shadow-sm animate-pulse disabled:opacity-40 cursor-pointer"
               >
                 {summarizing ? "Drafting..." : "Compile Weekly Draft Report"}
               </button>
@@ -358,7 +367,7 @@ export default function DashboardHome() {
       {/* 2. EXECUTIVE METRICS BOARD */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Folder className="h-4 w-4 text-teal-500 animate-pulse" /> Active Codebases
           </span>
@@ -366,7 +375,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Git hooks targets</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Activity className="h-4 w-4 text-teal-500" /> Total Raw Commits
           </span>
@@ -376,7 +385,7 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Ingested Telemetry</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Award className="h-4 w-4 text-teal-500 animate-pulse" /> Milestones Vaulted
           </span>
@@ -386,19 +395,89 @@ export default function DashboardHome() {
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Approved Summaries</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors shadow-sm">
           <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-550 flex items-center gap-1.5">
             <Layers className="h-4 w-4 text-teal-500" /> Primary Tech stack
           </span>
           <div className="text-xs font-black text-slate-800 dark:text-slate-100 flex flex-wrap gap-1.5 mt-1">
-            {Object.keys(stats).slice(0, 3).map(tech => (
-              <TechBadge key={tech} tech={`${tech} (${stats[tech]})`} />
+            {sortedStats.slice(0, 3).map(techWithCount => (
+              <TechBadge key={techWithCount} tech={techWithCount} />
             ))}
+            {sortedStats.length === 0 && (
+              <span className="text-xs text-zinc-400 dark:text-zinc-650 font-bold">N/A</span>
+            )}
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold mt-1.5">Captured Dialect metrics</p>
         </div>
 
       </section>
+
+      {/* CODEBASE WORKSPACE CATALOG OVERVIEW */}
+      <section className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+            <Laptop className="h-4 w-4 text-teal-500" /> Codebase Workspace Catalog
+          </h3>
+          <Link href="/workspaces" className="text-xs text-zinc-500 hover:text-teal-600 dark:hover:text-teal-400 flex items-center gap-0.5 uppercase tracking-wider font-bold transition-all">
+            Manage Workspaces <ChevronRight className="h-3 w-3" />
+          </Link>
+        </div>
+
+        {loadingProjects ? (
+          <div className="p-12 text-center text-zinc-500 text-xs">
+            Loading workspaces catalog...
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="p-8 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl text-center text-zinc-500 text-xs">
+            📭 No workspace codebases registered yet. Go to Workspaces to add one.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.slice(0, 3).map((proj) => {
+              const hasProfile = proj.profile_purpose || proj.profile_tech_stack || proj.profile_key_features;
+              return (
+                <div
+                  key={proj.id}
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-5 space-y-3.5 shadow-sm hover:border-slate-350 dark:hover:border-slate-800 transition-colors"
+                >
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="font-bold text-zinc-700 dark:text-zinc-400 truncate max-w-[150px]">📁 {proj.name}</span>
+                    <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md border ${
+                      hasProfile 
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
+                        : "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                    }`}>
+                      {hasProfile ? "Profiled" : "Pending"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <code className="text-[10px] bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-150 dark:border-slate-880 text-zinc-500 dark:text-zinc-450 block truncate select-all font-bold font-mono">
+                      {proj.path}
+                    </code>
+                    {hasProfile ? (
+                      <p className="text-xs text-zinc-650 dark:text-zinc-400 line-clamp-2 leading-relaxed font-sans font-semibold">
+                        {proj.profile_purpose}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-zinc-450 dark:text-zinc-600 font-sans italic leading-relaxed">
+                        No AI compiled profile description. Visit Workspaces route to scan.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {hasProfile && parseTechTags(proj.profile_tech_stack).slice(0, 3).map((tag, i) => (
+                      <TechBadge key={`${tag}-${i}`} tech={tag} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
 
       {/* 3. SPLIT columns: COmpact Logs (5 items) & Compact achievements (5 items) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -423,7 +502,7 @@ export default function DashboardHome() {
               ) : (
                 recentLogs.map((log) => (
                   <div key={log.id} className="p-3.5 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2">
-                    <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-550 font-mono">
+                    <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-555 font-mono">
                       <span className="font-bold text-zinc-700 dark:text-zinc-400">📁 {log.project_name}</span>
                       <span>{new Date(log.timestamp).toLocaleDateString()}</span>
                     </div>
@@ -454,7 +533,15 @@ export default function DashboardHome() {
                 <div className="py-12 text-center text-zinc-500 dark:text-zinc-650 text-xs">No approved milestones stored.</div>
               ) : (
                 recentAchievements.map((ach) => (
-                  <div key={ach.id} className="p-4 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2 hover:border-slate-300 dark:hover:border-slate-800 transition-colors">
+                  <div
+                    key={ach.id}
+                    onClick={() => {
+                      setActiveAchievement(ach);
+                      setEditedAchievementContent(ach.content_md);
+                      setIsEditingAchievement(false);
+                    }}
+                    className="p-4 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2 hover:border-slate-350 dark:hover:border-slate-800 transition-colors cursor-pointer"
+                  >
                     <div className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-500">
                       <span className="font-bold text-teal-600 dark:text-teal-400">
                         🗓️ {new Date(ach.start_date).toLocaleDateString()} - {new Date(ach.end_date).toLocaleDateString()}
@@ -467,143 +554,69 @@ export default function DashboardHome() {
                   </div>
                 ))
               )}
-            </div>
           </div>
         </div>
+      </div>
 
       </section>
 
-      {/* 4. ACTIVE REPOSITORY PROJECT PROFILER & REGISTRATION */}
-      <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 space-y-6 shadow-sm">
-        
-        {/* Profile Section header */}
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-900">
-          <div>
-            <h3 className="text-sm font-black uppercase text-slate-850 dark:text-slate-100 flex items-center gap-2">
-              <Folder className="h-4 w-4 text-teal-500" /> Workspace Codebases Profiles
-            </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-bold">AI-generated architectural catalogs and repository dependency profiles</p>
-          </div>
-          <button
-            onClick={() => setShowRegForm(!showRegForm)}
-            className="px-4 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-zinc-650 dark:text-zinc-300 hover:text-zinc-800 dark:hover:text-white font-bold uppercase transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer shadow-sm"
-          >
-            <PlusCircle className="h-4 w-4" /> Register Repository
-          </button>
-        </div>
-
-        {/* Repository manual registration form */}
-        {showRegForm && (
-          <form onSubmit={handleRegisterProject} className="p-5 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-4 animate-slide-down">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 block">Workspace Name</label>
-              <input
-                type="text"
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-                placeholder="e.g. core-auth-service"
-                className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans"
-                required
-              />
-            </div>
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 block">Absolute Path</label>
-              <input
-                type="text"
-                value={regPath}
-                onChange={(e) => setRegPath(e.target.value)}
-                placeholder="e.g. /home/tin/projects/core-auth-service"
-                className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans"
-                required
-              />
-            </div>
-            <div className="space-y-1.5 flex items-end">
-              <button
-                type="submit"
-                disabled={registering}
-                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 font-bold uppercase rounded text-xs shadow-sm cursor-pointer disabled:opacity-40 transition-all"
-              >
-                {registering ? "Registering..." : "Mount Git Interceptors"}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Profiles Grid list */}
-        {loadingProjects ? (
-          <div className="py-8 text-center text-zinc-500 text-xs">Loading projects profile...</div>
-        ) : projects.length === 0 ? (
-          <div className="py-12 text-center border border-dashed border-slate-200 dark:border-slate-900 rounded-2xl text-zinc-550 dark:text-zinc-650 text-xs">No workspace codebases registered yet.</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((proj) => {
-              const hasProfile = proj.profile_purpose || proj.profile_tech_stack || proj.profile_key_features;
-              return (
-                <div
-                  key={proj.id}
-                  onClick={() => setActiveProject(proj)}
-                  className="bg-slate-50 dark:bg-slate-900/20 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-2xl p-5 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/40 transition-all flex flex-col justify-between gap-4 shadow-sm"
-                >
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-black uppercase text-zinc-850 dark:text-zinc-200 truncate pr-2">{proj.name}</h4>
-                      <StatusBadge status={hasProfile ? "Completed" : "Pending"} />
-                    </div>
-                    <code className="text-xs bg-white dark:bg-slate-950 px-2.5 py-1 rounded border border-slate-150 dark:border-slate-900 text-zinc-500 dark:text-zinc-500 truncate block select-all font-bold">
-                      {proj.path}
-                    </code>
-                    {hasProfile ? (
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-1.5 border-t border-slate-200 dark:border-slate-900">
-                        {proj.profile_purpose}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-zinc-500 dark:text-zinc-600 font-sans italic leading-relaxed pt-1.5 border-t border-slate-200 dark:border-slate-900">
-                        No AI compiled profile description. Click to generate stack details.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {hasProfile && parseTechTags(proj.profile_tech_stack).slice(0, 3).map((tag, i) => (
-                      <TechBadge key={`${tag}-${i}`} tech={tag} />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-      </section>
-
-      {/* 5. DEEP WORKSPACE PROFILING MODAL */}
-      {activeProject && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
+      {/* 6. WEEKLY MILESTONE DRILL-DOWN LIGHTBOX FOR DASHBOARD FEEDS */}
+      {activeAchievement && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-mono text-left">
             
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <Folder className="h-5 w-5 text-teal-500 dark:text-teal-400 animate-pulse" />
+                <Award className="h-5 w-5 text-teal-500" />
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-850 dark:text-slate-100">{activeProject.name}</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 select-all">Path: {activeProject.path}</p>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-100">Weekly Achievement Detail</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-450 mt-1">
+                    {new Date(activeAchievement.start_date).toLocaleDateString(undefined, { month: "long", day: "numeric" })} - {new Date(activeAchievement.end_date).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
+              
+              <div className="flex items-center gap-2">
+                {/* Save/Edit Mode Toggle Buttons */}
+                {isEditingAchievement ? (
+                  <button
+                    onClick={handleDashboardSaveEdit}
+                    className="h-8 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-650 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                  >
+                    <Save className="h-3.5 w-3.5 text-emerald-500" /> Save Changes
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsEditingAchievement(true)}
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                  >
+                    <Edit3 className="h-3.5 w-3.5 text-teal-500" /> Edit Milestone
+                  </button>
+                )}
+
+                {isEditingAchievement && (
+                  <button
+                    onClick={() => setIsEditingAchievement(false)}
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1 transition-colors cursor-pointer text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                )}
+
                 <button
-                  onClick={async () => {
-                    const projId = activeProject.id;
-                    setActiveProject(null);
-                    await triggerProjectProfiling(projId);
-                  }}
-                  className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-extrabold text-xs uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                  onClick={() => handleDashboardDelete(activeAchievement.id)}
+                  className="h-8 px-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
                 >
-                  <Sparkles className="h-3 w-3" /> AI Compile Stack
+                  <Trash2 className="h-3.5 w-3.5 text-rose-500" /> Delete
                 </button>
+
                 <button
-                  onClick={() => setActiveProject(null)}
-                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                  onClick={() => {
+                    setActiveAchievement(null);
+                    setIsEditingAchievement(false);
+                  }}
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -611,66 +624,30 @@ export default function DashboardHome() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950 shadow-inner space-y-6">
-              
-              {activeProject.profile_purpose || activeProject.profile_tech_stack || activeProject.profile_key_features ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start font-sans">
-                  
-                  {/* Purpose */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Project Purpose
-                    </h4>
-                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-900 text-sm leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_purpose}</ReactMarkdown>
-                    </div>
+            <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950 shadow-inner flex flex-col">
+              {isEditingAchievement ? (
+                <div className="flex-1 flex flex-col h-full space-y-4">
+                  <div className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1">
+                    <Edit3 className="h-3.5 w-3.5 text-teal-500" /> Markdown Source Editor
                   </div>
-
-                  {/* Tech stack */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Architectural Tech Stack
-                    </h4>
-                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-900 space-y-4">
-                      {parseTechTags(activeProject.profile_tech_stack).length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
-                            <TechBadge key={`${tag}-${i}`} tech={tag} />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert max-w-none">
-                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_tech_stack}</ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Key Subsystems & Features
-                    </h4>
-                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-900 text-sm leading-relaxed text-zinc-700 dark:text-zinc-350 prose dark:prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
-                    </div>
-                  </div>
-
+                  <textarea
+                    value={editedAchievementContent}
+                    onChange={(e) => setEditedAchievementContent(e.target.value)}
+                    className="flex-1 min-h-[350px] w-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans leading-relaxed text-base shadow-inner"
+                    placeholder="Edit milestone description in markdown..."
+                  />
                 </div>
               ) : (
-                <div className="py-16 text-center max-w-lg mx-auto space-y-3">
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-sans">
-                    This project codebase profile has not been compiled yet. Run AI Compile Stack to trace folders, scan file definitions, and generate architectural summaries.
-                  </p>
+                <div className="prose dark:prose-invert prose-base lg:prose-lg max-w-none text-zinc-800 dark:text-zinc-300 font-sans leading-relaxed">
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
                 </div>
               )}
-
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-500 flex justify-between items-center">
-              <span>Register Source: {activeProject.source}</span>
-              <span>Enrolled: {new Date(activeProject.created_at).toLocaleString()}</span>
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
+              <span>Saved in vault database ID: #{activeAchievement.id}</span>
+              <span>Committed: {new Date(activeAchievement.created_at).toLocaleString()}</span>
             </div>
 
           </div>

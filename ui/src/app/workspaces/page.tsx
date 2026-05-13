@@ -1,0 +1,375 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Folder, PlusCircle, Sparkles, X, ChevronRight, Laptop, Cpu, Settings, Copy, Code, Layers, FileCode, CheckCircle, AlertTriangle } from "lucide-react";
+import { useApp, ProjectModel } from "../context/AppContext";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+import TechBadge from "../components/TechBadge";
+
+function StatusBadge({ status }: { status: string }) {
+  const normalized = status.trim().toLowerCase();
+  let colorClass = "";
+  if (normalized === "completed" || normalized === "active" || normalized === "sealed" || normalized === "synced") {
+    colorClass = "bg-emerald-50 text-emerald-850 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+  } else if (normalized === "pending" || normalized === "reviewing") {
+    colorClass = "bg-amber-50 text-amber-850 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+  } else {
+    colorClass = "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
+  }
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border font-mono ${colorClass}`}>
+      {status}
+    </span>
+  );
+}
+
+function parseTechTags(tagStr: string): string[] {
+  if (!tagStr) return [];
+  return tagStr
+    .split(/[,\n]/)
+    .map((s) => s.replace(/^[-*•\s]+/, "").trim())
+    .filter((s) => s.length > 0 && s.length < 30);
+}
+
+export default function WorkspacesPage() {
+  const { projects, loadingProjects, fetchProjects, showToast } = useApp();
+
+  // Registration states
+  const [showRegForm, setShowRegForm] = useState(false);
+  const [regName, setRegName] = useState("");
+  const [regPath, setRegPath] = useState("");
+  const [regSource, setRegSource] = useState("github");
+  const [registering, setRegistering] = useState(false);
+
+  // Active workspace profile details modal states
+  const [activeProject, setActiveProject] = useState<ProjectModel | null>(null);
+  const [profilingMode, setProfilingMode] = useState<"none" | "standard" | "deep">("none");
+
+  const handleRegisterProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim() || !regPath.trim()) {
+      showToast("Please specify both workspace name and absolute directory target.", "error");
+      return;
+    }
+    try {
+      setRegistering(true);
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: regName, path: regPath, source: regSource }),
+        cache: "no-store"
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to register target codebase.");
+      }
+      showToast("✓ Codebase registered! SQLite database records created & pre-commit trigger hooked.", "success");
+      setRegName("");
+      setRegPath("");
+      setShowRegForm(false);
+      await fetchProjects();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || "Repository registration failure.", "error");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const triggerProfilingWithOption = async (projectId: number, deepScan: boolean) => {
+    try {
+      setProfilingMode(deepScan ? "deep" : "standard");
+      showToast(
+        deepScan
+          ? "🚀 Running deep structural codebase Scan & AI diagnostic build mapping..."
+          : "✨ Generating standard commit activity AI profile summary...",
+        "info"
+      );
+
+      const params = new URLSearchParams();
+      params.set("id", projectId.toString());
+      if (deepScan) params.set("analyze_errors", "true");
+
+      const res = await fetch(`/api/projects/profile?${params.toString()}`, {
+        method: "POST"
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to compile AI codebase profile");
+      }
+
+      const updatedProj = await res.json();
+      showToast(
+        deepScan
+          ? "✓ Deep codebase structural analysis and diagnostics compiled!"
+          : "✓ Project log-based AI profile built successfully!",
+        "success"
+      );
+
+      // Refresh project list and re-sync active model fields
+      await fetchProjects();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || "AI Profiling command failed.", "error");
+    } finally {
+      setProfilingMode("none");
+    }
+  };
+
+  // Keep the active project modal details synchronized when projects refresh
+  useEffect(() => {
+    if (activeProject) {
+      const refreshed = projects.find(p => p.id === activeProject.id);
+      if (refreshed) {
+        setActiveProject(refreshed);
+      }
+    }
+  }, [projects, activeProject]);
+
+  return (
+    <div className="space-y-8 font-mono pb-12 p-8 max-w-7xl mx-auto animate-fade-in transition-colors">
+      
+      {/* 1. HEADER SECTION */}
+      <section className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-6 border-b border-slate-200 dark:border-slate-900">
+        <div className="space-y-1">
+          <span className="text-xs text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold tracking-wider">
+            <Cpu className="h-4 w-4 animate-pulse" /> Codebases Architecture Profiles
+          </span>
+          <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 uppercase">
+            Workspace Catalog
+          </h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-450 font-sans leading-relaxed">
+            Manage development filesystems, run deep structural scans, and compile detailed architectural reports of framework libraries and sub-modules.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowRegForm(!showRegForm)}
+          className="px-4 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-zinc-650 dark:text-zinc-300 hover:text-zinc-800 dark:hover:text-white font-bold uppercase transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+        >
+          <PlusCircle className="h-4 w-4" /> Register Repository
+        </button>
+      </section>
+
+      {/* 2. REPOSITORY REGISTRATION DRAWER */}
+      {showRegForm && (
+        <form
+          onSubmit={handleRegisterProject}
+          className="p-6 bg-white dark:bg-slate-950 border border-slate-250 dark:border-slate-900 rounded-3xl grid grid-cols-1 md:grid-cols-4 gap-6 animate-slide-down shadow-xl"
+        >
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 block">Workspace Title</label>
+            <input
+              type="text"
+              value={regName}
+              onChange={(e) => setRegName(e.target.value)}
+              placeholder="e.g. core-auth-service"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans shadow-inner"
+              required
+            />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 block">Absolute Folder Path</label>
+            <input
+              type="text"
+              value={regPath}
+              onChange={(e) => setRegPath(e.target.value)}
+              placeholder="e.g. /home/tin/projects/core-auth-service"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-xl text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans shadow-inner"
+              required
+            />
+          </div>
+          <div className="space-y-1.5 flex items-end">
+            <button
+              type="submit"
+              disabled={registering}
+              className="w-full py-2.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 font-extrabold uppercase rounded-xl text-xs shadow-sm cursor-pointer disabled:opacity-40 transition-all"
+            >
+              {registering ? "Registering..." : "Mount Git Interceptors"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* 3. PROFILES GRID LIST */}
+      <section className="space-y-6">
+        {loadingProjects ? (
+          <div className="py-24 text-center space-y-3">
+            <div className="h-6 w-6 border-t-2 border-r-2 border-teal-500 rounded-full animate-spin mx-auto" />
+            <p className="text-xs text-teal-600 dark:text-teal-400 font-bold">Querying enrolled workspaces...</p>
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="p-24 border border-dashed border-slate-200 dark:border-slate-900 rounded-3xl text-center text-zinc-500 text-sm leading-relaxed max-w-4xl mx-auto">
+            📭 No workspace codebases registered yet. Use the registration panel to mount interceptor hooks.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+            {projects.map((proj) => {
+              const hasProfile = proj.profile_purpose || proj.profile_tech_stack || proj.profile_key_features;
+              return (
+                <div
+                  key={proj.id}
+                  onClick={() => {
+                    setActiveProject(proj);
+                    setProfilingMode("none");
+                  }}
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-3xl p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/35 transition-all duration-300 flex flex-col justify-between gap-5 shadow-sm"
+                >
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center font-mono">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-450 flex items-center gap-1.5 uppercase font-black">
+                        <Laptop className="h-3.5 w-3.5" /> Workspace Base
+                      </span>
+                      <StatusBadge status={hasProfile ? "Completed" : "Pending"} />
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-black text-slate-850 dark:text-zinc-100 truncate uppercase tracking-wider">{proj.name}</h4>
+                      <code className="text-xs bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-150 dark:border-slate-880 text-zinc-500 dark:text-zinc-450 truncate block select-all font-bold">
+                        {proj.path}
+                      </code>
+                    </div>
+
+                    {hasProfile ? (
+                      <p className="text-xs text-zinc-650 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-3 border-t border-slate-150 dark:border-slate-900">
+                        {proj.profile_purpose}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-zinc-450 dark:text-zinc-600 font-sans italic leading-relaxed pt-3 border-t border-slate-150 dark:border-slate-900">
+                        No AI compiled profile description. Click card to run Standard Profile or deep filesystem Directory Scans.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 pt-2">
+                    {hasProfile && parseTechTags(proj.profile_tech_stack).slice(0, 4).map((tag, i) => (
+                      <TechBadge key={`${tag}-${i}`} tech={tag} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* 4. IMMERSIVE LIGHTBOX DEEP PROFILE VIEW WITH DUAL PROFILING CHANNELS */}
+      {activeProject && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
+            
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <Folder className="h-5 w-5 text-teal-500 dark:text-teal-400 animate-pulse" />
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-850 dark:text-slate-100">{activeProject.name}</h3>
+                  <p className="text-xs text-zinc-550 dark:text-zinc-450 mt-1 select-all">Path: {activeProject.path}</p>
+                </div>
+              </div>
+              
+              {/* Dual-Mode compilation controllers */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => triggerProfilingWithOption(activeProject.id, false)}
+                  disabled={profilingMode !== "none"}
+                  className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-350 hover:text-slate-800 dark:hover:text-white font-extrabold text-xs uppercase rounded-lg shadow-sm transition-all flex items-center gap-1 disabled:opacity-40 cursor-pointer"
+                  title="Generate profile based solely on SQLite commit logs"
+                >
+                  <FileCode className={`h-3.5 w-3.5 ${profilingMode === "standard" ? "animate-spin text-teal-500" : "text-teal-500"}`} />
+                  <span>{profilingMode === "standard" ? "Compiling Logs..." : "Standard Profile"}</span>
+                </button>
+
+                <button
+                  onClick={() => triggerProfilingWithOption(activeProject.id, true)}
+                  disabled={profilingMode !== "none"}
+                  className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-650 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-extrabold text-xs uppercase rounded-lg shadow-sm transition-all flex items-center gap-1 disabled:opacity-40 cursor-pointer animate-pulse"
+                  title="Run deep directory file system scanning, framework mappings and AI build analysis"
+                >
+                  <Sparkles className={`h-3.5 w-3.5 ${profilingMode === "deep" ? "animate-spin text-teal-400" : "text-teal-400"}`} />
+                  <span>{profilingMode === "deep" ? "Deep Scanning Repo..." : "Deep Scan (Diagnostics)"}</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveProject(null)}
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950 shadow-inner space-y-6 text-left">
+              
+              {activeProject.profile_purpose || activeProject.profile_tech_stack || activeProject.profile_key_features ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start font-sans">
+                  
+                  {/* Purpose */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
+                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Project Purpose
+                    </h4>
+                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-900 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_purpose}</ReactMarkdown>
+                    </div>
+                  </div>
+
+                  {/* Tech stack */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
+                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Technical Architectural Stack
+                    </h4>
+                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-900 space-y-4">
+                      {parseTechTags(activeProject.profile_tech_stack).length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
+                            <TechBadge key={`${tag}-${i}`} tech={tag} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_tech_stack}</ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
+                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Key Subsystems & Features
+                    </h4>
+                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-900 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
+                    </div>
+                  </div>
+
+                </div>
+              ) : (
+                <div className="py-20 text-center max-w-xl mx-auto space-y-4 font-sans">
+                  <div className="text-4xl">🤖</div>
+                  <h3 className="text-sm font-black uppercase font-mono text-slate-850 dark:text-slate-100">AI Profile Summary Pending</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    This project codebase profile has not been compiled yet. Click <strong>Standard Profile</strong> to scan git commit logs, or run <strong>Deep Scan (Diagnostics)</strong> to run structural folder maps & configuration scanners.
+                  </p>
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
+              <span>Register Source: {activeProject.source}</span>
+              <span>Enrolled: {new Date(activeProject.created_at).toLocaleString()}</span>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

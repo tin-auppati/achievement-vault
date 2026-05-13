@@ -139,12 +139,14 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 			return
 		}
 
+		analyzeErrors := r.URL.Query().Get("analyze_errors") == "true"
+
 		var purpose, techStack, features string
 
 		// If project has a local path registered, execute our premium deep directory mapping scanner!
 		if projectPath != "" {
 			if info, sErr := os.Stat(projectPath); sErr == nil && info.IsDir() {
-				_, _, purpose, techStack, features, err = ScanAndProfileRepository(db, projectPath, false)
+				_, _, purpose, techStack, features, err = ScanAndProfileRepository(db, projectPath, analyzeErrors)
 				if err != nil {
 					http.Error(w, fmt.Sprintf(`{"error": "AI scan-repo profiling failed: %s"}`, err.Error()), http.StatusInternalServerError)
 					return

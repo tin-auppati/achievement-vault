@@ -62,8 +62,13 @@ interface AppContextType {
   approving: boolean;
   checkingPending: boolean;
   savingDraft: boolean;
+  refreshing: boolean;
+  loadingProjectSummary: boolean;
+  projectSummaryContent: string;
+  showProjectSummaryModal: boolean;
   toast: { message: string; type: "success" | "error" | "info" } | null;
   
+  setShowProjectSummaryModal: (show: boolean) => void;
   showToast: (message: string, type?: "success" | "error" | "info") => void;
   hideToast: () => void;
   fetchProjects: () => Promise<void>;
@@ -77,7 +82,9 @@ interface AppContextType {
   saveDraftChanges: (content: string) => Promise<void>;
   approveDraft: (content: string, startDate: string, endDate: string) => Promise<void>;
   deleteAchievement: (id: number) => Promise<void>;
+  updateAchievement: (id: number, content: string) => Promise<void>;
   triggerProjectProfiling: (projectId: number) => Promise<void>;
+  triggerProjectSummary: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -101,11 +108,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [approving, setApproving] = useState(false);
   const [checkingPending, setCheckingPending] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  
+  // NEW GLOBAL STATES FOR PROJECT SUMMARY MODAL
+  const [loadingProjectSummary, setLoadingProjectSummary] = useState(false);
+  const [projectSummaryContent, setProjectSummaryContent] = useState("");
+  const [showProjectSummaryModal, setShowProjectSummaryModal] = useState(false);
+
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 5500);
+    setTimeout(() => setToast(null), 5550);
   };
 
   const hideToast = () => setToast(null);
@@ -174,12 +188,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const fetchAllGlobalData = async () => {
-    await Promise.all([
-      fetchProjects(),
-      fetchResumes(),
-      fetchStats(),
-      fetchStatus()
-    ]);
+    try {
+      setRefreshing(true);
+      await Promise.all([
+        fetchProjects(),
+        fetchResumes(),
+        fetchStats(),
+        fetchStatus()
+      ]);
+    } catch (err) {
+      console.error("Error refreshing global feeds", err);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Run initial data loading
@@ -301,6 +322,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // PUT METHOD TO UPDATE AN EXISTING SEALED ACHIEVEMENT
+  const updateAchievement = async (id: number, content: string) => {
+    try {
+      showToast("Saving edits to weekly achievement milestone...", "info");
+      const res = await fetch(`/api/achievements/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content_md: content })
+      });
+      if (!res.ok) throw new Error("Failed to update milestone");
+      showToast("✓ Milestone details updated inside SQLite vault!", "success");
+      await fetchAllGlobalData();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || "Failed to update milestone.", "error");
+    }
+  };
+
   const triggerProjectProfiling = async (projectId: number) => {
     try {
       showToast("Generating AI architectural project profile...", "info");
@@ -313,6 +352,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       console.error(err);
       showToast(err.message || "Profiling command failed.", "error");
+    }
+  };
+
+  // NEW DEDICATED METHOD FOR GLOBAL RESUME SUMMARIZE-PROJECT TRIGGER
+  const triggerProjectSummary = async () => {
+    try {
+      setLoadingProjectSummary(true);
+      showToast("✨ Gathering all approved weekly achievements to build professional portfolio resume with Gemini...", "info");
+      
+      const res = await fetch("/api/resume", { cache: "no-store" });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to compile project portfolio resume");
+      }
+      
+      const data = await res.json();
+      setProjectSummaryContent(data.resume_content || "");
+      setShowProjectSummaryModal(true);
+      showToast("✓ Portfolio resume compiled! View or save from the modal.", "success");
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || "Failed to summarize projects into resume.", "error");
+    } finally {
+      setLoadingProjectSummary(false);
     }
   };
 
@@ -330,7 +393,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         approving,
         checkingPending,
         savingDraft,
+        refreshing,
+        loadingProjectSummary,
+        projectSummaryContent,
+        showProjectSummaryModal,
         toast,
+        setShowProjectSummaryModal,
         showToast,
         hideToast,
         fetchProjects,
@@ -343,7 +411,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         saveDraftChanges,
         approveDraft,
         deleteAchievement,
+        updateAchievement,
         triggerProjectProfiling,
+        triggerProjectSummary,
       }}
     >
       {children}
