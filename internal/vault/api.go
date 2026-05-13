@@ -288,7 +288,28 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 	}))
 
 	http.HandleFunc("/api/logs", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		logs, err := getAPILogs(db)
+		q := r.URL.Query().Get("q")
+		
+		limitStr := r.URL.Query().Get("limit")
+		limit := 0
+		if limitStr != "" {
+			if l, err := strconv.Atoi(limitStr); err == nil {
+				limit = l
+			}
+		}
+
+		offsetStr := r.URL.Query().Get("offset")
+		offset := 0
+		if offsetStr != "" {
+			if o, err := strconv.Atoi(offsetStr); err == nil {
+				offset = o
+			}
+		}
+
+		startDate := r.URL.Query().Get("start_date")
+		endDate := r.URL.Query().Get("end_date")
+
+		logs, err := getAPILogs(db, q, limit, offset, startDate, endDate)
 		if err != nil {
 			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
 			return
@@ -298,7 +319,28 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 	}))
 
 	http.HandleFunc("/api/achievements", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		achievements, err := GetWeeklyAchievements(db)
+		q := r.URL.Query().Get("q")
+		
+		limitStr := r.URL.Query().Get("limit")
+		limit := 0
+		if limitStr != "" {
+			if l, err := strconv.Atoi(limitStr); err == nil {
+				limit = l
+			}
+		}
+
+		offsetStr := r.URL.Query().Get("offset")
+		offset := 0
+		if offsetStr != "" {
+			if o, err := strconv.Atoi(offsetStr); err == nil {
+				offset = o
+			}
+		}
+
+		startDate := r.URL.Query().Get("start_date")
+		endDate := r.URL.Query().Get("end_date")
+
+		achievements, err := GetWeeklyAchievementsFiltered(db, q, limit, offset, startDate, endDate)
 		if err != nil {
 			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
 			return
@@ -467,14 +509,47 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func getAPILogs(db *sql.DB) ([]APILog, error) {
+func getAPILogs(db *sql.DB, q string, limit, offset int, startDate, endDate string) ([]APILog, error) {
 	query := `
 		SELECT raw_logs.id, raw_logs.project_id, projects.name, raw_logs.type, raw_logs.content, raw_logs.metadata, raw_logs.timestamp
 		FROM raw_logs
-		JOIN projects ON projects.id = raw_logs.project_id
-		ORDER BY raw_logs.timestamp DESC`
+		JOIN projects ON projects.id = raw_logs.project_id`
 
-	rows, err := db.Query(query)
+	var conditions []string
+	var args []interface{}
+
+	if q != "" {
+		conditions = append(conditions, "(raw_logs.content LIKE ? OR raw_logs.metadata LIKE ? OR projects.name LIKE ? OR raw_logs.type LIKE ?)")
+		searchPattern := "%" + q + "%"
+		args = append(args, searchPattern, searchPattern, searchPattern, searchPattern)
+	}
+
+	if startDate != "" {
+		conditions = append(conditions, "raw_logs.timestamp >= ?")
+		args = append(args, startDate)
+	}
+
+	if endDate != "" {
+		conditions = append(conditions, "raw_logs.timestamp <= ?")
+		args = append(args, endDate)
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	query += " ORDER BY raw_logs.timestamp DESC"
+
+	if limit > 0 {
+		query += " LIMIT ?"
+		args = append(args, limit)
+		if offset > 0 {
+			query += " OFFSET ?"
+			args = append(args, offset)
+		}
+	}
+
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve logs: %w", err)
 	}

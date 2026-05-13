@@ -3,6 +3,7 @@ package vault
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
 // WeeklyAchievement represents a record in the weekly_achievements table.
@@ -36,12 +37,49 @@ func SaveWeeklyAchievement(db *sql.DB, contentMd, startDate, endDate string) (in
 
 // GetWeeklyAchievements retrieves all previously saved weekly achievements.
 func GetWeeklyAchievements(db *sql.DB) ([]WeeklyAchievement, error) {
+	return GetWeeklyAchievementsFiltered(db, "", 0, 0, "", "")
+}
+
+// GetWeeklyAchievementsFiltered retrieves weekly achievements matching search queries, pagination, and date constraints.
+func GetWeeklyAchievementsFiltered(db *sql.DB, q string, limit, offset int, startDate, endDate string) ([]WeeklyAchievement, error) {
 	query := `
 		SELECT id, content_md, start_date, end_date, created_at 
-		FROM weekly_achievements 
-		ORDER BY id ASC`
+		FROM weekly_achievements`
 
-	rows, err := db.Query(query)
+	var conditions []string
+	var args []interface{}
+
+	if q != "" {
+		conditions = append(conditions, "content_md LIKE ?")
+		args = append(args, "%"+q+"%")
+	}
+
+	if startDate != "" {
+		conditions = append(conditions, "(start_date >= ? OR created_at >= ?)")
+		args = append(args, startDate, startDate)
+	}
+
+	if endDate != "" {
+		conditions = append(conditions, "(end_date <= ? OR created_at <= ?)")
+		args = append(args, endDate, endDate)
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	query += " ORDER BY id DESC"
+
+	if limit > 0 {
+		query += " LIMIT ?"
+		args = append(args, limit)
+		if offset > 0 {
+			query += " OFFSET ?"
+			args = append(args, offset)
+		}
+	}
+
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query weekly achievements list: %w", err)
 	}

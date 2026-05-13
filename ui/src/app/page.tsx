@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -1072,9 +1073,17 @@ export default function Dashboard() {
                     <h2 className="text-xs font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 flex items-center gap-2 font-mono">
                       <span>📥</span> Raw Log Feed
                     </h2>
-                    <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-200 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-300 dark:border-zinc-800">
-                      {logs.length} logged events
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href="/logs"
+                        className="text-[9px] font-black uppercase tracking-wider text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 flex items-center gap-0.5 transition-colors"
+                      >
+                        View All <ChevronRight className="h-3 w-3" />
+                      </Link>
+                      <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-200 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-300 dark:border-zinc-800">
+                        {logs.length} logged events
+                      </span>
+                    </div>
                   </div>
  
                   <div className="flex-1 overflow-y-auto max-h-[500px] pr-2 space-y-3">
@@ -1093,9 +1102,11 @@ export default function Dashboard() {
                               : "bg-white dark:bg-zinc-900/40 border-slate-200 dark:border-slate-800 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/80 hover:border-slate-300 dark:hover:border-slate-750"
                           }`}
                         >
-                          <div className="flex justify-between items-start gap-2">
-                            <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 rounded border border-zinc-200 dark:border-zinc-700 uppercase font-semibold">
-                              {log.project_name}
+                           <div className="flex justify-between items-start gap-2">
+                            <span className="inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 bg-zinc-50 dark:bg-zinc-850/60 text-slate-600 dark:text-slate-300 rounded-md border border-zinc-200 dark:border-zinc-800/80 font-semibold shadow-sm">
+                              <Folder className="h-2.5 w-2.5 text-teal-500" />
+                              <span className="text-[7.5px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mr-0.5">Repo:</span>
+                              <span className="text-zinc-700 dark:text-zinc-200">{log.project_name}</span>
                             </span>
                             <span className="text-[9px] font-mono text-zinc-500 dark:text-zinc-300">
                               {new Date(log.timestamp).toLocaleDateString(undefined, {
@@ -1126,9 +1137,17 @@ export default function Dashboard() {
                     <h2 className="text-xs font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 flex items-center gap-2 font-mono">
                       <span>🏆</span> Weekly Achievements Vault
                     </h2>
-                    <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-200 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-300 dark:border-zinc-800">
-                      {achievements.length} approved periods
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href="/vault"
+                        className="text-[9px] font-black uppercase tracking-wider text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 flex items-center gap-0.5 transition-colors"
+                      >
+                        View All <ChevronRight className="h-3 w-3" />
+                      </Link>
+                      <span className="text-[9px] font-mono px-2 py-0.5 bg-zinc-200 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded border border-zinc-300 dark:border-zinc-800">
+                        {achievements.length} approved periods
+                      </span>
+                    </div>
                   </div>
  
                   {achievements.length === 0 ? (

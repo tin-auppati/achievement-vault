@@ -38,5 +38,5 @@ data/
 
 # Binaries
 bin/
-achievement-vault
-vault
+/achievement-vault
+/vault
