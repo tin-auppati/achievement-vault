@@ -10,6 +10,45 @@ import TechBadge from "../components/TechBadge";
 import StatusBadge from "../components/StatusBadge";
 import { parseTechTags } from "../utils/techUtils";
 
+function calculateWorkspaceQualityScore(proj: any): number {
+  let score = 0;
+  
+  const hasProfile = proj.profile_purpose || proj.profile_tech_stack || proj.profile_key_features;
+  if (!hasProfile) {
+    return 0;
+  }
+  
+  // Base score for having a profile compiled
+  score += 100;
+  
+  // Scoring by Purpose detail length
+  if (proj.profile_purpose) {
+    const purposeLen = proj.profile_purpose.trim().length;
+    score += Math.min(purposeLen, 150);
+    if (purposeLen > 40) {
+      score += 50; // Bonus for thorough descriptive overview
+    }
+  }
+  
+  // Scoring by Tech Stack diversity
+  if (proj.profile_tech_stack) {
+    const tags = parseTechTags(proj.profile_tech_stack);
+    score += tags.length * 20;
+  }
+  
+  // Scoring by Key Features richness and bullet items
+  if (proj.profile_key_features) {
+    const featuresLen = proj.profile_key_features.trim().length;
+    score += Math.min(featuresLen, 150);
+    
+    // Count bullets/key points
+    const bulletCount = (proj.profile_key_features.match(/[-*•]/g) || []).length;
+    score += bulletCount * 15;
+  }
+  
+  return score;
+}
+
 export default function WorkspacesPage() {
   const { projects, loadingProjects, fetchProjects, showToast } = useApp();
 
@@ -279,49 +318,75 @@ export default function WorkspacesPage() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950 shadow-inner space-y-6 text-left">
+            <div className="p-8 overflow-y-auto flex-1 bg-white dark:bg-slate-950 flex flex-col space-y-6 text-left">
               
+              {/* Path and Score Section */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-850 rounded-2xl">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-black font-mono">Workspace path</span>
+                  <code className="text-xs text-zinc-650 dark:text-zinc-300 block font-bold select-all break-all font-mono">
+                    {activeProject.path}
+                  </code>
+                </div>
+                {calculateWorkspaceQualityScore(activeProject) > 0 && (
+                  <div className="flex flex-col items-center justify-center bg-amber-500/10 border border-amber-500/25 px-4 py-2 rounded-xl text-center min-w-[100px] font-mono">
+                    <span className="text-[9px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest">Profile Score</span>
+                    <span className="text-lg font-black text-amber-500">{calculateWorkspaceQualityScore(activeProject)}</span>
+                  </div>
+                )}
+              </div>
+
               {activeProject.profile_purpose || activeProject.profile_tech_stack || activeProject.profile_key_features ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start font-sans">
+                <div className="space-y-6">
                   
-                  {/* Purpose */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Project Purpose
+                  {/* Profile Purpose */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 font-mono">
+                      <Laptop className="h-4 w-4 text-teal-500" /> Workspace Purpose
                     </h4>
-                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-900 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_purpose}</ReactMarkdown>
-                    </div>
+                    {activeProject.profile_purpose ? (
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed bg-slate-50/50 dark:bg-slate-900/10 p-4 border border-slate-150 dark:border-slate-900 rounded-2xl font-semibold">
+                        {activeProject.profile_purpose}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-zinc-400 dark:text-zinc-650 italic leading-relaxed font-sans">
+                        No purpose description compiled for this repository.
+                      </p>
+                    )}
                   </div>
 
-                  {/* Tech stack */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Technical Architectural Stack
+                  {/* Profile Tech Stack */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 font-mono">
+                      <Code className="h-4 w-4 text-teal-500" /> Tech Stack & Dialects
                     </h4>
-                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-900 space-y-4">
-                      {parseTechTags(activeProject.profile_tech_stack).length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
-                            <TechBadge key={`${tag}-${i}`} tech={tag} />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
-                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_tech_stack}</ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
+                    {activeProject.profile_tech_stack ? (
+                      <div className="flex flex-wrap gap-1.5 p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl">
+                        {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
+                          <TechBadge key={`${tag}-${i}`} tech={tag} />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-zinc-400 dark:text-zinc-650 italic leading-relaxed font-sans">
+                        No tech stack identified yet.
+                      </p>
+                    )}
                   </div>
 
-                  {/* Features */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Key Subsystems & Features
+                  {/* Profile Key Features */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5 font-mono">
+                      <Layers className="h-4 w-4 text-teal-500" /> Key Features & Architecture
                     </h4>
-                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-900 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
-                    </div>
+                    {activeProject.profile_key_features ? (
+                      <div className="p-4 bg-slate-50/50 dark:bg-slate-900/10 border border-slate-150 dark:border-slate-900 rounded-2xl prose dark:prose-invert max-w-none text-xs font-sans text-zinc-700 dark:text-zinc-300">
+                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-zinc-400 dark:text-zinc-650 italic leading-relaxed font-sans">
+                        No key architectural features compiled yet. Run a Deep Scan to extract them.
+                      </p>
+                    )}
                   </div>
 
                 </div>
@@ -330,7 +395,7 @@ export default function WorkspacesPage() {
                   <div className="text-4xl">🤖</div>
                   <h3 className="text-sm font-black uppercase font-mono text-slate-850 dark:text-slate-100">AI Profile Summary Pending</h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    This project codebase profile has not been compiled yet. Click <strong>Standard Profile</strong> to scan git commit logs, or run <strong>Deep Scan (Diagnostics)</strong> to run structural folder maps & configuration scanners.
+                    This project codebase profile has not been compiled yet. Click <strong>Standard Profile</strong> above to scan git commit logs, or run <strong>Deep Scan (Diagnostics)</strong> to run structural folder maps & configuration scanners.
                   </p>
                 </div>
               )}
