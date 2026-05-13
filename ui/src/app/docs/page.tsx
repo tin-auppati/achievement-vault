@@ -229,7 +229,7 @@ export default function DocsPage() {
           filteredCommands.map((cmd) => (
             <div
               key={cmd.command}
-              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 hover:border-slate-350 dark:hover:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 relative group overflow-hidden shadow-sm"
+              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 relative group overflow-hidden shadow-sm"
             >
               <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                 <div className="space-y-2.5 flex-1">
