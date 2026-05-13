@@ -1,19 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { Award, Search, Calendar, ChevronLeft, Sparkles, X, Folder, Clock, ArrowDownCircle } from "lucide-react";
-
-interface Achievement {
-  id: number;
-  content_md: string;
-  start_date: string;
-  end_date: string;
-  created_at: string;
-}
+import { Award, Search, Calendar, Sparkles, X, Clock, ArrowDownCircle, Trash2 } from "lucide-react";
+import { useApp, Achievement } from "../context/AppContext";
 
 function TechBadge({ tech }: { tech: string }) {
   const normalized = tech.trim().toLowerCase();
@@ -87,6 +79,8 @@ function extractTechKeywords(text: string): string[] {
 }
 
 export default function AchievementsVault() {
+  const { deleteAchievement } = useApp();
+
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState("all");
@@ -100,7 +94,7 @@ export default function AchievementsVault() {
   const limit = 12;
 
   // Initial fetch when filters change
-  useEffect(() => {
+  const fetchInitialAchievements = () => {
     setLoading(true);
     let startStr = "";
     let endStr = "";
@@ -147,6 +141,10 @@ export default function AchievementsVault() {
         setHasMore(false);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchInitialAchievements();
   }, [search, dateRange, customStartDate, customEndDate]);
 
   // Handle Load More (Incremental appending for Infinite Scroll style)
@@ -195,63 +193,42 @@ export default function AchievementsVault() {
       });
   };
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-teal-500/25 selection:text-teal-200">
-      
-      {/* HEADER SECTION */}
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-10 px-6 py-4.5 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="h-8 w-8 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shadow-sm"
-              title="Return to Main Dashboard"
-            >
-              <ChevronLeft className="h-4.5 w-4.5" />
-            </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-teal-400 animate-pulse" />
-                <h1 className="text-sm font-black uppercase tracking-widest text-slate-100 font-mono">Weekly Achievements Vault</h1>
-              </div>
-              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">Explore full historic, Gemini AI compiled and approved developer milestones.</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-500">
-            <span>Database state:</span>
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-bold text-zinc-300 uppercase">Synchronized</span>
-          </div>
-        </div>
-      </header>
+  const handleDelete = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this achievement milestone?")) return;
+    await deleteAchievement(id);
+    fetchInitialAchievements();
+  };
 
+  return (
+    <div className="flex flex-col space-y-6">
+      
       {/* FILTER CONTROLS GRID */}
-      <section className="bg-slate-900/40 border-b border-slate-900 p-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="bg-slate-950 border border-slate-900 rounded-2xl p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           {/* SEARCH BAR */}
-          <div className="relative md:col-span-2">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400 pointer-events-none">
-              <Search className="h-3.5 w-3.5" />
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-550 pointer-events-none">
+              <Search className="h-3.5 w-3.5 text-zinc-500" />
             </span>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search achievements contents, markdown titles, keywords..."
-              className="w-full pl-9 pr-3 py-2 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all shadow-inner"
+              placeholder="Search weekly summaries..."
+              className="w-full pl-9 pr-3 py-2 text-[11px] bg-slate-950 border border-slate-900 rounded-lg text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all"
             />
           </div>
 
-          {/* DATE RANGE CHANGER */}
+          {/* DATE RANGE FILTER */}
           <div>
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full px-3 py-2 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer shadow-inner"
+              className="w-full px-3 py-2 text-[11px] bg-slate-950 border border-slate-900 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all cursor-pointer"
             >
-              <option value="all">📅 All Approved Periods</option>
+              <option value="all">📅 All Time</option>
               <option value="week">📅 Last 7 Days</option>
               <option value="month">📅 Last 30 Days</option>
               <option value="three_months">📅 Last 3 Months</option>
@@ -259,36 +236,44 @@ export default function AchievementsVault() {
             </select>
           </div>
 
+          {/* TOTAL SUMMARY COUNTER */}
+          <div className="flex items-center justify-between gap-2 bg-slate-950 px-4 py-2 border border-slate-900 rounded-lg font-mono text-[10px]">
+            <span className="text-zinc-500 uppercase font-bold tracking-wider">Milestones Vault:</span>
+            <span className="font-black text-teal-400 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/10">
+              {achievements.length} loaded
+            </span>
+          </div>
+
         </div>
 
-        {/* CUSTOM DATE PICKERS PANEL */}
+        {/* CUSTOM DATE RANGE ROW */}
         {dateRange === "custom" && (
-          <div className="max-w-7xl mx-auto mt-4 pt-4 border-t border-slate-900 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-down">
+          <div className="mt-4 pt-4 border-t border-slate-900 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-down">
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase font-mono block">Start Boundary</label>
+              <label className="text-[9px] font-bold text-zinc-500 uppercase font-mono block">From Date</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500 pointer-events-none">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-550 pointer-events-none">
                   <Calendar className="h-3.5 w-3.5" />
                 </span>
                 <input
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-800 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
+                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-900 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-zinc-500 uppercase font-mono block">End Boundary</label>
+              <label className="text-[9px] font-bold text-zinc-500 uppercase font-mono block">To Date</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500 pointer-events-none">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-550 pointer-events-none">
                   <Calendar className="h-3.5 w-3.5" />
                 </span>
                 <input
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-800 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
+                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-900 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
                 />
               </div>
             </div>
@@ -296,133 +281,114 @@ export default function AchievementsVault() {
         )}
       </section>
 
-      {/* CORE GALLERY CONTAINER */}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
-        
-        <div className="flex justify-between items-center bg-slate-950/40 p-3.5 border border-slate-900 rounded-xl">
-          <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-teal-400" /> Executive Milestones Grid
-          </span>
-          <span className="text-[9px] font-mono px-2 py-0.5 bg-slate-900 text-zinc-400 rounded border border-slate-800">
-            Total {achievements.length} loaded records
-          </span>
-        </div>
-
+      {/* CORE GRID GALLERY */}
+      <section className="space-y-6">
         {loading ? (
-          <div className="h-60 flex flex-col items-center justify-center space-y-3">
-            <div className="h-8 w-8 border-t-2 border-r-2 border-teal-500 rounded-full animate-spin" />
-            <p className="text-xs text-teal-400 font-mono">Syncing weekly reports with SQLite server...</p>
+          <div className="py-24 text-center space-y-3 font-mono">
+            <div className="h-6 w-6 border-t-2 border-r-2 border-teal-500 rounded-full animate-spin mx-auto" />
+            <p className="text-[10px] text-teal-400">Loading achievements archive...</p>
           </div>
         ) : achievements.length === 0 ? (
-          <div className="p-20 border border-dashed border-slate-900 rounded-3xl text-center text-zinc-500 max-w-xl mx-auto">
-            <span className="text-4xl mb-4 block">📭</span>
-            <p className="text-sm font-semibold font-mono">Empty Milestone Archive</p>
-            <p className="text-[10px] text-zinc-600 mt-1 font-mono">No approved weekly achievements matched the search filters or date range constraints.</p>
+          <div className="p-24 border border-dashed border-slate-900 rounded-3xl text-center text-zinc-500 text-xs font-mono">
+            📭 No approved milestone summaries stored inside the SQLite vault database yet.
           </div>
         ) : (
-          <div className="space-y-8">
-            {/* GRID LAYOUT */}
+          <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {achievements.map((ach) => {
-                const tags = extractTechKeywords(ach.content_md);
-                return (
-                  <div
-                    key={ach.id}
-                    onClick={() => setActiveAchievement(ach)}
-                    className="bg-slate-950 border border-slate-900 p-5 rounded-2xl cursor-pointer flex flex-col justify-between space-y-4 hover:scale-[1.01] hover:border-teal-500 transition-all duration-300 shadow-sm shadow-black/40 relative group overflow-hidden"
-                  >
-                    {/* Hover Glow Edge effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
-
-                    <div className="space-y-3.5">
-                      <div className="flex justify-between items-center gap-2">
-                        <span className="text-[8px] font-mono px-1.5 py-0.5 bg-slate-900 border border-slate-850 rounded text-slate-400 uppercase font-bold">
-                          ID: #{ach.id}
+              {achievements.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => setActiveAchievement(item)}
+                  className="bg-slate-950 border border-slate-900 hover:border-slate-800 rounded-2xl p-6 transition-all duration-300 shadow-sm cursor-pointer relative group flex flex-col justify-between hover:bg-slate-950/60"
+                >
+                  <div className="space-y-4">
+                    {/* Badge and Title Row */}
+                    <div className="flex justify-between items-start gap-1 font-mono">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-zinc-500 flex items-center gap-1.5 uppercase font-bold">
+                          <Clock className="h-3 w-3" /> Milestone Summary
                         </span>
-                        <StatusBadge status="Approved" />
+                        <div className="text-[9px] font-black text-slate-200 uppercase tracking-wide mt-1">
+                          {new Date(item.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })} - {new Date(item.end_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                        </div>
                       </div>
-
-                      <div>
-                        <h3 className="text-xs font-black uppercase tracking-wider text-slate-100 font-mono flex items-center gap-1.5">
-                          <Clock className="h-3 w-3 text-teal-500" /> {ach.start_date} <span className="text-zinc-600 font-sans font-normal">to</span> {ach.end_date}
-                        </h3>
-                        <p className="text-[11px] leading-relaxed text-zinc-400 mt-2 line-clamp-3 prose dark:prose-invert font-mono">
-                          {ach.content_md.replace(/[#*`>_\-]/g, " ").substring(0, 150)}...
-                        </p>
-                      </div>
+                      <StatusBadge status="Sealed" />
                     </div>
 
-                    {tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 pt-2 border-t border-slate-900/80">
-                        {tags.map((tag, i) => (
-                          <TechBadge key={`${tag}-${i}`} tech={tag} />
-                        ))}
-                      </div>
-                    )}
+                    {/* Markdown snippet container */}
+                    <div className="text-[10px] text-zinc-400 line-clamp-5 leading-relaxed prose dark:prose-invert prose-xs max-w-none font-sans py-2.5 border-t border-slate-900 border-b">
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{item.content_md}</ReactMarkdown>
+                    </div>
                   </div>
-                );
-              })}
+
+                  {/* Card bottom details */}
+                  <div className="flex justify-between items-center pt-4 font-mono text-[9px] text-zinc-500">
+                    <span className="font-bold text-[8px] tracking-wider uppercase">Saved in vault: #{item.id}</span>
+                    <div className="flex items-center gap-2">
+                      {extractTechKeywords(item.content_md).slice(0, 2).map((tech, i) => (
+                        <TechBadge key={`${tech}-${i}`} tech={tech} />
+                      ))}
+                      <button
+                        onClick={(e) => handleDelete(item.id, e)}
+                        className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-950/20 rounded transition-colors"
+                        title="Delete Milestone"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* INFINITE SCROLL / LOAD MORE BUTTON */}
+            {/* Load More Trigger Button for Infinite Scroll */}
             {hasMore && (
-              <div className="flex justify-center pt-4 pb-12">
+              <div className="text-center pt-6 font-mono">
                 <button
                   onClick={handleLoadMore}
-                  className="px-6 py-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 hover:text-white font-mono font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md"
+                  className="px-6 py-2.5 bg-slate-900 hover:bg-slate-850 text-zinc-300 hover:text-white border border-slate-800 rounded-xl transition-all cursor-pointer font-bold text-[10px] uppercase tracking-wider inline-flex items-center gap-2"
                 >
-                  <ArrowDownCircle className="h-4 w-4 text-teal-400" />
-                  Load More Achievements
+                  <ArrowDownCircle className="h-4 w-4 text-teal-400 animate-bounce" /> Load More Milestones
                 </button>
               </div>
             )}
-          </div>
+          </>
         )}
-      </main>
+      </section>
 
-      {/* INDIVIDUAL ACHIEVEMENT FULL VIEW MODAL */}
+      {/* IMMERSIVE LIGHTBOX DETAIL MODAL */}
       {activeAchievement && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 animate-fade-in">
-          <div className="bg-slate-950 border border-slate-900 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in">
             
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-900 flex justify-between items-center bg-slate-900/50">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-md font-mono">
-                    Milestone Overview
-                  </span>
-                  <StatusBadge status="Approved" />
+            <div className="p-6 border-b border-slate-850 flex justify-between items-center font-mono">
+              <div className="flex items-center gap-3">
+                <Award className="h-5 w-5 text-teal-400" />
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-100">Weekly Achievement Detail</h3>
+                  <p className="text-[9px] text-zinc-400 dark:text-zinc-500 mt-1">
+                    {new Date(activeAchievement.start_date).toLocaleDateString(undefined, { month: "long", day: "numeric" })} - {new Date(activeAchievement.end_date).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}
+                  </p>
                 </div>
-                <h2 className="text-xs font-bold text-slate-100 mt-2 font-mono flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-teal-500" /> Period: {activeAchievement.start_date} to {activeAchievement.end_date}
-                </h2>
-                
-                {extractTechKeywords(activeAchievement.content_md).length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {extractTechKeywords(activeAchievement.content_md).map((tech, i) => (
-                      <TechBadge key={`${tech}-${i}`} tech={tech} />
-                    ))}
-                  </div>
-                )}
               </div>
               <button
                 onClick={() => setActiveAchievement(null)}
-                className="h-8 w-8 bg-slate-900 hover:bg-slate-800 rounded-full border border-slate-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="h-8 w-8 bg-slate-950 hover:bg-slate-850 border border-slate-800 text-zinc-400 hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto flex-1 bg-slate-950 shadow-inner flex flex-col">
-              <div className="prose dark:prose-invert max-w-none text-zinc-300 font-mono text-xs leading-relaxed">
+            <div className="p-8 overflow-y-auto flex-1 bg-slate-950 shadow-inner flex flex-col">
+              <div className="prose dark:prose-invert max-w-none text-zinc-300 font-sans text-xs leading-relaxed">
                 <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeAchievement.content_md}</ReactMarkdown>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-900/30 border-t border-slate-900/80 rounded-b-2xl flex justify-between items-center text-[9px] text-zinc-500 font-mono">
+            <div className="p-4 bg-slate-900/35 border-t border-slate-850 text-[9px] text-zinc-500 font-mono flex justify-between items-center">
               <span>Saved in vault database ID: #{activeAchievement.id}</span>
               <span>Committed: {new Date(activeAchievement.created_at).toLocaleString()}</span>
             </div>

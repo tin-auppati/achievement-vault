@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Folder, Search, Calendar, ChevronLeft, ChevronRight, Activity, Terminal, Code, Clock } from "lucide-react";
+import { useApp } from "../context/AppContext";
 
 interface Log {
   id: number;
@@ -12,13 +12,6 @@ interface Log {
   content: string;
   metadata: string;
   timestamp: string;
-}
-
-interface Project {
-  id: number;
-  name: string;
-  path: string;
-  source: string;
 }
 
 function TechBadge({ tech }: { tech: string }) {
@@ -83,8 +76,9 @@ function extractTechKeywords(text: string): string[] {
 }
 
 export default function LogsArchive() {
+  const { projects } = useApp();
+  
   const [logs, setLogs] = useState<Log[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [search, setSearch] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
   const [dateRange, setDateRange] = useState("all");
@@ -96,18 +90,6 @@ export default function LogsArchive() {
   const [activeLog, setActiveLog] = useState<Log | null>(null);
 
   const limit = 25;
-
-  // Load Projects once
-  useEffect(() => {
-    fetch("/api/projects")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setProjects(data);
-        }
-      })
-      .catch(err => console.error("Failed to load projects", err));
-  }, []);
 
   // Fetch logs when search, page, filters, or date bounds change
   useEffect(() => {
@@ -193,51 +175,23 @@ export default function LogsArchive() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-teal-500/25 selection:text-teal-200">
+    <div className="flex flex-col space-y-6">
       
-      {/* HEADER SECTION */}
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-10 px-6 py-4.5 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="h-8 w-8 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shadow-sm"
-              title="Return to Main Dashboard"
-            >
-              <ChevronLeft className="h-4.5 w-4.5" />
-            </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-teal-400" />
-                <h1 className="text-sm font-black uppercase tracking-widest text-slate-100 font-mono">Raw Log Archives</h1>
-              </div>
-              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">Explore full historic post-commit telemetry and ingestion logs.</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-500">
-            <span>Server status:</span>
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-bold text-zinc-300 uppercase">REST Live</span>
-          </div>
-        </div>
-      </header>
-
       {/* FILTER CONTROLS GRID */}
-      <section className="bg-slate-900/40 border-b border-slate-900 p-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+      <section className="bg-slate-950 border border-slate-900 rounded-2xl p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           
           {/* SEARCH BAR */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400 pointer-events-none">
-              <Search className="h-3.5 w-3.5" />
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-550 pointer-events-none">
+              <Search className="h-3.5 w-3.5 text-zinc-500" />
             </span>
             <input
               type="text"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search logs or diffs..."
-              className="w-full pl-9 pr-3 py-2 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all shadow-inner"
+              className="w-full pl-9 pr-3 py-2 text-[11px] bg-slate-950 border border-slate-900 rounded-lg text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all"
             />
           </div>
 
@@ -246,7 +200,7 @@ export default function LogsArchive() {
             <select
               value={selectedProject}
               onChange={(e) => handleProjectChange(e.target.value)}
-              className="w-full px-3 py-2 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer shadow-inner"
+              className="w-full px-3 py-2 text-[11px] bg-slate-950 border border-slate-900 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all cursor-pointer"
             >
               <option value="all">📁 All Codebases</option>
               {projects.map(proj => (
@@ -262,7 +216,7 @@ export default function LogsArchive() {
             <select
               value={dateRange}
               onChange={(e) => handleDateRangeChange(e.target.value)}
-              className="w-full px-3 py-2 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono transition-all cursor-pointer shadow-inner"
+              className="w-full px-3 py-2 text-[11px] bg-slate-950 border border-slate-900 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-all cursor-pointer"
             >
               <option value="all">📅 All Time</option>
               <option value="week">📅 Last 7 Days</option>
@@ -273,7 +227,7 @@ export default function LogsArchive() {
           </div>
 
           {/* PAGINATION INFO / CONTROLS */}
-          <div className="flex items-center justify-between gap-2 bg-slate-950 px-4 py-2 border border-slate-800 rounded-lg font-mono text-[10px]">
+          <div className="flex items-center justify-between gap-2 bg-slate-950 px-4 py-2 border border-slate-900 rounded-lg font-mono text-[10px]">
             <span className="text-zinc-500">
               Page <span className="font-black text-slate-200">{page}</span>
             </span>
@@ -281,14 +235,14 @@ export default function LogsArchive() {
               <button
                 onClick={handlePrevPage}
                 disabled={page === 1 || loading}
-                className="h-6 px-2 bg-slate-900 border border-slate-800 rounded text-zinc-400 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-400 cursor-pointer transition-colors"
+                className="h-6 px-2 bg-slate-900 border border-slate-800 rounded text-zinc-450 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-500 cursor-pointer transition-colors"
               >
                 <ChevronLeft className="h-3 w-3 inline" /> Prev
               </button>
               <button
                 onClick={handleNextPage}
                 disabled={logs.length < limit || loading}
-                className="h-6 px-2 bg-slate-900 border border-slate-800 rounded text-zinc-400 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-400 cursor-pointer transition-colors"
+                className="h-6 px-2 bg-slate-900 border border-slate-800 rounded text-zinc-450 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-500 cursor-pointer transition-colors"
               >
                 Next <ChevronRight className="h-3 w-3 inline" />
               </button>
@@ -299,7 +253,7 @@ export default function LogsArchive() {
 
         {/* CUSTOM DATE PICKERS POPUP PANEL */}
         {dateRange === "custom" && (
-          <div className="max-w-7xl mx-auto mt-4 pt-4 border-t border-slate-900 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-down">
+          <div className="mt-4 pt-4 border-t border-slate-900 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-down">
             <div className="space-y-1.5">
               <label className="text-[9px] font-bold text-zinc-500 uppercase font-mono block">From Date</label>
               <div className="relative">
@@ -310,7 +264,7 @@ export default function LogsArchive() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => { setCustomStartDate(e.target.value); setPage(1); }}
-                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-800 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
+                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-900 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
                 />
               </div>
             </div>
@@ -324,7 +278,7 @@ export default function LogsArchive() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => { setCustomEndDate(e.target.value); setPage(1); }}
-                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-800 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
+                  className="w-full pl-9 pr-3 py-2 text-[10px] bg-slate-950 border border-slate-900 rounded-lg text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono shadow-inner"
                 />
               </div>
             </div>
@@ -333,7 +287,7 @@ export default function LogsArchive() {
       </section>
 
       {/* CORE WORKSPACE CONTENT AREA */}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <main className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         
         {/* LEFT COLUMN: Logs Scrollable Feed (Colspan 2) */}
         <div className="lg:col-span-2 flex flex-col space-y-4">
@@ -341,7 +295,7 @@ export default function LogsArchive() {
             <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase flex items-center gap-1">
               <Terminal className="h-3.5 w-3.5 text-teal-500" /> Commits Ingestion List
             </span>
-            <span className="text-[9px] font-mono px-2 py-0.5 bg-slate-900 text-zinc-400 rounded border border-slate-800">
+            <span className="text-[9px] font-mono px-2 py-0.5 bg-slate-900 text-zinc-450 rounded border border-slate-800">
               Showing {logs.length} on page
             </span>
           </div>
@@ -350,7 +304,7 @@ export default function LogsArchive() {
             {loading ? (
               <div className="h-40 flex flex-col items-center justify-center space-y-2">
                 <div className="h-6 w-6 border-t-2 border-r-2 border-teal-500 rounded-full animate-spin" />
-                <p className="text-[9px] text-teal-400 font-mono">Quering SQLite backend...</p>
+                <p className="text-[9px] text-teal-400 font-mono">Querying SQLite backend...</p>
               </div>
             ) : logs.length === 0 ? (
               <div className="p-12 border border-dashed border-slate-900 rounded-2xl text-center text-zinc-500 text-xs font-mono">
@@ -433,7 +387,7 @@ export default function LogsArchive() {
               {activeLog.metadata ? (
                 <div className="flex flex-col flex-1">
                   <h4 className="text-[9px] font-black tracking-widest text-zinc-500 uppercase font-mono">Git Commit Statistics & Diffs</h4>
-                  <pre className="bg-slate-900/80 border border-slate-850 p-4 rounded-xl text-[10px] font-mono text-teal-400 mt-2 overflow-x-auto whitespace-pre leading-relaxed shadow-inner max-h-[40vh] scrollbar-thin">
+                  <pre className="bg-slate-900/80 border border-slate-850 p-4 rounded-xl text-[10px] font-mono text-teal-400 mt-2 overflow-x-auto whitespace-pre leading-relaxed shadow-inner max-h-[45vh] scrollbar-thin">
                     <code>{activeLog.metadata}</code>
                   </pre>
                 </div>
@@ -447,7 +401,7 @@ export default function LogsArchive() {
             <div className="h-80 border border-dashed border-slate-900 rounded-2xl flex flex-col items-center justify-center text-center p-6 text-zinc-500">
               <span className="text-3xl mb-2">🔍</span>
               <p className="text-xs font-semibold font-mono">Inspection Terminal Empty</p>
-              <p className="text-[10px] text-zinc-600 mt-1 font-mono">Select any log from the left commits ingestion list to inspect file diff changes, branch patches, and tech signatures.</p>
+              <p className="text-[10px] text-zinc-655 mt-1 font-mono">Select any log from the left commits ingestion list to inspect file diff changes, branch patches, and tech signatures.</p>
             </div>
           )}
         </div>
