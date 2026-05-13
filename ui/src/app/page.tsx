@@ -108,6 +108,7 @@ export default function DashboardHome() {
 
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([]);
+  const [totalAchievementsCount, setTotalAchievementsCount] = useState(0);
   const [loadingFeed, setLoadingFeed] = useState(true);
   const [draftViewMode, setDraftViewMode] = useState<"preview" | "raw">("preview");
 
@@ -137,12 +138,14 @@ export default function DashboardHome() {
   const fetchCompactFeeds = async () => {
     try {
       setLoadingFeed(true);
-      const [logsRes, achievementsRes] = await Promise.all([
+      const [logsRes, achievementsRes, allAchievementsRes] = await Promise.all([
         fetch(`/api/logs?limit=5&_t=${Date.now()}`, { cache: "no-store" }).then(r => r.json()),
-        fetch(`/api/achievements?limit=5&_t=${Date.now()}`, { cache: "no-store" }).then(r => r.json())
+        fetch(`/api/achievements?limit=5&_t=${Date.now()}`, { cache: "no-store" }).then(r => r.json()),
+        fetch(`/api/achievements?_t=${Date.now()}`, { cache: "no-store" }).then(r => r.json())
       ]);
       setRecentLogs(Array.isArray(logsRes) ? logsRes : []);
       setRecentAchievements(Array.isArray(achievementsRes) ? achievementsRes : []);
+      setTotalAchievementsCount(Array.isArray(allAchievementsRes) ? allAchievementsRes.length : 0);
     } catch (err) {
       console.error("Failed to fetch dashboard preview feeds", err);
     } finally {
@@ -390,7 +393,7 @@ export default function DashboardHome() {
             <Award className="h-4 w-4 text-teal-500 animate-pulse" /> Milestones Vaulted
           </span>
           <div className="text-3xl font-black text-slate-800 dark:text-slate-100">
-            {recentAchievements.length ? `${recentAchievements.length}+` : "0"}
+            {totalAchievementsCount}
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-650 uppercase tracking-widest font-bold">Approved Summaries</p>
         </div>
