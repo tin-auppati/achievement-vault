@@ -217,7 +217,7 @@ Here is the log data:
 			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
 		}
 		
-		fmt.Printf("\033[33m[GEMINI INFO] Model %s failed. Switching to alternative model...\033[0m\n", modelName)
+		fmt.Printf("\033[31m[GEMINI ERROR] Model %s failed: %v. Switching...\033[0m\n", modelName, lastErr)
 	}
 
 	return "", fmt.Errorf("Gemini API was unavailable across all tested models. Last error received: %w", lastErr)
@@ -311,6 +311,7 @@ Return ONLY the refined Markdown content. Do not include any conversational fill
 
 			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
 		}
+		fmt.Printf("\033[31m[GEMINI ERROR] Model %s failed: %v. Switching...\033[0m\n", modelName, lastErr)
 	}
 
 	return "", fmt.Errorf("Gemini API was unavailable for refinement. Last error received: %w", lastErr)
@@ -429,6 +430,7 @@ Here is the weekly achievement data:
 
 			return geminiResp.Candidates[0].Content.Parts[0].Text, nil
 		}
+		fmt.Printf("\033[31m[GEMINI ERROR] Model %s failed: %v. Switching...\033[0m\n", modelName, lastErr)
 	}
 
 	return "", fmt.Errorf("Gemini API was unavailable for project resume generation. Last error received: %w", lastErr)
@@ -560,6 +562,7 @@ Activity Logs:
 
 			return result.Purpose, result.TechStack, result.KeyFeatures, nil
 		}
+		fmt.Printf("\033[31m[GEMINI ERROR] Model %s failed: %v. Switching...\033[0m\n", modelName, lastErr)
 	}
 
 	return "", "", "", fmt.Errorf("Gemini API was unavailable for project profile generation. Last error received: %w", lastErr)
