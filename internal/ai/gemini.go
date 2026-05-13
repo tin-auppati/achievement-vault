@@ -154,8 +154,8 @@ Here is the log data:
 	for _, modelName := range modelsToTry {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 3
-		backoffDuration := 2 * time.Second
+		maxRetries := 2
+		backoffDuration := 1 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
@@ -267,8 +267,8 @@ Return ONLY the refined Markdown content. Do not include any conversational fill
 	for _, modelName := range modelsToTry {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 3
-		backoffDuration := 2 * time.Second
+		maxRetries := 2
+		backoffDuration := 1 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
@@ -391,8 +391,8 @@ Here is the weekly achievement data:
 	for _, modelName := range modelsToTry {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 3
-		backoffDuration := 2 * time.Second
+		maxRetries := 2
+		backoffDuration := 1 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
@@ -503,8 +503,8 @@ Activity Logs:
 	for _, modelName := range modelsToTry {
 		apiURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", modelName, apiKey)
 		
-		maxRetries := 3
-		backoffDuration := 2 * time.Second
+		maxRetries := 2
+		backoffDuration := 1 * time.Second
 
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(reqBytes))
