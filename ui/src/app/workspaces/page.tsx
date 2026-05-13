@@ -192,35 +192,35 @@ export default function WorkspacesPage() {
                     setActiveProject(proj);
                     setProfilingMode("none");
                   }}
-                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-5 space-y-3.5 shadow-sm hover:border-slate-350 dark:hover:border-slate-800 transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/35"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-3xl p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/35 transition-all duration-300 flex flex-col justify-between gap-5 shadow-sm"
                 >
-                  <div className="flex justify-between items-center text-xs font-mono">
-                    <span className="font-bold text-zinc-700 dark:text-zinc-400 truncate max-w-[150px]">📁 {proj.name}</span>
-                    <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md border ${
-                      hasProfile 
-                        ? "bg-emerald-50 text-emerald-850 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
-                        : "bg-amber-50 text-amber-850 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
-                    }`}>
-                      {hasProfile ? "Profiled" : "Pending"}
-                    </span>
-                  </div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center font-mono">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-450 flex items-center gap-1.5 uppercase font-black">
+                        <Laptop className="h-3.5 w-3.5" /> Workspace Base
+                      </span>
+                      <StatusBadge status={hasProfile ? "Completed" : "Pending"} />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <code className="text-[10px] bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-150 dark:border-slate-880 text-zinc-500 dark:text-zinc-450 block truncate select-all font-bold font-mono">
-                      {proj.path}
-                    </code>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-black text-slate-850 dark:text-zinc-100 truncate uppercase tracking-wider">{proj.name}</h4>
+                      <code className="text-xs bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-150 dark:border-slate-880 text-zinc-500 dark:text-zinc-450 truncate block select-all font-bold">
+                        {proj.path}
+                      </code>
+                    </div>
+
                     {hasProfile ? (
-                      <p className="text-xs text-zinc-650 dark:text-zinc-400 line-clamp-2 leading-relaxed font-sans font-semibold">
+                      <p className="text-xs text-zinc-650 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-3 border-t border-slate-150 dark:border-slate-900">
                         {proj.profile_purpose}
                       </p>
                     ) : (
-                      <p className="text-xs text-zinc-450 dark:text-zinc-600 font-sans italic leading-relaxed">
+                      <p className="text-xs text-zinc-450 dark:text-zinc-600 font-sans italic leading-relaxed pt-3 border-t border-slate-150 dark:border-slate-900">
                         No AI compiled profile description. Click card to run Standard Profile or deep filesystem Directory Scans.
                       </p>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap gap-1.5 pt-1">
+                  <div className="flex flex-wrap gap-1.5 pt-2">
                     {hasProfile && parseTechTags(proj.profile_tech_stack).slice(0, 4).map((tag, i) => (
                       <TechBadge key={`${tag}-${i}`} tech={tag} />
                     ))}

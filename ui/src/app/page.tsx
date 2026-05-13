@@ -30,6 +30,45 @@ import TechBadge from "./components/TechBadge";
 import StatusBadge from "./components/StatusBadge";
 import { extractTechKeywords, parseTechTags } from "./utils/techUtils";
 
+function calculateWorkspaceQualityScore(proj: any): number {
+  let score = 0;
+  
+  const hasProfile = proj.profile_purpose || proj.profile_tech_stack || proj.profile_key_features;
+  if (!hasProfile) {
+    return 0;
+  }
+  
+  // Base score for having a profile compiled
+  score += 100;
+  
+  // Scoring by Purpose detail length
+  if (proj.profile_purpose) {
+    const purposeLen = proj.profile_purpose.trim().length;
+    score += Math.min(purposeLen, 150);
+    if (purposeLen > 40) {
+      score += 50; // Bonus for thorough descriptive overview
+    }
+  }
+  
+  // Scoring by Tech Stack diversity
+  if (proj.profile_tech_stack) {
+    const tags = parseTechTags(proj.profile_tech_stack);
+    score += tags.length * 20;
+  }
+  
+  // Scoring by Key Features richness and bullet items
+  if (proj.profile_key_features) {
+    const featuresLen = proj.profile_key_features.trim().length;
+    score += Math.min(featuresLen, 150);
+    
+    // Count bullets/key points
+    const bulletCount = (proj.profile_key_features.match(/[-*•]/g) || []).length;
+    score += bulletCount * 15;
+  }
+  
+  return score;
+}
+
 export default function DashboardHome() {
   const {
     projects,
@@ -53,6 +92,10 @@ export default function DashboardHome() {
     .filter(([_, count]) => count > 0)
     .sort((a, b) => b[1] - a[1])
     .map(([tech, count]) => `${tech} (${count})`);
+
+  const sortedProjects = [...projects].sort((a, b) => {
+    return calculateWorkspaceQualityScore(b) - calculateWorkspaceQualityScore(a);
+  });
 
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([]);
@@ -384,22 +427,40 @@ export default function DashboardHome() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.slice(0, 3).map((proj) => {
+            {sortedProjects.slice(0, 3).map((proj, idx) => {
               const hasProfile = proj.profile_purpose || proj.profile_tech_stack || proj.profile_key_features;
+              const score = calculateWorkspaceQualityScore(proj);
+              const isTop = idx === 0 && score > 0;
               return (
                 <div
                   key={proj.id}
-                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-5 space-y-3.5 shadow-sm hover:border-slate-350 dark:hover:border-slate-800 transition-colors"
+                  className={`bg-white dark:bg-slate-950 border rounded-3xl p-5 space-y-3.5 shadow-sm transition-all duration-300 relative group overflow-hidden ${
+                    isTop 
+                      ? "border-amber-200 dark:border-amber-500/30 ring-1 ring-amber-100/50 dark:ring-amber-500/5 hover:border-amber-350 dark:hover:border-amber-500/50" 
+                      : "border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800"
+                  }`}
                 >
+                  {isTop && (
+                    <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-[9px] text-white font-black px-2.5 py-0.5 rounded-bl-xl uppercase tracking-wider shadow-sm flex items-center gap-1 font-mono">
+                      <span>👑</span> PRIME CODEBASE
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center text-xs font-mono">
                     <span className="font-bold text-zinc-700 dark:text-zinc-400 truncate max-w-[150px]">📁 {proj.name}</span>
-                    <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md border ${
-                      hasProfile 
-                        ? "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
-                        : "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
-                    }`}>
-                      {hasProfile ? "Profiled" : "Pending"}
-                    </span>
+                    {!isTop ? (
+                      <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md border ${
+                        hasProfile 
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
+                          : "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                      }`}>
+                        {hasProfile ? "Profiled" : "Pending"}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-2 py-0.5 rounded-md">
+                        Score: {score}
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-1.5">
