@@ -7,52 +7,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import TechBadge from "../components/TechBadge";
-
-function StatusBadge({ status }: { status: string }) {
-  const normalized = status.trim().toLowerCase();
-  let colorClass = "";
-  if (normalized === "completed" || normalized === "active" || normalized === "sealed" || normalized === "synced") {
-    colorClass = "bg-emerald-50 text-emerald-850 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
-  } else if (normalized === "pending" || normalized === "reviewing") {
-    colorClass = "bg-amber-50 text-amber-850 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
-  } else {
-    colorClass = "bg-slate-50 text-slate-705 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
-  }
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border font-mono ${colorClass}`}>
-      {status}
-    </span>
-  );
-}
-
-function extractTechKeywords(text: string): string[] {
-  if (!text) return [];
-  const keywords = [
-    { label: "Go", patterns: [/\bgo\b/i, /\bgolang\b/i] },
-    { label: "TypeScript", patterns: [/\btypescript\b/i, /\bts\b/i] },
-    { label: "Python", patterns: [/\bpython\b/i] },
-    { label: "Docker", patterns: [/\bdocker\b/i, /\bdockerfile\b/i] },
-    { label: "Next.js", patterns: [/\bnext\.js\b/i, /\bnextjs\b/i] },
-    { label: "React", patterns: [/\breact\b/i] },
-    { label: "JavaScript", patterns: [/\bjavascript\b/i, /\bjs\b/i] },
-    { label: "Tailwind CSS", patterns: [/\btailwind\b/i, /\btailwindcss\b/i] },
-    { label: "SQLite", patterns: [/\bsqlite\b/i] },
-    { label: "SQL", patterns: [/\bsql\b/i] },
-    { label: "Git", patterns: [/\bgit\b/i] },
-    { label: "Rust", patterns: [/\brust\b/i] },
-  ];
-
-  const found: string[] = [];
-  keywords.forEach(kw => {
-    for (const pattern of kw.patterns) {
-      if (pattern.test(text)) {
-        found.push(kw.label);
-        break;
-      }
-    }
-  });
-  return found;
-}
+import StatusBadge from "../components/StatusBadge";
+import { extractTechKeywords } from "../utils/techUtils";
 
 export default function VaultGallery() {
   const { deleteAchievement, updateAchievement, showToast } = useApp();
