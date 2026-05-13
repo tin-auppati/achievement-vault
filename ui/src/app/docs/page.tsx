@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Terminal, Search, Code, BookOpen } from "lucide-react";
 
 interface CLICommand {
@@ -122,8 +122,27 @@ const CLI_COMMANDS: CLICommand[] = [
 export default function DocsPage() {
   const [activeCategory, setActiveCategory] = useState<"all" | "setup" | "collect" | "summarize" | "services">("all");
   const [search, setSearch] = useState("");
+  const [commands, setCommands] = useState<CLICommand[]>(CLI_COMMANDS);
+  const [version, setVersion] = useState("1.3");
 
-  const filteredCommands = CLI_COMMANDS.filter((cmd) => {
+  useEffect(() => {
+    fetch(`/api/docs?_t=${Date.now()}`, { cache: "no-store" })
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Offline");
+      })
+      .then((data) => {
+        if (data && Array.isArray(data.commands)) {
+          setCommands(data.commands);
+        }
+        if (data && data.version) {
+          setVersion(data.version);
+        }
+      })
+      .catch((err) => console.log("Backend offline or error fetching docs API, using local fallbacks:", err));
+  }, []);
+
+  const filteredCommands = commands.filter((cmd) => {
     const matchesCategory = activeCategory === "all" || cmd.category === activeCategory;
     const matchesSearch =
       cmd.command.toLowerCase().includes(search.toLowerCase()) ||
@@ -160,7 +179,7 @@ export default function DocsPage() {
           </div>
         </div>
         <div className="text-xs text-zinc-650 dark:text-zinc-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg font-bold self-start sm:self-auto">
-          v1.3 Stable CLI Manual
+          v{version} Stable CLI Manual
         </div>
       </div>
 

@@ -423,6 +423,15 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 		json.NewEncoder(w).Encode(stats)
 	}))
 
+	http.HandleFunc("/api/docs", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		response := map[string]interface{}{
+			"version":  Version,
+			"commands": GetCLICommands(),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}))
+
 	http.HandleFunc("/api/achievements/approve", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
@@ -488,6 +497,7 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 			"draft_content":     draftContent,
 			"draft_start_date":  draftStart,
 			"draft_end_date":    draftEnd,
+			"version":           Version,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

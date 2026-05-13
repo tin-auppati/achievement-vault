@@ -1049,58 +1049,7 @@ func handleTestUI() {
 }
 
 func printUsage() {
-	manualMarkdown := `# 🏆 ACHIEVEMENT VAULT - PREMIUM CLI TOOL v1.3
-
-Welcome to the **Achievement Vault** developer workstation control center. This CLI manages automated collection, intelligent profiling, and resume synthesis of your codebase accomplishments.
-
----
-
-## 📁 1. SETUP & CONFIGURATION
-
-| Command | Description | Example |
-| :--- | :--- | :--- |
-| **register** '<name> <path> <source>' | Register a local development project to track its commits in the SQLite database. | 'vault register "my-api" "/home/tin/projects/my-api" "github"' |
-| **scan-repo** '<path> [--analyze-errors]' | Deep scan a directory structure and Git history to compile a Project Profile. Fallback to static config scan. '--analyze-errors' diagnoses broken builds. | 'vault scan-repo /home/tin/projects/achievement-vault --analyze-errors' |
-| **install** '<project_name>' | Install the Git 'post-commit' hook in the registered project folder to automate future commit log capture. | 'vault install "my-api"' |
-| **setup-shell** | Append an alert trigger to your shell config ('.bashrc' / '.zshrc') to warn you on login if weekly summaries are pending. | 'vault setup-shell' |
-| **setup-global** | Symlink the compiled executable to '/home/tin/go/bin/vault' and configure environment shell exports globally. | 'vault setup-global' |
-
----
-
-## 📥 2. ACTIVITY LOG COLLECTION
-
-| Command | Description | Example |
-| :--- | :--- | :--- |
-| **collect** '--project-id <id> --message <msg> --diff <diff>' | System-facing backend utility to log code achievements. Automatically triggered by the installed post-commit hook. | 'vault collect --project-id 1 --message "feat: auth" --diff "+ func Login()"' |
-
----
-
-## ✨ 3. AI SUMMARIZATION & REPORTS
-
-| Command | Description | Example |
-| :--- | :--- | :--- |
-| **summarize** '[--days <days>]' | Gather raw logs from the database, query Gemini AI, and draft a formatted, reviewer-ready Weekly Progress Summary. | 'vault summarize --days 7' |
-| **summarize-project** | Gather all approved achievements in 'weekly_achievements' to compile a professional, recruiter-ready Markdown Resume. | 'vault summarize-project' |
-| **history** '[<id>]' | List saved weekly progress summaries or print a full-fidelity rendered summary by its database ID. | 'vault history 5' |
-| **check-pending** | Scan the workspace database and output a warning if no summary has been recorded for the current week. | 'vault check-pending' |
-
----
-
-## ⚙ 4. SERVICES & WEB PORTAL
-
-| Command | Description | Example |
-| :--- | :--- | :--- |
-| **serve** '[<port>]' | Launch the REST API backend server to expose endpoint data (default port: '8001') for Next.js UI integration. | 'vault serve 8001' |
-| **start-all** | Concurrently launch both the Go API backend ('8001') and the Next.js frontend web interface ('3000') in background sessions. | 'vault start-all' |
-| **autostart** '<enable\|disable>' | Install or remove a persistent Systemd user daemon unit to keep the vault servers running on boot. | 'vault autostart enable' |
-| **test-ui** | Execute headless automated Chrome DOM tests on 'http://localhost:3000' and archive the page state to recovery. | 'vault test-ui' |
-| **help** | Render and present this comprehensive interactive usage manual inside your terminal window. | 'vault help' |
-
----
-
-> [!NOTE]
-> Database file location defaults to '~/.achievement-vault/data/vault.db' unless specified by the 'VAULT_HOME' environment variable.
-`
+	manualMarkdown := vault.GetManualMarkdown()
 
 	r, err := glamour.Render(manualMarkdown, "dark")
 	if err == nil {

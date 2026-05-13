@@ -30,7 +30,7 @@ export default function Sidebar() {
             <span className="text-xl">🛡️</span>
             <div>
               <h1 className="text-sm font-black tracking-widest text-slate-800 dark:text-slate-100 uppercase">Vault Console</h1>
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mt-0.5">SaaS Platform v1.1</p>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mt-0.5">SaaS Platform v{status.version || "1.3"}</p>
             </div>
           </div>
         </div>

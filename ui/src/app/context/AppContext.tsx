@@ -48,6 +48,7 @@ export interface VaultStatus {
   draft_content: string;
   draft_start_date: string;
   draft_end_date: string;
+  version?: string;
 }
 
 interface AppContextType {
@@ -99,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     draft_content: "",
     draft_start_date: "",
     draft_end_date: "",
+    version: "1.3",
   });
 
   const [loadingProjects, setLoadingProjects] = useState(false);
