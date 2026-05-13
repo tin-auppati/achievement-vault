@@ -231,7 +231,7 @@ export default function WorkspacesPage() {
                     setActiveProject(proj);
                     setProfilingMode("none");
                   }}
-                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 hover:border-slate-350 dark:hover:border-slate-800 rounded-3xl p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/35 transition-all duration-300 flex flex-col justify-between gap-5 shadow-sm"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 hover:border-slate-350 dark:hover:border-teal-500/30 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-teal-500/5 rounded-3xl p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/10 transition-all duration-300 flex flex-col justify-between gap-5 shadow-sm"
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-center font-mono">
