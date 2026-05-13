@@ -143,9 +143,10 @@ Here is the log data:
 
 	// Dynamic Fallback Models Chain to guarantee high availability (Guards against temporary 503 Overloads)
 	modelsToTry := []string{
-		"gemini-2.5-flash",
+		"gemini-2.0-flash",
 		"gemini-1.5-flash",
-		"gemini-1.5-pro",
+		"gemini-1.5-flash-latest",
+		"gemini-1.5-pro-latest",
 	}
 
 	var lastErr error
@@ -256,9 +257,10 @@ Return ONLY the refined Markdown content. Do not include any conversational fill
 	}
 
 	modelsToTry := []string{
-		"gemini-2.5-flash",
+		"gemini-2.0-flash",
 		"gemini-1.5-flash",
-		"gemini-1.5-pro",
+		"gemini-1.5-flash-latest",
+		"gemini-1.5-pro-latest",
 	}
 
 	var lastErr error
@@ -380,9 +382,10 @@ Here is the weekly achievement data:
 	}
 
 	modelsToTry := []string{
-		"gemini-2.5-flash",
+		"gemini-2.0-flash",
 		"gemini-1.5-flash",
-		"gemini-1.5-pro",
+		"gemini-1.5-flash-latest",
+		"gemini-1.5-pro-latest",
 	}
 
 	var lastErr error
@@ -492,9 +495,10 @@ Activity Logs:
 	}
 
 	modelsToTry := []string{
-		"gemini-2.5-flash",
+		"gemini-2.0-flash",
 		"gemini-1.5-flash",
-		"gemini-1.5-pro",
+		"gemini-1.5-flash-latest",
+		"gemini-1.5-pro-latest",
 	}
 
 	var lastErr error
