@@ -9,7 +9,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const { toast } = useApp();
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-teal-500/25 selection:text-teal-200">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-teal-500/25 selection:text-teal-200">
       {/* PERSISTENT SIDEBAR */}
       <Sidebar />
       

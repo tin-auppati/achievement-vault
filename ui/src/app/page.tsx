@@ -59,9 +59,9 @@ function StatusBadge({ status }: { status: string }) {
   const normalized = status.trim().toLowerCase();
   let colorClass = "";
   if (normalized === "completed" || normalized === "active" || normalized === "sealed" || normalized === "synced") {
-    colorClass = "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+    colorClass = "bg-emerald-50 text-emerald-850 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
   } else if (normalized === "pending" || normalized === "reviewing") {
-    colorClass = "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+    colorClass = "bg-amber-50 text-amber-850 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
   } else {
     colorClass = "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20";
   }
@@ -103,7 +103,6 @@ function extractTechKeywords(text: string): string[] {
 
 function parseTechTags(tagStr: string): string[] {
   if (!tagStr) return [];
-  // Split on commas, bullets, or markdown bullet items
   return tagStr
     .split(/[,\n]/)
     .map((s) => s.replace(/^[-*•\s]+/, "").trim())
@@ -121,7 +120,6 @@ export default function DashboardHome() {
     approving,
     savingDraft,
     showToast,
-    fetchStatus,
     fetchProjects,
     triggerRefine,
     saveDraftChanges,
@@ -219,33 +217,33 @@ export default function DashboardHome() {
   };
 
   return (
-    <div className="space-y-8 font-mono pb-12 animate-fade-in">
+    <div className="space-y-8 font-mono pb-12 p-8 max-w-7xl mx-auto animate-fade-in">
       
       {/* 1. STATE-AWARE ACTION CENTER (GEMINI WEEKLY summaries WORKBENCH) */}
       {(status.has_pending_draft || status.is_weekly_pending) && (
-        <section className="bg-slate-950 border border-slate-900 rounded-3xl p-6 shadow-xl animate-slide-down space-y-6">
+        <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 shadow-xl animate-slide-down space-y-6">
           {status.has_pending_draft ? (
             <>
               {/* Draft Ready for Approval Panel */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-900">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-250 dark:border-slate-900">
                 <div className="space-y-1">
-                  <span className="text-[9px] text-teal-400 flex items-center gap-1.5 uppercase font-bold animate-pulse">
+                  <span className="text-[9px] text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold animate-pulse">
                     <Sparkles className="h-4 w-4" /> Action Center: Weekly Summary Compiled
                   </span>
-                  <div className="text-xs font-black text-slate-100 uppercase mt-1">
+                  <div className="text-xs font-black text-slate-800 dark:text-slate-100 uppercase mt-1">
                     Review Milestones Period: {status.draft_start_date} to {status.draft_end_date}
                   </div>
                 </div>
 
                 {/* Switcher Mode / Approve Action Row */}
                 <div className="flex flex-wrap items-center gap-3 self-end md:self-auto text-[10px]">
-                  <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 shadow-inner">
+                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-inner">
                     <button
                       onClick={() => setDraftViewMode("preview")}
                       className={`px-3 py-1.5 rounded-md transition-all font-bold cursor-pointer ${
                         draftViewMode === "preview"
-                          ? "bg-slate-950 text-teal-400"
-                          : "text-zinc-500 hover:text-zinc-300"
+                          ? "bg-white dark:bg-slate-950 text-teal-600 dark:text-teal-400 shadow-sm"
+                          : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                       }`}
                     >
                       Preview
@@ -254,8 +252,8 @@ export default function DashboardHome() {
                       onClick={() => setDraftViewMode("raw")}
                       className={`px-3 py-1.5 rounded-md transition-all font-bold cursor-pointer ${
                         draftViewMode === "raw"
-                          ? "bg-slate-950 text-teal-400"
-                          : "text-zinc-500 hover:text-zinc-300"
+                          ? "bg-white dark:bg-slate-950 text-teal-600 dark:text-teal-400 shadow-sm"
+                          : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                       }`}
                     >
                       Markdown Source
@@ -265,7 +263,7 @@ export default function DashboardHome() {
                   <button
                     onClick={handleMilestoneApproval}
                     disabled={approving}
-                    className="px-4 py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-400 hover:text-teal-300 font-extrabold uppercase rounded-lg shadow-sm disabled:opacity-40"
+                    className="px-4 py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 font-extrabold uppercase rounded-lg shadow-sm disabled:opacity-40 cursor-pointer transition-all"
                   >
                     {approving ? "Sealing..." : "Approve & Seal Vault"}
                   </button>
@@ -276,19 +274,19 @@ export default function DashboardHome() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 
                 {/* Draft Content Panel (8/12) */}
-                <div className="lg:col-span-8 bg-slate-900/30 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
+                <div className="lg:col-span-8 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
-                    <h4 className="text-[9px] font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-900">Milestone Report Draft</h4>
-                    <div className="pt-4 max-h-[350px] overflow-y-auto text-xs font-sans leading-relaxed text-zinc-300">
+                    <h4 className="text-[9px] font-black tracking-widest text-zinc-400 dark:text-zinc-500 uppercase pb-2 border-b border-slate-200 dark:border-slate-900">Milestone Report Draft</h4>
+                    <div className="pt-4 max-h-[350px] overflow-y-auto text-xs font-sans leading-relaxed text-zinc-800 dark:text-zinc-300">
                       {draftViewMode === "preview" ? (
-                        <div className="prose dark:prose-invert max-w-none text-zinc-300">
+                        <div className="prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-300">
                           <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{editedDraftInput}</ReactMarkdown>
                         </div>
                       ) : (
                         <textarea
                           value={editedDraftInput}
                           onChange={(e) => setEditedDraftInput(e.target.value)}
-                          className="w-full h-72 p-4 bg-slate-950 text-zinc-100 font-mono text-xs rounded-xl border border-slate-900 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed"
+                          className="w-full h-72 p-4 bg-white dark:bg-slate-955 text-zinc-800 dark:text-zinc-100 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-900 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed"
                           placeholder="Edit report draft..."
                         />
                       )}
@@ -297,11 +295,11 @@ export default function DashboardHome() {
 
                   {/* Manual Save Draft Trigger */}
                   {draftViewMode === "raw" && (
-                    <div className="pt-4 border-t border-slate-900 flex justify-end mt-4">
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-900 flex justify-end mt-4">
                       <button
                         onClick={handleManualDraftSave}
                         disabled={savingDraft}
-                        className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-850 rounded text-zinc-300 hover:text-white text-[9px] font-bold uppercase transition-colors"
+                        className="px-3.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-850 rounded text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-[9px] font-bold uppercase transition-colors cursor-pointer"
                       >
                         {savingDraft ? "Saving..." : "Save Draft Changes"}
                       </button>
@@ -310,26 +308,26 @@ export default function DashboardHome() {
                 </div>
 
                 {/* AI Instruction / Refine Panel (4/12) */}
-                <div className="lg:col-span-4 bg-slate-900/30 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
+                <div className="lg:col-span-4 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
                   <div className="space-y-4">
-                    <h4 className="text-[9px] font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-900 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-teal-400" /> Refine Draft with Gemini AI
+                    <h4 className="text-[9px] font-black tracking-widest text-zinc-400 dark:text-zinc-500 uppercase pb-2 border-b border-slate-200 dark:border-slate-900 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-teal-500 dark:text-teal-400" /> Refine Draft with Gemini AI
                     </h4>
-                    <p className="text-[10px] text-zinc-500 font-sans leading-relaxed">
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-sans leading-relaxed">
                       Instruct Gemini to tailor this draft report summary. E.g., &quot;reformat as bullet points, highlight PostgreSQL migrations, make it more recruiter-friendly.&quot;
                     </p>
                     <textarea
                       value={aiRefinePrompt}
                       onChange={(e) => setAiRefinePrompt(e.target.value)}
-                      placeholder="e.g. rewrite in a professional narrative tone, focusing on backend refactors..."
-                      className="w-full h-32 p-3 bg-slate-950 border border-slate-900 rounded-xl text-xs text-zinc-300 placeholder-zinc-650 focus:ring-1 focus:ring-teal-500 outline-none font-mono"
+                      placeholder="e.g. rewrite in a professional tone, focusing on backend refactors..."
+                      className="w-full h-32 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-xl text-xs text-zinc-800 dark:text-zinc-300 placeholder-zinc-400 focus:ring-1 focus:ring-teal-500 outline-none font-mono"
                     />
                   </div>
 
                   <button
                     onClick={handleAIRefinement}
                     disabled={refining || !aiRefinePrompt.trim()}
-                    className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-400 hover:text-teal-300 font-extrabold uppercase rounded-lg shadow-sm text-[10px] disabled:opacity-45 mt-4"
+                    className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-extrabold uppercase rounded-lg shadow-sm text-[10px] disabled:opacity-45 mt-4 cursor-pointer transition-all"
                   >
                     {refining ? "Refining..." : "Apply AI Instructions"}
                   </button>
@@ -338,17 +336,17 @@ export default function DashboardHome() {
               </div>
             </>
           ) : (
-            // 2. No Draft, but Weekly End Reached, prompt to trigger AI summarizes
+            // 2. No Draft, but Weekly End Reached, prompt to trigger AI summaries
             <div className="p-8 text-center max-w-xl mx-auto space-y-4">
               <span className="text-4xl">🔔</span>
-              <h3 className="text-xs font-black uppercase text-slate-200">Weekly Milestones Completed!</h3>
-              <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+              <h3 className="text-xs font-black uppercase text-slate-800 dark:text-slate-200">Weekly Milestones Completed!</h3>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-450 font-sans leading-relaxed">
                 Raw Git hook activities are captured and waiting inside the database. Launch Gemini pipeline to compile weekly accomplishment report draft now!
               </p>
               <button
                 onClick={useApp().triggerSummarize}
                 disabled={summarizing}
-                className="px-5 py-2.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-400 font-extrabold uppercase text-[10px] rounded-xl tracking-wider shadow-sm animate-pulse disabled:opacity-40"
+                className="px-5 py-2.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 font-extrabold uppercase text-[10px] rounded-xl tracking-wider shadow-sm animate-pulse disabled:opacity-40 cursor-pointer"
               >
                 {summarizing ? "Drafting..." : "Compile Weekly Draft Report"}
               </button>
@@ -360,44 +358,44 @@ export default function DashboardHome() {
       {/* 2. EXECUTIVE METRICS BOARD */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-850 transition-colors">
-          <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1.5">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+          <span className="text-[8px] font-black uppercase text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
             <Folder className="h-3.5 w-3.5 text-teal-500" /> Active Codebases
           </span>
-          <div className="text-xl font-black text-slate-100">{projects.length}</div>
-          <p className="text-[8px] text-zinc-600 uppercase tracking-widest">Git hooks targets</p>
+          <div className="text-xl font-black text-slate-800 dark:text-slate-100">{projects.length}</div>
+          <p className="text-[8px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-bold">Git hooks targets</p>
         </div>
 
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-850 transition-colors">
-          <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1.5">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+          <span className="text-[8px] font-black uppercase text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
             <Activity className="h-3.5 w-3.5 text-teal-500" /> Total Raw Commits
           </span>
-          <div className="text-xl font-black text-slate-100">
+          <div className="text-xl font-black text-slate-800 dark:text-slate-100">
             {Object.values(stats).reduce((a, b) => a + b, 0)}
           </div>
-          <p className="text-[8px] text-zinc-600 uppercase tracking-widest">Ingested Telemetry</p>
+          <p className="text-[8px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-bold">Ingested Telemetry</p>
         </div>
 
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-850 transition-colors">
-          <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1.5">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+          <span className="text-[8px] font-black uppercase text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
             <Award className="h-3.5 w-3.5 text-teal-500" /> Milestones Vaulted
           </span>
-          <div className="text-xl font-black text-slate-100">
+          <div className="text-xl font-black text-slate-800 dark:text-slate-100">
             {recentAchievements.length ? `${recentAchievements.length}+` : "0"}
           </div>
-          <p className="text-[8px] text-zinc-600 uppercase tracking-widest">Approved Summaries</p>
+          <p className="text-[8px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-bold">Approved Summaries</p>
         </div>
 
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-850 transition-colors">
-          <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1.5">
+        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl p-5 space-y-2 hover:border-slate-350 dark:hover:border-slate-850 transition-colors shadow-sm">
+          <span className="text-[8px] font-black uppercase text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-teal-500" /> Primary Tech stack
           </span>
-          <div className="text-xs font-black text-slate-100 flex flex-wrap gap-1 mt-1">
+          <div className="text-xs font-black text-slate-800 dark:text-slate-100 flex flex-wrap gap-1 mt-1">
             {Object.keys(stats).slice(0, 3).map(tech => (
               <TechBadge key={tech} tech={`${tech} (${stats[tech]})`} />
             ))}
           </div>
-          <p className="text-[8px] text-zinc-600 uppercase tracking-widest mt-1.5">Captured Dialect metrics</p>
+          <p className="text-[8px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-bold mt-1.5">Captured Dialect metrics</p>
         </div>
 
       </section>
@@ -406,13 +404,13 @@ export default function DashboardHome() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Recent Ingestion Logs (Colspan 5) */}
-        <div className="lg:col-span-5 bg-slate-950 border border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-900">
-              <span className="text-[9px] font-bold text-zinc-400 flex items-center gap-2 uppercase">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
+              <span className="text-[9px] font-bold text-zinc-750 dark:text-zinc-400 flex items-center gap-2 uppercase">
                 <Activity className="h-4 w-4 text-teal-500" /> Recent Ingestion Activity
               </span>
-              <Link href="/logs" className="text-[8px] text-zinc-500 hover:text-teal-400 flex items-center gap-0.5 uppercase tracking-wider font-bold">
+              <Link href="/logs" className="text-[8px] text-zinc-400 hover:text-teal-500 flex items-center gap-0.5 uppercase tracking-wider font-bold transition-all">
                 View All <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
@@ -421,15 +419,15 @@ export default function DashboardHome() {
               {loadingFeed ? (
                 <div className="py-12 text-center text-zinc-500 text-[10px]">Loading feeds...</div>
               ) : recentLogs.length === 0 ? (
-                <div className="py-12 text-center text-zinc-650 text-[10px]">No telemetry logged.</div>
+                <div className="py-12 text-center text-zinc-500 dark:text-zinc-650 text-[10px]">No telemetry logged.</div>
               ) : (
                 recentLogs.map((log) => (
-                  <div key={log.id} className="p-3.5 bg-slate-900/25 border border-slate-900 rounded-xl space-y-2">
-                    <div className="flex justify-between text-[8px] text-zinc-500 font-mono">
-                      <span className="font-bold text-zinc-400">📁 {log.project_name}</span>
+                  <div key={log.id} className="p-3.5 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2">
+                    <div className="flex justify-between text-[8px] text-zinc-400 dark:text-zinc-550 font-mono">
+                      <span className="font-bold text-zinc-600 dark:text-zinc-400">📁 {log.project_name}</span>
                       <span>{new Date(log.timestamp).toLocaleDateString()}</span>
                     </div>
-                    <p className="text-[10px] text-zinc-300 font-sans font-semibold leading-relaxed line-clamp-2">{log.content}</p>
+                    <p className="text-[10px] text-zinc-700 dark:text-zinc-300 font-sans font-semibold leading-relaxed line-clamp-2">{log.content}</p>
                   </div>
                 ))
               )}
@@ -438,13 +436,13 @@ export default function DashboardHome() {
         </div>
 
         {/* Recent Approved Achievements Milestones (Colspan 7) */}
-        <div className="lg:col-span-7 bg-slate-950 border border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 p-6 rounded-3xl flex flex-col justify-between gap-5 shadow-sm">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-900">
-              <span className="text-[9px] font-bold text-zinc-400 flex items-center gap-2 uppercase">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-900">
+              <span className="text-[9px] font-bold text-zinc-750 dark:text-zinc-400 flex items-center gap-2 uppercase">
                 <Award className="h-4 w-4 text-teal-500 animate-pulse" /> Approved Milestones Vault
               </span>
-              <Link href="/vault" className="text-[8px] text-zinc-500 hover:text-teal-400 flex items-center gap-0.5 uppercase tracking-wider font-bold">
+              <Link href="/vault" className="text-[8px] text-zinc-400 hover:text-teal-500 flex items-center gap-0.5 uppercase tracking-wider font-bold transition-all">
                 View All <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
@@ -453,17 +451,17 @@ export default function DashboardHome() {
               {loadingFeed ? (
                 <div className="py-12 text-center text-zinc-500 text-[10px]">Loading feeds...</div>
               ) : recentAchievements.length === 0 ? (
-                <div className="py-12 text-center text-zinc-650 text-[10px]">No approved milestones stored.</div>
+                <div className="py-12 text-center text-zinc-500 dark:text-zinc-650 text-[10px]">No approved milestones stored.</div>
               ) : (
                 recentAchievements.map((ach) => (
-                  <div key={ach.id} className="p-4 bg-slate-900/25 border border-slate-900 rounded-xl space-y-2 hover:border-slate-800 transition-colors">
-                    <div className="flex justify-between items-center text-[8.5px] text-zinc-500">
-                      <span className="font-bold text-teal-400">
+                  <div key={ach.id} className="p-4 bg-slate-50 dark:bg-slate-900/25 border border-slate-150 dark:border-slate-900 rounded-xl space-y-2 hover:border-slate-300 dark:hover:border-slate-800 transition-colors">
+                    <div className="flex justify-between items-center text-[8.5px] text-zinc-450 dark:text-zinc-500">
+                      <span className="font-bold text-teal-600 dark:text-teal-400">
                         🗓️ {new Date(ach.start_date).toLocaleDateString()} - {new Date(ach.end_date).toLocaleDateString()}
                       </span>
                       <span>ID: #{ach.id}</span>
                     </div>
-                    <div className="text-[9.5px] font-sans text-zinc-400 line-clamp-2 leading-relaxed border-t border-slate-900/80 pt-2">
+                    <div className="text-[9.5px] font-sans text-zinc-700 dark:text-zinc-400 line-clamp-2 leading-relaxed border-t border-slate-200 dark:border-slate-900/80 pt-2">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{ach.content_md}</ReactMarkdown>
                     </div>
                   </div>
@@ -476,19 +474,19 @@ export default function DashboardHome() {
       </section>
 
       {/* 4. ACTIVE REPOSITORY PROJECT PROFILER & REGISTRATION */}
-      <section className="bg-slate-950 border border-slate-900 rounded-3xl p-6 space-y-6">
+      <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-6 space-y-6 shadow-sm">
         
         {/* Profile Section header */}
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-900">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-900">
           <div>
-            <h3 className="text-xs font-black uppercase text-slate-100 flex items-center gap-2">
+            <h3 className="text-xs font-black uppercase text-slate-850 dark:text-slate-100 flex items-center gap-2">
               <Folder className="h-4 w-4 text-teal-500" /> Workspace Codebases Profiles
             </h3>
-            <p className="text-[9px] text-zinc-500 mt-1">AI-generated architectural catalogs and repository dependency profiles</p>
+            <p className="text-[9px] text-zinc-550 dark:text-zinc-500 mt-1">AI-generated architectural catalogs and repository dependency profiles</p>
           </div>
           <button
             onClick={() => setShowRegForm(!showRegForm)}
-            className="px-4 py-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-lg text-[9px] text-zinc-300 hover:text-white font-bold uppercase transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+            className="px-4 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg text-[9px] text-zinc-650 dark:text-zinc-300 hover:text-zinc-800 dark:hover:text-white font-bold uppercase transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
           >
             <PlusCircle className="h-3.5 w-3.5" /> Register Repository
           </button>
@@ -496,7 +494,7 @@ export default function DashboardHome() {
 
         {/* Repository manual registration form */}
         {showRegForm && (
-          <form onSubmit={handleRegisterProject} className="p-5 bg-slate-900/30 border border-slate-900 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-4 animate-slide-down">
+          <form onSubmit={handleRegisterProject} className="p-5 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-900 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-4 animate-slide-down">
             <div className="space-y-1.5">
               <label className="text-[8px] font-bold uppercase text-zinc-500 block">Workspace Name</label>
               <input
@@ -504,7 +502,7 @@ export default function DashboardHome() {
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
                 placeholder="e.g. core-auth-service"
-                className="w-full px-3 py-1.5 bg-slate-950 border border-slate-850 rounded text-xs text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 required
               />
             </div>
@@ -515,7 +513,7 @@ export default function DashboardHome() {
                 value={regPath}
                 onChange={(e) => setRegPath(e.target.value)}
                 placeholder="e.g. /home/tin/projects/core-auth-service"
-                className="w-full px-3 py-1.5 bg-slate-950 border border-slate-850 rounded text-xs text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 required
               />
             </div>
@@ -523,7 +521,7 @@ export default function DashboardHome() {
               <button
                 type="submit"
                 disabled={registering}
-                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-400 font-bold uppercase rounded text-[10px] shadow-sm cursor-pointer disabled:opacity-40"
+                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 font-bold uppercase rounded text-[10px] shadow-sm cursor-pointer disabled:opacity-40 transition-all"
               >
                 {registering ? "Registering..." : "Mount Git Interceptors"}
               </button>
@@ -535,7 +533,7 @@ export default function DashboardHome() {
         {loadingProjects ? (
           <div className="py-8 text-center text-zinc-500 text-[10px]">Loading projects profile...</div>
         ) : projects.length === 0 ? (
-          <div className="py-12 text-center border border-dashed border-slate-900 rounded-2xl text-zinc-650 text-[10px]">No workspace codebases registered yet.</div>
+          <div className="py-12 text-center border border-dashed border-slate-200 dark:border-slate-900 rounded-2xl text-zinc-650 text-[10px]">No workspace codebases registered yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((proj) => {
@@ -544,22 +542,22 @@ export default function DashboardHome() {
                 <div
                   key={proj.id}
                   onClick={() => setActiveProject(proj)}
-                  className="bg-slate-900/20 border border-slate-900 hover:border-slate-800 rounded-2xl p-5 cursor-pointer hover:bg-slate-900/40 transition-all flex flex-col justify-between gap-4"
+                  className="bg-slate-50 dark:bg-slate-900/20 border border-slate-200 dark:border-slate-900 hover:border-slate-300 dark:hover:border-slate-800 rounded-2xl p-5 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/40 transition-all flex flex-col justify-between gap-4"
                 >
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-black uppercase text-zinc-200 truncate pr-2">{proj.name}</h4>
+                      <h4 className="text-xs font-black uppercase text-zinc-800 dark:text-zinc-200 truncate pr-2">{proj.name}</h4>
                       <StatusBadge status={hasProfile ? "Completed" : "Pending"} />
                     </div>
-                    <code className="text-[8px] bg-slate-950 px-1.5 py-0.5 rounded border border-slate-900 text-zinc-500 truncate block select-all">
+                    <code className="text-[8px] bg-white dark:bg-slate-950 px-1.5 py-0.5 rounded border border-slate-150 dark:border-slate-900 text-zinc-450 dark:text-zinc-500 truncate block select-all">
                       {proj.path}
                     </code>
                     {hasProfile ? (
-                      <p className="text-[10px] text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-1.5 border-t border-slate-900">
+                      <p className="text-[10px] text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed font-sans pt-1.5 border-t border-slate-200 dark:border-slate-900">
                         {proj.profile_purpose}
                       </p>
                     ) : (
-                      <p className="text-[9px] text-zinc-600 font-sans italic leading-relaxed pt-1.5 border-t border-slate-900">
+                      <p className="text-[9px] text-zinc-500 dark:text-zinc-600 font-sans italic leading-relaxed pt-1.5 border-t border-slate-200 dark:border-slate-900">
                         No AI compiled profile description. Click to generate stack details.
                       </p>
                     )}
@@ -581,15 +579,15 @@ export default function DashboardHome() {
       {/* 5. DEEP WORKSPACE PROFILING MODAL */}
       {activeProject && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in font-mono">
             
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-850 flex justify-between items-center">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <Folder className="h-5 w-5 text-teal-400 animate-pulse" />
+                <Folder className="h-5 w-5 text-teal-500 dark:text-teal-400 animate-pulse" />
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-100">{activeProject.name}</h3>
-                  <p className="text-[9px] text-zinc-400 mt-1 select-all">Path: {activeProject.path}</p>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-slate-100">{activeProject.name}</h3>
+                  <p className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-1 select-all">Path: {activeProject.path}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
@@ -599,13 +597,13 @@ export default function DashboardHome() {
                     setActiveProject(null);
                     await triggerProjectProfiling(projId);
                   }}
-                  className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-400 hover:text-teal-300 font-extrabold text-[9px] uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/25 border border-teal-500/30 text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-extrabold text-[9px] uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
                 >
                   <Sparkles className="h-3 w-3" /> AI Compile Stack
                 </button>
                 <button
                   onClick={() => setActiveProject(null)}
-                  className="h-8 w-8 bg-slate-950 hover:bg-slate-850 border border-slate-800 text-zinc-400 hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -613,27 +611,27 @@ export default function DashboardHome() {
             </div>
 
             {/* Modal Content */}
-            <div className="p-8 overflow-y-auto flex-1 bg-slate-950 shadow-inner space-y-6">
+            <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-slate-950 shadow-inner space-y-6">
               
               {activeProject.profile_purpose || activeProject.profile_tech_stack || activeProject.profile_key_features ? (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start font-sans">
                   
                   {/* Purpose */}
                   <div className="space-y-2">
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-900 pb-2">
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
                       <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Project Purpose
                     </h4>
-                    <div className="p-4 bg-slate-900/30 rounded-xl border border-slate-900 text-[11px] leading-relaxed text-zinc-300 prose dark:prose-invert max-w-none">
+                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-900 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_purpose}</ReactMarkdown>
                     </div>
                   </div>
 
                   {/* Tech stack */}
                   <div className="space-y-2">
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-900 pb-2">
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
                       <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Architectural Tech Stack
                     </h4>
-                    <div className="p-4 bg-slate-900/30 rounded-xl border border-slate-900 space-y-4">
+                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-900 space-y-4">
                       {parseTechTags(activeProject.profile_tech_stack).length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {parseTechTags(activeProject.profile_tech_stack).map((tag, i) => (
@@ -641,7 +639,7 @@ export default function DashboardHome() {
                           ))}
                         </div>
                       ) : (
-                        <div className="text-[11px] leading-relaxed text-zinc-300 prose dark:prose-invert max-w-none">
+                        <div className="text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
                           <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_tech_stack}</ReactMarkdown>
                         </div>
                       )}
@@ -650,10 +648,10 @@ export default function DashboardHome() {
 
                   {/* Features */}
                   <div className="space-y-2">
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-900 pb-2">
-                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> key Subsystems & Features
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-550 font-mono flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-900 pb-2">
+                      <span className="h-1.5 w-1.5 bg-teal-500 rounded-full" /> Key Subsystems & Features
                     </h4>
-                    <div className="p-4 bg-slate-900/30 rounded-xl border border-slate-900 text-[11px] leading-relaxed text-zinc-300 prose dark:prose-invert max-w-none">
+                    <div className="p-4 bg-white dark:bg-slate-900/30 rounded-xl border border-slate-200 dark:border-slate-900 text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-300 prose dark:prose-invert max-w-none">
                       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{activeProject.profile_key_features}</ReactMarkdown>
                     </div>
                   </div>
@@ -661,7 +659,7 @@ export default function DashboardHome() {
                 </div>
               ) : (
                 <div className="py-16 text-center max-w-lg mx-auto space-y-3">
-                  <p className="text-[11px] text-zinc-500 leading-relaxed font-sans">
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-sans">
                     This project codebase profile has not been compiled yet. Run AI Compile Stack to trace folders, scan file definitions, and generate architectural summaries.
                   </p>
                 </div>
@@ -670,7 +668,7 @@ export default function DashboardHome() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-900/35 border-t border-slate-850 text-[9px] text-zinc-500 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-[9px] text-zinc-500 flex justify-between items-center">
               <span>Register Source: {activeProject.source}</span>
               <span>Enrolled: {new Date(activeProject.created_at).toLocaleString()}</span>
             </div>
