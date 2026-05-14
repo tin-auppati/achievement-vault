@@ -57,7 +57,7 @@ curl -sSL https://raw.githubusercontent.com/tin-auppati/achievement-vault/main/i
 ```
 ┌────────────────────────────────────────────────────────┐
 │                   Next.js Web Portal                   │
-│        (TypeScript, Tailwind CSS, Glassmorphism)        │
+│        (TypeScript, Tailwind CSS, Glassmorphism)       │
 └───────────────────────────┬────────────────────────────┘
                             │ HTTP REST / JSON
 ┌───────────────────────────▼────────────────────────────┐
