@@ -108,6 +108,22 @@ Your API server will listen on port `8001` and the stunning Web Portal will be a
 
 ---
 
+## 🗑️ Uninstallation
+
+A truly professional open-source project must provide a graceful way to uninstall. To remove **Achievement Vault** cleanly from your system, execute our uninstallation script:
+
+```bash
+./uninstall.sh
+```
+
+### Uninstallation Workflow:
+1. **Docker Cleanup**: Automatically stops and purges associated containers, networks, volumes, and images (`docker compose down -v --rmi all`).
+2. **Binary Cleanup**: Removes `vault` and `achievement-vault` executables from your `$PATH` (`~/.local/bin`, `/usr/local/bin`).
+3. **Interactive Data Protection**: Prompts you before deleting your database (`vault.db`) and configuration (`.env`). Defaults to `No` to prevent accidental data loss.
+4. **Source Teardown**: Removes the cloned source directory cleanly.
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE). Copyright (c) 2026 Tin Auppati.

@@ -323,7 +323,7 @@ export default function LogsArchive() {
                 </div>
               ) : (
                 <div className="p-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-zinc-500 text-xs">
-                  // No advanced patch code or file stats metadata captured for this event.
+                  No advanced patch code or file stats metadata captured for this event.
                 </div>
               )}
             </div>
