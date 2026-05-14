@@ -131,11 +131,11 @@ export default function LogsArchive() {
             <select
               value={selectedProject}
               onChange={(e) => handleProjectChange(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-zinc-800 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-all cursor-pointer font-mono"
+              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-all cursor-pointer font-mono"
             >
-              <option value="all">📁 All Codebases</option>
+              <option value="all" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📁 All Codebases</option>
               {projects.map(proj => (
-                <option key={proj.id} value={proj.id.toString()}>
+                <option key={proj.id} value={proj.id.toString()} className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
                   {proj.name}
                 </option>
               ))}
@@ -147,13 +147,13 @@ export default function LogsArchive() {
             <select
               value={dateRange}
               onChange={(e) => handleDateRangeChange(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-zinc-800 dark:text-zinc-300 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-all cursor-pointer font-mono"
+              className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-all cursor-pointer font-mono"
             >
-              <option value="all">📅 All Time</option>
-              <option value="week">📅 Last 7 Days</option>
-              <option value="month">📅 Last 30 Days</option>
-              <option value="three_months">📅 Last 3 Months</option>
-              <option value="custom">📅 Custom Date Range...</option>
+              <option value="all" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 All Time</option>
+              <option value="week" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Last 7 Days</option>
+              <option value="month" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Last 30 Days</option>
+              <option value="three_months" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Last 3 Months</option>
+              <option value="custom" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">📅 Custom Date Range...</option>
             </select>
           </div>
 
@@ -194,7 +194,7 @@ export default function LogsArchive() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => { setCustomStartDate(e.target.value); setPage(1); }}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-150 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 dark:[color-scheme:dark] focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
                 />
               </div>
             </div>
@@ -208,7 +208,7 @@ export default function LogsArchive() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => { setCustomEndDate(e.target.value); setPage(1); }}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-150 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 dark:[color-scheme:dark] focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
                 />
               </div>
             </div>

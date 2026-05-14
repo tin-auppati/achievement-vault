@@ -54,13 +54,14 @@ func GetWeeklyAchievementsFiltered(db *sql.DB, q string, limit, offset int, star
 		args = append(args, "%"+q+"%")
 	}
 
-	if startDate != "" {
-		conditions = append(conditions, "(start_date >= ? OR created_at >= ?)")
+	if startDate != "" && endDate != "" {
+		conditions = append(conditions, "((start_date <= ? AND end_date >= ?) OR (DATE(created_at) >= ? AND DATE(created_at) <= ?))")
+		args = append(args, endDate, startDate, startDate, endDate)
+	} else if startDate != "" {
+		conditions = append(conditions, "(end_date >= ? OR DATE(created_at) >= ?)")
 		args = append(args, startDate, startDate)
-	}
-
-	if endDate != "" {
-		conditions = append(conditions, "(end_date <= ? OR created_at <= ?)")
+	} else if endDate != "" {
+		conditions = append(conditions, "(start_date <= ? OR DATE(created_at) <= ?)")
 		args = append(args, endDate, endDate)
 	}
 

@@ -207,7 +207,7 @@ export default function VaultGallery() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 dark:[color-scheme:dark] focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
                 />
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function VaultGallery() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 dark:[color-scheme:dark] focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-inner font-mono"
                 />
               </div>
             </div>

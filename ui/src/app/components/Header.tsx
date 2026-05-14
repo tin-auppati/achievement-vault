@@ -50,7 +50,7 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-slate-200 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-10 px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 font-mono transition-colors">
+    <header className="border-b border-slate-200 dark:border-slate-700/80 bg-white/85 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-10 px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 font-mono transition-colors">
       
       {/* BRANDING */}
       <div>
@@ -69,7 +69,7 @@ export default function Header() {
       <div className="flex flex-wrap items-center gap-4 text-xs">
         
         {/* Check Pending Indicator */}
-        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg">
+        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg">
           <span className="text-zinc-500 dark:text-zinc-600 uppercase text-xs tracking-wider font-bold">Status:</span>
           {checkingPending ? (
             <span className="flex items-center gap-1.5 text-zinc-550 dark:text-zinc-400 font-bold">
@@ -117,7 +117,7 @@ export default function Header() {
             showToast("Global data caches synchronized with SQLite db.", "success");
           }}
           disabled={refreshing}
-          className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-teal-500/10 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+          className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer shadow-sm disabled:opacity-50"
           title="Refresh Global Feeds"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-teal-500" : ""}`} />
@@ -127,7 +127,7 @@ export default function Header() {
         {mounted && (
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-teal-500/10 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer shadow-sm"
+            className="h-9 w-9 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer shadow-sm"
             title="Toggle theme"
           >
             {theme === "dark" ? (

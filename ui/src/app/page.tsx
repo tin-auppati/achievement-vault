@@ -232,11 +232,11 @@ export default function DashboardHome() {
       
       {/* 1. STATE-AWARE ACTION CENTER (GEMINI WEEKLY summaries WORKBENCH) */}
       {(status.has_pending_draft || status.is_weekly_pending) && (
-        <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl animate-slide-down space-y-6">
+        <section className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-xl animate-slide-down space-y-6">
           {status.has_pending_draft ? (
             <>
               {/* Draft Ready for Approval Panel */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-250 dark:border-slate-800">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-250 dark:border-slate-700">
                 <div className="space-y-1">
                   <span className="text-xs text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase font-bold animate-pulse">
                     <Sparkles className="h-4 w-4" /> Action Center: Weekly Summary Compiled
@@ -248,7 +248,7 @@ export default function DashboardHome() {
 
                 {/* Switcher Mode / Approve Action Row */}
                 <div className="flex flex-wrap items-center gap-3 self-end md:self-auto text-xs">
-                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-880 shadow-inner">
+                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-inner">
                     <button
                       onClick={() => setDraftViewMode("preview")}
                       className={`px-3 py-1.5 rounded-md transition-all font-bold cursor-pointer ${
@@ -293,9 +293,9 @@ export default function DashboardHome() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 
                 {/* Draft Content Panel (8/12) */}
-                <div className="lg:col-span-8 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+                <div className="lg:col-span-8 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 p-6 rounded-2xl flex flex-col justify-between">
                   <div>
-                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-250 dark:border-slate-800">Milestone Report Draft</h4>
+                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-250 dark:border-slate-700">Milestone Report Draft</h4>
                     <div className="pt-4 max-h-[350px] overflow-y-auto text-base font-sans leading-relaxed text-zinc-800 dark:text-zinc-300">
                       {draftViewMode === "preview" ? (
                         <div className="prose dark:prose-invert prose-base max-w-none text-zinc-800 dark:text-zinc-300">
@@ -305,7 +305,7 @@ export default function DashboardHome() {
                         <textarea
                           value={editedDraftInput}
                           onChange={(e) => setEditedDraftInput(e.target.value)}
-                          className="w-full h-72 p-4 bg-white dark:bg-slate-950 text-zinc-800 dark:text-zinc-100 font-mono text-sm rounded-xl border border-slate-200 dark:border-slate-800 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed"
+                          className="w-full h-72 p-4 bg-white dark:bg-slate-950 text-zinc-800 dark:text-zinc-100 font-mono text-sm rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-1 focus:ring-teal-500 outline-none leading-relaxed"
                           placeholder="Edit report draft..."
                         />
                       )}
@@ -314,11 +314,11 @@ export default function DashboardHome() {
 
                   {/* Manual Save Draft Trigger */}
                   {draftViewMode === "raw" && (
-                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end mt-4">
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end mt-4">
                       <button
                         onClick={handleManualDraftSave}
                         disabled={savingDraft}
-                        className="px-3.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-805 border border-slate-200 dark:border-slate-850 rounded text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs font-bold uppercase transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs font-bold uppercase transition-colors cursor-pointer"
                       >
                         {savingDraft ? "Saving..." : "Save Draft Changes"}
                       </button>
@@ -327,9 +327,9 @@ export default function DashboardHome() {
                 </div>
 
                 {/* AI Instruction / Refine Panel (4/12) */}
-                <div className="lg:col-span-4 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+                <div className="lg:col-span-4 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 p-6 rounded-2xl flex flex-col justify-between">
                   <div className="space-y-4">
-                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-200 dark:border-slate-800 flex items-center gap-1.5">
+                    <h4 className="text-xs font-black tracking-widest text-zinc-500 uppercase pb-2 border-b border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-teal-500 dark:text-teal-400" /> Refine Draft with Gemini AI
                     </h4>
                     <p className="text-xs text-zinc-550 dark:text-zinc-400 font-sans leading-relaxed">
@@ -339,7 +339,7 @@ export default function DashboardHome() {
                       value={aiRefinePrompt}
                       onChange={(e) => setAiRefinePrompt(e.target.value)}
                       placeholder="e.g. rewrite in a professional tone, focusing on backend refactors..."
-                      className="w-full h-32 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-zinc-800 dark:text-zinc-300 placeholder-zinc-450 focus:ring-1 focus:ring-teal-500 outline-none font-mono"
+                      className="w-full h-32 p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-zinc-800 dark:text-zinc-300 placeholder-zinc-450 focus:ring-1 focus:ring-teal-500 outline-none font-mono"
                     />
                   </div>
 
@@ -481,7 +481,7 @@ export default function DashboardHome() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <code className="text-[10px] bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-150 dark:border-slate-880 text-zinc-500 dark:text-zinc-450 block truncate select-all font-bold font-mono">
+                    <code className="text-[10px] bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-150 dark:border-slate-700 text-zinc-500 dark:text-zinc-450 block truncate select-all font-bold font-mono">
                       {proj.path}
                     </code>
                     {hasProfile ? (
@@ -592,15 +592,15 @@ export default function DashboardHome() {
       {/* 6. WEEKLY MILESTONE DRILL-DOWN LIGHTBOX FOR DASHBOARD FEEDS */}
       {activeAchievement && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-mono text-left">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-mono text-left">
             
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <Award className="h-5 w-5 text-teal-500" />
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-100">Weekly Achievement Detail</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-450 mt-1">
+                  <p className="text-xs text-zinc-550 dark:text-zinc-400 mt-1 font-bold">
                     {new Date(activeAchievement.start_date).toLocaleDateString(undefined, { month: "long", day: "numeric" })} - {new Date(activeAchievement.end_date).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}
                   </p>
                 </div>
@@ -618,7 +618,7 @@ export default function DashboardHome() {
                 ) : (
                   <button
                     onClick={() => setIsEditingAchievement(true)}
-                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold"
                   >
                     <Edit3 className="h-3.5 w-3.5 text-teal-500" /> Edit Milestone
                   </button>
@@ -627,7 +627,7 @@ export default function DashboardHome() {
                 {isEditingAchievement && (
                   <button
                     onClick={() => setIsEditingAchievement(false)}
-                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1 transition-colors cursor-pointer text-xs font-bold"
+                    className="h-8 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 text-zinc-650 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center gap-1 transition-colors cursor-pointer text-xs font-bold"
                   >
                     Cancel
                   </button>
@@ -645,7 +645,7 @@ export default function DashboardHome() {
                     setActiveAchievement(null);
                     setIsEditingAchievement(false);
                   }}
-                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-8 w-8 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 text-zinc-500 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -662,7 +662,7 @@ export default function DashboardHome() {
                   <textarea
                     value={editedAchievementContent}
                     onChange={(e) => setEditedAchievementContent(e.target.value)}
-                    className="flex-1 min-h-[350px] w-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans leading-relaxed text-base shadow-inner"
+                    className="flex-1 min-h-[350px] w-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-800 dark:text-slate-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans leading-relaxed text-base shadow-inner"
                     placeholder="Edit milestone description in markdown..."
                   />
                 </div>
@@ -674,7 +674,7 @@ export default function DashboardHome() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-700 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
               <span>Saved in vault database ID: #{activeAchievement.id}</span>
               <span>Committed: {new Date(activeAchievement.created_at).toLocaleString()}</span>
             </div>
@@ -685,25 +685,24 @@ export default function DashboardHome() {
 
       {activeProject && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-mono text-left">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-mono text-left">
             
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-850 flex justify-between items-center bg-slate-50 dark:bg-slate-900/60">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/60">
               <div className="flex items-center gap-3">
                 <Laptop className="h-5 w-5 text-teal-500" />
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-100 flex items-center gap-2">
                     📁 {activeProject.name}
                   </h3>
-                  <p className="text-[10px] text-zinc-500 dark:text-zinc-450 uppercase mt-1 tracking-wider font-bold">
+                  <p className="text-[10px] text-zinc-550 dark:text-zinc-400 uppercase mt-1 tracking-wider font-bold">
                     Source Host: {activeProject.source || "github"}
                   </p>
                 </div>
               </div>
-              
               <button
                 onClick={() => setActiveProject(null)}
-                className="h-8 w-8 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-zinc-550 dark:text-zinc-450 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                className="h-8 w-8 bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 text-zinc-550 dark:text-zinc-455 hover:text-slate-800 dark:hover:text-white rounded-lg flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -713,7 +712,7 @@ export default function DashboardHome() {
             <div className="p-8 overflow-y-auto flex-1 bg-white dark:bg-slate-950 flex flex-col space-y-6">
               
               {/* Path and Score Section */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-850 rounded-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-700 rounded-2xl">
                 <div className="space-y-1">
                   <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-black">Workspace path</span>
                   <code className="text-xs text-zinc-650 dark:text-zinc-300 block font-bold select-all break-all">
@@ -781,7 +780,7 @@ export default function DashboardHome() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-500 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-700 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
               <span>Workspace ID: #{activeProject.id}</span>
               <span>Registered: {new Date(activeProject.created_at).toLocaleDateString()}</span>
             </div>

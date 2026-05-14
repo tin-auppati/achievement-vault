@@ -182,7 +182,7 @@ export default function WorkspacesPage() {
               value={regName}
               onChange={(e) => setRegName(e.target.value)}
               placeholder="e.g. core-auth-service"
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans shadow-inner"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans shadow-inner"
               required
             />
           </div>
@@ -193,7 +193,7 @@ export default function WorkspacesPage() {
               value={regPath}
               onChange={(e) => setRegPath(e.target.value)}
               placeholder="e.g. /home/tin/projects/core-auth-service"
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-xl text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans shadow-inner"
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-teal-500 font-sans shadow-inner"
               required
             />
           </div>
@@ -403,7 +403,7 @@ export default function WorkspacesPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-850 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/35 border-t border-slate-200 dark:border-slate-700 text-xs text-zinc-550 dark:text-zinc-500 flex justify-between items-center">
               <span>Register Source: {activeProject.source}</span>
               <span>Enrolled: {new Date(activeProject.created_at).toLocaleString()}</span>
             </div>

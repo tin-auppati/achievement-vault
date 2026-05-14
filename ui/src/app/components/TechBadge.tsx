@@ -1,5 +1,12 @@
 import React from "react";
 
+/**
+ * Determines the specific Tailwind CSS styling classes (background, text, and border colors)
+ * based on the provided technology keyword name.
+ *
+ * @param tech - The raw string name of the technology or framework (e.g., "React", "Go").
+ * @returns A space-separated string of Tailwind utility classes for both light and dark themes.
+ */
 export function getBadgeStyle(tech: string): string {
   const normalized = tech.trim().toLowerCase();
 
@@ -112,6 +119,14 @@ export function getBadgeStyle(tech: string): string {
   return "bg-slate-50/70 text-slate-600 border-slate-200 dark:bg-slate-500/5 dark:text-slate-400 dark:border-slate-500/10";
 }
 
+/**
+ * TechBadge renders a premium, color-coded visual pill badge representing a specific technology,
+ * framework, or tool. It automatically strips statistical counters and applies harmonious styling.
+ *
+ * @param props - Component properties object.
+ * @param props.tech - The technology label string to display.
+ * @returns A React JSX Element representing the styled badge.
+ */
 export default function TechBadge({ tech }: { tech: string }) {
   // Strip parenthetical statistics counters (e.g., "Go (14)" -> "Go") for style matching
   const cleanedTech = tech.replace(/\s*\(\d+\)\s*$/, "");

@@ -553,12 +553,12 @@ func getAPILogs(db *sql.DB, q string, limit, offset int, startDate, endDate stri
 	}
 
 	if startDate != "" {
-		conditions = append(conditions, "raw_logs.timestamp >= ?")
+		conditions = append(conditions, "DATE(raw_logs.timestamp) >= ?")
 		args = append(args, startDate)
 	}
 
 	if endDate != "" {
-		conditions = append(conditions, "raw_logs.timestamp <= ?")
+		conditions = append(conditions, "DATE(raw_logs.timestamp) <= ?")
 		args = append(args, endDate)
 	}
 

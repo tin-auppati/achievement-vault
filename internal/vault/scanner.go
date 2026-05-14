@@ -110,9 +110,9 @@ Recent Git Commit History (git log --oneline):
 	}
 
 	modelsToTry := []string{
+		"gemini-3-flash-preview",
 		"gemini-2.5-flash",
-		"gemini-1.5-flash",
-		"gemini-1.5-pro",
+		"gemini-3.1-flash-lite",
 	}
 
 	var lastErr error
@@ -512,9 +512,9 @@ Your response MUST be in clean, professional Markdown with bold headers and bull
 	}
 
 	modelsToTry := []string{
+		"gemini-3-flash-preview",
 		"gemini-2.5-flash",
-		"gemini-1.5-flash",
-		"gemini-1.5-pro",
+		"gemini-3.1-flash-lite",
 	}
 
 	var lastErr error

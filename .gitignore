@@ -1,42 +1,66 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+# ====================================================================
+# Achievement Vault - Exhaustive Open Source .gitignore
+# ====================================================================
+
+# 1. Environment Secrets
+.env
+.env.*
+!.env.example
+!.env.template
+
+# 2. Go Binaries & Build Artifacts
+achievement-vault
+vault
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-# Test binary, built with `go test -c`
 *.test
-
-# Code coverage profiles and other test artifacts
 *.out
 coverage.*
 *.coverprofile
 profile.cov
+bin/
+obj/
+dummy-build
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# 3. Next.js & Node.js UI Frontend
+ui/node_modules/
+ui/.next/
+ui/out/
+ui/build/
+ui/.pnp*
+ui/.yarn/*
+!ui/.yarn/patches
+!ui/.yarn/plugins
+!ui/.yarn/releases
+!ui/.yarn/versions
+ui/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Go workspace file
-go.work
-go.work.sum
-
-# env file
-.env
-
-# Editor/IDE
-# .idea/
-# .vscode/
-
-# Local Database and Assets
+# 4. SQLite Database & Local Data
 data/
 *.db
 *.db-journal
+*.sqlite
+*.sqlite3
 
-# Binaries
-bin/
-/achievement-vault
-/vault
+# 5. OS & IDE Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
