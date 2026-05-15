@@ -87,37 +87,19 @@ Once installed, use the `vault` command to orchestrate your tracking workflow:
 | `vault scan-repo` | Scans any local directory layout and synthesizes a permanent architectural profile. | `vault scan-repo ./my-app` |
 | `vault history` | Displays past weekly achievements formatted directly in the terminal. | `vault history` |
 
----
-
 ## 🛠️ Manual Installation (From Source)
 
-If you prefer to clone the repository and run it manually:
+If you have already cloned the repository, you can set up everything automatically using our local installer:
 
-1.  **Clone the Repository**:
-    ```bash
-    git clone https://github.com/tin-auppati/achievement-vault.git
-    cd achievement-vault
-    ```
+```bash
+# Make the script executable
+chmod +x install.sh
 
-2.  **Configure Environment**:
-    Create a `.env` file in the root directory:
-    ```bash
-    echo "GEMINI_API_KEY=your_api_key_here" > .env
-    ```
+# Run the automated setup
+./install.sh
+```
 
-3.  **Install & Build**:
-    ```bash
-    # Build the Go binary
-    go build -o vault main.go
-
-    # Build the Frontend
-    cd ui && npm install && npm run build && cd ..
-    ```
-
-4.  **Run**:
-    ```bash
-    ./vault start-all
-    ```
+The script will verify dependencies, compile the Go binary, build the Next.js frontend, and set up your `.env` configuration in one go.
 
 ---
 
