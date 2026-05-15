@@ -89,13 +89,15 @@ Once installed, use the `vault` command to orchestrate your tracking workflow:
 
 ## 🛠️ Manual Installation (From Source)
 
-If you have already cloned the repository, you can set up everything automatically using our local installer:
+If you prefer to set up the repository manually from source:
 
 ```bash
-# Make the script executable
-chmod +x install.sh
+# 1. Clone the repository
+git clone https://github.com/tin-auppati/achievement-vault.git
+cd achievement-vault
 
-# Run the automated setup
+# 2. Run the automated setup
+chmod +x install.sh
 ./install.sh
 ```
 
