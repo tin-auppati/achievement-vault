@@ -51,8 +51,11 @@ if [ -d "${HOME}/.achievement-vault" ]; then
     CONFIRM=${CONFIRM:-N}
 
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-        rm -rf "${HOME}/.achievement-vault"
-        echo -e "${GREEN}✔ Configuration and database archives permanently deleted.${RESET}\n"
+        ARCHIVE_DIR="${HOME}/.achievement-vault"
+        if [ -n "$ARCHIVE_DIR" ] && [ "$ARCHIVE_DIR" != "/" ] && [ -d "$ARCHIVE_DIR" ]; then
+            rm -rf "$ARCHIVE_DIR"
+            echo -e "${GREEN}✔ Configuration and database archives permanently deleted.${RESET}\n"
+        fi
     else
         echo -e "${GREEN}✔ Database and API keys preserved at ${HOME}/.achievement-vault.${RESET}\n"
     fi
@@ -63,7 +66,7 @@ fi
 # 4. Directory Teardown
 echo -e "${CYAN}⚡ Cleaning up cloned source code directory...${RESET}"
 TARGET_DIR="${HOME}/.achievement-vault-src"
-if [ -d "$TARGET_DIR" ]; then
+if [ -n "$TARGET_DIR" ] && [ "$TARGET_DIR" != "/" ] && [ -d "$TARGET_DIR" ]; then
     rm -rf "$TARGET_DIR"
     echo -e "${GREEN}✔ Removed source directory: ${TARGET_DIR}${RESET}\n"
 else

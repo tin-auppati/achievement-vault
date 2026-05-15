@@ -21,11 +21,7 @@ func RunUITest(db *sql.DB) error {
 	report.WriteString("# 🧪 **Achievement Vault UI Automated Test Suite**\n\n")
 	report.WriteString("## **1. Environment Discovery**\n")
 
-	vh := os.Getenv("VAULT_HOME")
-	if vh == "" {
-		cwd, _ := os.Getwd()
-		vh = cwd
-	}
+	vh := GetSourceHome()
 
 	// 1. Discover Active Ports
 	backendActive := isPortOpen(8001)

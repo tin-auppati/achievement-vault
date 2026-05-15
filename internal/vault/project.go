@@ -161,3 +161,13 @@ func UpdateProjectProfile(db *sql.DB, id int64, purpose, techStack, features str
 
 	return nil
 }
+// DeleteProject removes a project from the SQLite database by its ID.
+func DeleteProject(db *sql.DB, id int64) error {
+	query := `DELETE FROM projects WHERE id = ?`
+	_, err := db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete project ID %d: %w", id, err)
+	}
+
+	return nil
+}

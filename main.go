@@ -19,38 +19,17 @@ import (
 	"github.com/tin-auppati/achievement-vault/internal/vault"
 )
 
-func GetVaultHome() string {
-	vaultHome := os.Getenv("VAULT_HOME")
-	if vaultHome != "" {
-		return vaultHome
-	}
-
-	// Fallback 1: directory where the binary is located
-	execPath, err := os.Executable()
-	if err == nil {
-		execDir := filepath.Dir(execPath)
-		// Check if data directory or config exists in binary folder
-		if _, err := os.Stat(filepath.Join(execDir, "data")); err == nil {
-			return execDir
-		}
-	}
-
-	// Fallback 2: ~/.achievement-vault config dir in user home
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "."
-	}
-	return filepath.Join(home, ".achievement-vault")
-}
-
 func getDBPath() string {
-	vh := GetVaultHome()
-	dbDir := filepath.Join(vh, "data")
+	dh := vault.GetDataHome()
+	dbDir := filepath.Join(dh, "data")
 	os.MkdirAll(dbDir, 0755)
 	return filepath.Join(dbDir, "vault.db")
 }
 
 func main() {
+	// Load environment variables from .env files (.env, ~/.achievement-vault/.env)
+	vault.LoadEnv()
+
 	// Force the application to use the Asia/Bangkok timezone globally
 	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err == nil {
@@ -782,7 +761,7 @@ func handleStartAll() {
 	fmt.Println(" \033[1m🚀 Launching Achievement Vault Stack Concurrently...\033[0m")
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 
-	vh := GetVaultHome()
+	vh := vault.GetSourceHome()
 
 	// 1. Prepare Backend Server process with absolute binary path
 	backendBin := filepath.Join(vh, "achievement-vault")
@@ -980,7 +959,7 @@ func handleSetupGlobal() {
 	fmt.Println(" \033[1m🌍 Configuring Achievement Vault for Global Directory Execution...\033[0m")
 	fmt.Println("\033[1;36m==================================================================\033[0m")
 
-	vh := GetVaultHome()
+	vh := vault.GetSourceHome()
 
 	// 1. Ask/Instruct the user to compile the binary using 'go build -o vault main.go'
 	fmt.Println("\033[36m⚡ Phase 1: Compiling fresh global binary 'vault'...\033[0m")

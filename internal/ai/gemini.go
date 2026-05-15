@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -42,45 +40,7 @@ type geminiResponse struct {
 
 // loadEnvAPIKey manually searches for GEMINI_API_KEY in system env first, then parses the local .env file.
 func loadEnvAPIKey() string {
-	// 1. Check system environment
-	if val := os.Getenv("GEMINI_API_KEY"); val != "" {
-		return val
-	}
-
-	// 2. Locate .env path globally
-	envPath := ".env"
-	if vaultHome := os.Getenv("VAULT_HOME"); vaultHome != "" {
-		envPath = filepath.Join(vaultHome, ".env")
-	}
-
-	// 3. Fallback / Read file manually to avoid dependencies
-	data, err := os.ReadFile(envPath)
-	if err != nil {
-		// Fallback to relative .env if VAULT_HOME reading fails
-		data, err = os.ReadFile(".env")
-		if err != nil {
-			return ""
-		}
-	}
-
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		// Skip empty lines or comments
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) == 2 && strings.TrimSpace(parts[0]) == "GEMINI_API_KEY" {
-			// Clean any quotes surrounding the key
-			val := strings.TrimSpace(parts[1])
-			val = strings.Trim(val, `"'`)
-			return val
-		}
-	}
-
-	return ""
+	return vault.GetAPIKey()
 }
 
 // SummarizeLogs sends raw logs data to the Google Gemini API to analyze and return a structured summary.

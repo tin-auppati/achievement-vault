@@ -188,6 +188,33 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{"success": true, "profile_purpose": %q, "profile_tech_stack": %q, "profile_key_features": %q}`, purpose, techStack, features)
 	}))
+ 
+	http.HandleFunc("/api/projects/", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "DELETE" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		idStr := strings.TrimPrefix(r.URL.Path, "/api/projects/")
+		if idStr == "" {
+			http.Error(w, `{"error": "missing project id"}`, http.StatusBadRequest)
+			return
+		}
+
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			http.Error(w, `{"error": "invalid project ID"}`, http.StatusBadRequest)
+			return
+		}
+
+		if err := DeleteProject(db, id); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true}`)
+	}))
 
 	http.HandleFunc("/api/resume", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {

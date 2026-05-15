@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Folder, PlusCircle, Sparkles, X, ChevronRight, Laptop, Cpu, Settings, Copy, Code, Layers, FileCode, CheckCircle, AlertTriangle } from "lucide-react";
+import { Folder, PlusCircle, Sparkles, X, ChevronRight, Laptop, Cpu, Settings, Copy, Code, Layers, FileCode, CheckCircle, AlertTriangle, Trash2 } from "lucide-react";
 import { useApp, ProjectModel } from "../context/AppContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -50,7 +50,7 @@ function calculateWorkspaceQualityScore(proj: any): number {
 }
 
 export default function WorkspacesPage() {
-  const { projects, loadingProjects, fetchProjects, showToast } = useApp();
+  const { projects, loadingProjects, fetchProjects, deleteProject, showToast } = useApp();
 
   // Registration states
   const [showRegForm, setShowRegForm] = useState(false);
@@ -132,6 +132,14 @@ export default function WorkspacesPage() {
       showToast(err.message || "AI Profiling command failed.", "error");
     } finally {
       setProfilingMode("none");
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!activeProject) return;
+    if (window.confirm(`Are you sure you want to permanently delete the project "${activeProject.name}"? This action cannot be undone and will remove all associated AI profile data.`)) {
+      await deleteProject(activeProject.id);
+      setActiveProject(null);
     }
   };
 
@@ -306,6 +314,17 @@ export default function WorkspacesPage() {
                 >
                   <Sparkles className={`h-3.5 w-3.5 ${profilingMode === "deep" ? "animate-spin text-teal-400" : "text-teal-400"}`} />
                   <span>{profilingMode === "deep" ? "Deep Scanning Repo..." : "Deep Scan (Diagnostics)"}</span>
+                </button>
+
+                <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
+
+                <button
+                  onClick={handleDeleteProject}
+                  className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-650 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-extrabold text-xs uppercase rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                  title="Permanently remove project from vault"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete</span>
                 </button>
 
                 <button

@@ -79,12 +79,45 @@ Once installed, use the `vault` command to orchestrate your tracking workflow:
 
 | Command | Description | Example |
 | :--- | :--- | :--- |
-| `vault serve` | Launches both the Next.js Web Dashboard and Go REST API server. | `vault serve` |
+| `vault start-all` | **Recommended**: Launches both Frontend Dashboard and Backend API concurrently. | `vault start-all` |
+| `vault serve` | Launches only the Go REST API server. | `vault serve` |
 | `vault register` | Registers the current directory as a monitored project in the SQLite database. | `vault register` |
 | `vault collect` | Gathers recent Git commits and diffs into raw activity logs. | `vault collect` |
 | `vault summarize` | Triggers Gemini AI to analyze raw logs and generate a weekly draft summary. | `vault summarize` |
 | `vault scan-repo` | Scans any local directory layout and synthesizes a permanent architectural profile. | `vault scan-repo ./my-app` |
 | `vault history` | Displays past weekly achievements formatted directly in the terminal. | `vault history` |
+
+---
+
+## 🛠️ Manual Installation (From Source)
+
+If you prefer to clone the repository and run it manually:
+
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/tin-auppati/achievement-vault.git
+    cd achievement-vault
+    ```
+
+2.  **Configure Environment**:
+    Create a `.env` file in the root directory:
+    ```bash
+    echo "GEMINI_API_KEY=your_api_key_here" > .env
+    ```
+
+3.  **Install & Build**:
+    ```bash
+    # Build the Go binary
+    go build -o vault main.go
+
+    # Build the Frontend
+    cd ui && npm install && npm run build && cd ..
+    ```
+
+4.  **Run**:
+    ```bash
+    ./vault start-all
+    ```
 
 ---
 

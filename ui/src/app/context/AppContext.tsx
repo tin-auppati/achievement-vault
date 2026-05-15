@@ -87,6 +87,7 @@ interface AppContextType {
   updateAchievement: (id: number, content: string) => Promise<void>;
   triggerProjectProfiling: (projectId: number) => Promise<void>;
   triggerProjectSummary: () => Promise<void>;
+  deleteProject: (id: number) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -377,6 +378,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteProject = async (id: number) => {
+    try {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Failed to delete project");
+      showToast("Project successfully removed from vault.", "success");
+      await fetchProjects();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || "Failed to delete project", "error");
+    }
+  };
+
   // NEW DEDICATED METHOD FOR GLOBAL RESUME SUMMARIZE-PROJECT TRIGGER
   const triggerProjectSummary = async () => {
     try {
@@ -437,6 +452,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateAchievement,
         triggerProjectProfiling,
         triggerProjectSummary,
+        deleteProject,
       }}
     >
       {children}
