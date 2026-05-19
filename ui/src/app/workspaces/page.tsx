@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Folder, PlusCircle, Sparkles, X, ChevronRight, Laptop, Cpu, Settings, Copy, Code, Layers, FileCode, CheckCircle, AlertTriangle, Trash2 } from "lucide-react";
+import { Folder, PlusCircle, Sparkles, X, ChevronRight, Laptop, Cpu, Settings, Copy, Code, Layers, FileCode, CheckCircle, AlertTriangle, Trash2, Database, History, Plus, RefreshCw, Save } from "lucide-react";
 import { useApp, ProjectModel } from "../context/AppContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -62,6 +62,15 @@ export default function WorkspacesPage() {
   // Active workspace profile details modal states
   const [activeProject, setActiveProject] = useState<ProjectModel | null>(null);
   const [profilingMode, setProfilingMode] = useState<"none" | "standard" | "deep">("none");
+
+  // Historic git import and custom log states
+  const [importLimit, setImportLimit] = useState<number>(50);
+  const [importingGit, setImportingGit] = useState(false);
+  const [importResult, setImportResult] = useState<string | null>(null);
+
+  const [customLogContent, setCustomLogContent] = useState("");
+  const [savingCustomLog, setSavingCustomLog] = useState(false);
+  const [customLogResult, setCustomLogResult] = useState<string | null>(null);
 
   const handleRegisterProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +149,57 @@ export default function WorkspacesPage() {
     if (window.confirm(`Are you sure you want to permanently delete the project "${activeProject.name}"? This action cannot be undone and will remove all associated AI profile data.`)) {
       await deleteProject(activeProject.id);
       setActiveProject(null);
+    }
+  };
+
+  const handleImportGitHistory = async () => {
+    if (!activeProject) return;
+    try {
+      setImportingGit(true);
+      setImportResult(null);
+      const res = await fetch("/api/projects/import-git", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project_id: activeProject.id, limit: importLimit }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to import commits.");
+      }
+      setImportResult(`✓ Success: imported ${data.imported} new commit logs.`);
+      showToast(`✓ Git history imported: ${data.imported} commits loaded!`, "success");
+    } catch (err: any) {
+      console.error(err);
+      setImportResult(`❌ Error: ${err.message}`);
+      showToast(err.message || "Failed to import git commits.", "error");
+    } finally {
+      setImportingGit(false);
+    }
+  };
+
+  const handleSaveCustomLog = async () => {
+    if (!activeProject || !customLogContent.trim()) return;
+    try {
+      setSavingCustomLog(true);
+      setCustomLogResult(null);
+      const res = await fetch("/api/projects/custom-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project_id: activeProject.id, content: customLogContent.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to save log entry.");
+      }
+      setCustomLogResult(`✓ Log entry successfully saved!`);
+      setCustomLogContent("");
+      showToast("✓ Custom achievement log added successfully!", "success");
+    } catch (err: any) {
+      console.error(err);
+      setCustomLogResult(`❌ Error: ${err.message}`);
+      showToast(err.message || "Failed to add manual log.", "error");
+    } finally {
+      setSavingCustomLog(false);
     }
   };
 
@@ -353,6 +413,87 @@ export default function WorkspacesPage() {
                     <span className="text-lg font-black text-amber-500">{calculateWorkspaceQualityScore(activeProject)}</span>
                   </div>
                 )}
+              </div>
+
+              {/* Log Ingestion & Import History Section */}
+              <div className="p-6 bg-slate-50/50 dark:bg-slate-900/20 border border-slate-150 dark:border-slate-700 rounded-3xl space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Database className="h-5 w-5 text-teal-500 animate-pulse" />
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-850 dark:text-zinc-200 font-mono">Telemetry & Log Injection</h4>
+                      <p className="text-[10px] text-zinc-550 dark:text-zinc-400 font-sans mt-0.5">Ingest missing commits or add manual achievements easily</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                  {/* Left Column: Import Git History */}
+                  <div className="space-y-3">
+                    <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 font-mono">
+                      <History className="h-3.5 w-3.5 text-teal-500" /> Git Commit Importer
+                    </h5>
+                    <p className="text-[11px] text-zinc-550 dark:text-zinc-400 font-sans leading-relaxed">
+                      Clone got done *before* setting up the vault hook? Import your existing commit history directly from the git database to record past accomplishments.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 max-w-[120px]">
+                        <input
+                          type="number"
+                          value={importLimit}
+                          onChange={(e) => setImportLimit(parseInt(e.target.value) || 50)}
+                          placeholder="Limit"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-zinc-800 dark:text-zinc-200 rounded-xl font-bold font-mono focus:outline-none focus:border-teal-500"
+                        />
+                      </div>
+                      <button
+                        onClick={handleImportGitHistory}
+                        disabled={importingGit}
+                        className="px-4 py-2 bg-teal-500 hover:bg-teal-600 disabled:opacity-40 text-white font-extrabold text-xs uppercase rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RefreshCw className={`h-3.5 w-3.5 ${importingGit ? "animate-spin" : ""}`} />
+                        <span>{importingGit ? "Importing..." : "Scan & Import"}</span>
+                      </button>
+                    </div>
+                    {importResult && (
+                      <p className={`text-[11px] font-bold ${importResult.includes("Success") ? "text-emerald-500" : "text-amber-500"}`}>
+                        {importResult}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Right Column: Custom Log Addition */}
+                  <div className="space-y-3 border-t md:border-t-0 md:border-l border-slate-150 dark:border-slate-800 pt-4 md:pt-0 md:pl-6">
+                    <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 font-mono">
+                      <Plus className="h-3.5 w-3.5 text-teal-500" /> Manual Achievement Log
+                    </h5>
+                    <p className="text-[11px] text-zinc-550 dark:text-zinc-400 font-sans leading-relaxed">
+                      Completed an architectural planning session, whiteboard design, or offline code review? Inject it as a custom accomplishment.
+                    </p>
+                    <div className="flex gap-2 items-start">
+                      <textarea
+                        value={customLogContent}
+                        onChange={(e) => setCustomLogContent(e.target.value)}
+                        placeholder="E.g. Completed advanced security authentication audit..."
+                        rows={2}
+                        className="flex-1 px-3 py-2 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-zinc-800 dark:text-zinc-200 rounded-xl font-semibold focus:outline-none focus:border-teal-500 resize-none font-sans"
+                      />
+                      <button
+                        onClick={handleSaveCustomLog}
+                        disabled={savingCustomLog || !customLogContent.trim()}
+                        className="px-4 py-2 bg-slate-950 dark:bg-zinc-100 hover:bg-slate-850 dark:hover:bg-white disabled:opacity-40 text-white dark:text-slate-950 font-extrabold text-xs uppercase rounded-xl shadow-sm transition-all h-[36px] flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Save className="h-3.5 w-3.5" />
+                        <span>{savingCustomLog ? "Saving..." : "Save"}</span>
+                      </button>
+                    </div>
+                    {customLogResult && (
+                      <p className={`text-[11px] font-bold ${customLogResult.includes("successfully") ? "text-emerald-500" : "text-red-500"}`}>
+                        {customLogResult}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {activeProject.profile_purpose || activeProject.profile_tech_stack || activeProject.profile_key_features ? (

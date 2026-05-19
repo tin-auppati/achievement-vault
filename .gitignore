@@ -9,8 +9,8 @@
 !.env.template
 
 # 2. Go Binaries & Build Artifacts
-achievement-vault
-vault
+/achievement-vault
+/vault
 *.exe
 *.exe~
 *.dll

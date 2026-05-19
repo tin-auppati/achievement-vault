@@ -63,6 +63,20 @@ func GetCLICommands() []CLICommand {
 			Tags:     []string{"Ingestion", "Telemetry", "Git Patch"},
 		},
 		{
+			Command:  "vault add-log --project-id <id> --content <text>",
+			Desc:     "Manually log a custom programming or non-git achievement directly into the database.",
+			Category: "collect",
+			Example:  `vault add-log --project-id 1 --content "Completed premium high-fidelity UI redesign for the admin panel"`,
+			Tags:     []string{"Custom Log", "Manual Ingestion"},
+		},
+		{
+			Command:  "vault import-history --project-id <id> [--limit <n>]",
+			Desc:     "Batch import already committed Git logs from the project directory. Extremely useful if you forgot to register/install the hook earlier.",
+			Category: "collect",
+			Example:  `vault import-history --project-id 1 --limit 50`,
+			Tags:     []string{"Batch Import", "Git History"},
+		},
+		{
 			Command:  "vault summarize [--days <days>]",
 			Desc:     "Gather raw logs from the database, query Gemini AI, and draft a formatted, reviewer-ready Weekly Progress Summary.",
 			Category: "summarize",

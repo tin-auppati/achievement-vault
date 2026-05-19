@@ -84,6 +84,7 @@ func GetProjectByName(db *sql.DB, name string) (*Project, error) {
 type GitCommitMetadata struct {
 	Message string `json:"message"`
 	Diff    string `json:"diff"`
+	Hash    string `json:"hash,omitempty"`
 }
 
 // SaveGitLog saves a git commit log in raw_logs.

@@ -189,6 +189,81 @@ func StartAPIServer(db *sql.DB, port int, summarizeFn func(days int) (string, er
 		fmt.Fprintf(w, `{"success": true, "profile_purpose": %q, "profile_tech_stack": %q, "profile_key_features": %q}`, purpose, techStack, features)
 	}))
  
+	http.HandleFunc("/api/projects/import-git", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var payload struct {
+			ProjectID int64 `json:"project_id"`
+			Limit     int   `json:"limit"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+			return
+		}
+
+		if payload.ProjectID <= 0 {
+			http.Error(w, `{"error": "invalid project ID"}`, http.StatusBadRequest)
+			return
+		}
+
+		if payload.Limit <= 0 {
+			payload.Limit = 50
+		}
+
+		var projectPath string
+		err := db.QueryRow("SELECT path FROM projects WHERE id = ?", payload.ProjectID).Scan(&projectPath)
+		if err != nil {
+			http.Error(w, `{"error": "project not found"}`, http.StatusNotFound)
+			return
+		}
+
+		imported, err := ImportGitHistory(db, payload.ProjectID, projectPath, payload.Limit)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true, "imported": %d}`, imported)
+	}))
+
+	http.HandleFunc("/api/projects/custom-log", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var payload struct {
+			ProjectID int64  `json:"project_id"`
+			Content   string `json:"content"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, `{"error": "invalid json payload"}`, http.StatusBadRequest)
+			return
+		}
+
+		if payload.ProjectID <= 0 {
+			http.Error(w, `{"error": "invalid project ID"}`, http.StatusBadRequest)
+			return
+		}
+		if payload.Content == "" {
+			http.Error(w, `{"error": "content cannot be empty"}`, http.StatusBadRequest)
+			return
+		}
+
+		id, err := SaveCustomLog(db, payload.ProjectID, payload.Content)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error": %q}`, err.Error()), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"success": true, "id": %d}`, id)
+	}))
+
 	http.HandleFunc("/api/projects/", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "DELETE" {
 			http.Error(w, `{"error": "method not allowed"}`, http.StatusMethodNotAllowed)

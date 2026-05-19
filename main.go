@@ -53,6 +53,10 @@ func main() {
 		handleInstall()
 	case "collect":
 		handleCollect()
+	case "add-log":
+		handleAddLog()
+	case "import-history":
+		handleImportHistory()
 	case "summarize":
 		handleSummarize()
 	case "summarize-project":
@@ -279,6 +283,116 @@ func handleCollect() {
 	fmt.Printf("\033[32m✔ Git log successfully collected and saved!\033[0m\n")
 	fmt.Printf("  \033[1mLog ID:\033[0m      %d\n", id)
 	fmt.Printf("  \033[1mProject ID:\033[0m  %d\n", projectID)
+}
+
+func handleAddLog() {
+	// Expecting: main add-log --project-id <id> --content <text>
+	if len(os.Args) < 6 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: add-log command requires --project-id and --content flags\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault add-log --project-id <id> --content <text>")
+		os.Exit(1)
+	}
+
+	var projectIDStr, content string
+	for i := 2; i < len(os.Args); i++ {
+		if os.Args[i] == "--project-id" && i+1 < len(os.Args) {
+			projectIDStr = os.Args[i+1]
+			i++
+		} else if os.Args[i] == "--content" && i+1 < len(os.Args) {
+			content = os.Args[i+1]
+			i++
+		}
+	}
+
+	if projectIDStr == "" || content == "" {
+		fmt.Fprintln(os.Stderr, "\033[31mError: both --project-id and --content flags are required\033[0m")
+		os.Exit(1)
+	}
+
+	projectID, err := strconv.ParseInt(projectIDStr, 10, 64)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError: invalid --project-id %q: must be an integer\033[0m\n", projectIDStr)
+		os.Exit(1)
+	}
+
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	id, err := vault.SaveCustomLog(db.DB, projectID, content)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError saving custom log: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\033[32m✔ Custom log entry successfully added!\033[0m\n")
+	fmt.Printf("  \033[1mLog ID:\033[0m      %d\n", id)
+	fmt.Printf("  \033[1mProject ID:\033[0m  %d\n", projectID)
+}
+
+func handleImportHistory() {
+	// Expecting: main import-history --project-id <id> [--limit <n>]
+	if len(os.Args) < 4 {
+		fmt.Fprintln(os.Stderr, "\033[31mError: import-history command requires --project-id flag\033[0m")
+		fmt.Fprintln(os.Stderr, "Usage: achievement-vault import-history --project-id <id> [--limit <n>]")
+		os.Exit(1)
+	}
+
+	var projectIDStr string
+	limit := 50
+	var err error
+
+	for i := 2; i < len(os.Args); i++ {
+		if os.Args[i] == "--project-id" && i+1 < len(os.Args) {
+			projectIDStr = os.Args[i+1]
+			i++
+		} else if os.Args[i] == "--limit" && i+1 < len(os.Args) {
+			limit, err = strconv.Atoi(os.Args[i+1])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "\033[31mError: invalid --limit %q: must be an integer\033[0m\n", os.Args[i+1])
+				os.Exit(1)
+			}
+			i++
+		}
+	}
+
+	if projectIDStr == "" {
+		fmt.Fprintln(os.Stderr, "\033[31mError: --project-id flag is required\033[0m")
+		os.Exit(1)
+	}
+
+	projectID, err := strconv.ParseInt(projectIDStr, 10, 64)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError: invalid --project-id %q: must be an integer\033[0m\n", projectIDStr)
+		os.Exit(1)
+	}
+
+	db, err := database.InitDB(getDBPath())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mDatabase initialization failed: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	var projectPath string
+	err = db.QueryRow("SELECT path FROM projects WHERE id = ?", projectID).Scan(&projectPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError: project ID %d not registered in database\033[0m\n", projectID)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\033[36m⚡ Scanning git repository commits at %s...\033[0m\n", projectPath)
+	imported, err := vault.ImportGitHistory(db.DB, projectID, projectPath, limit)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mError importing git history: %v\033[0m\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\033[32m✔ Git commit history successfully imported!\033[0m\n")
+	fmt.Printf("  \033[1mImported Commits:\033[0m  %d new logs saved\n", imported)
 }
 
 func handleSummarize() {
